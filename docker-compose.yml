@@ -1,0 +1,38 @@
+# The Gate Appointment SUT with its database. Start:   docker compose up -d --build
+# Then run suites against it with HARNESS_ENV=docker (see README).
+name: testharness
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: gate
+      POSTGRES_USER: gate
+      POSTGRES_PASSWORD: ${GATE_DB_PASSWORD:-gate}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U gate -d gate"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "127.0.0.1:5432:5432"
+
+  gate:
+    build:
+      context: .
+      dockerfile: docker/gate.Dockerfile
+    image: testharness/gate:local
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      GATE_DB_URL: jdbc:postgresql://postgres:5432/gate
+      GATE_DB_USER: gate
+      GATE_DB_PASSWORD: ${GATE_DB_PASSWORD:-gate}
+      GATE_TEST_SUPPORT_ENABLED: "true"
+      # Local demo default; CI and anyone exposing the port must set their own value.
+      GATE_TEST_SUPPORT_KEY: ${GATE_TEST_SUPPORT_KEY:-local-test-support-key}
+      GATE_JWT_SECRET: ${GATE_JWT_SECRET:-local-only-jwt-secret-change-me-0123456789}
+      GATE_SEED_PASSWORD: ${GATE_SEED_PASSWORD:-gate-demo-pass}
+    ports:
+      - "127.0.0.1:8080:8080"
