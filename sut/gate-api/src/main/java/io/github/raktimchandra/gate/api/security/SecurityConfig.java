@@ -27,6 +27,7 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.firewall.RequestRejectedHandler;
 
 @Configuration(proxyBeanMethods = false)
 public class SecurityConfig {
@@ -57,6 +58,16 @@ public class SecurityConfig {
         NimbusJwtDecoder decoder = NimbusJwtDecoder.withSecretKey(key).macAlgorithm(MacAlgorithm.HS256).build();
         decoder.setJwtValidator(JwtValidators.createDefaultWithIssuer(TokenService.ISSUER));
         return decoder;
+    }
+
+    /**
+     * Requests the firewall rejects (e.g. ';', encoded '%' or '..' in the path) get the same
+     * problem+json error contract as every other 4xx instead of a bare container error page.
+     */
+    @Bean
+    RequestRejectedHandler requestRejectedHandler(ProblemWriter problems) {
+        return (req, res, ex) -> problems.write(req, res, ErrorCode.VALIDATION_FAILED,
+                "Request rejected: the URL contains characters that are not allowed");
     }
 
     @Bean
