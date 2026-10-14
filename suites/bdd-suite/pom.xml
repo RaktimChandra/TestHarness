@@ -35,6 +35,13 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>harness-data</artifactId>
         </dependency>
+        <!-- Present so surefire selects the JUnit Platform provider deterministically
+             (Testcontainers 1.x puts JUnit 4 on the classpath). -->
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>io.cucumber</groupId>
             <artifactId>cucumber-junit-platform-engine</artifactId>
@@ -69,6 +76,10 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <argLine>@{argLine} ${aspectj.agent} -XX:+EnableDynamicAgentLoading -Dfile.encoding=UTF-8</argLine>
+                    <!-- The JUnit Platform suite class runs all features through the Cucumber engine. -->
+                    <includes>
+                        <include>**/RunBddSuite.java</include>
+                    </includes>
                 </configuration>
             </plugin>
         </plugins>
