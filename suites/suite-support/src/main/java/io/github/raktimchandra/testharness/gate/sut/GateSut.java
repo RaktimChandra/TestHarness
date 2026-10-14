@@ -98,6 +98,8 @@ public final class GateSut {
         props.put("gate.test-support.enabled", "true");
         props.put("gate.test-support.key", key);
         props.put("gate.jwt.secret", random(32));
+        // The SUT seeds its demo users with the same secret the tests log in with.
+        props.put("gate.seed.password", config.secret("GATE_SEED_PASSWORD", "gate-demo-pass").reveal());
         String bugs = config.string("sut.seeded-bugs", "").strip();
         if (!bugs.isEmpty()) {
             props.put("gate.seeded-bugs", bugs);
