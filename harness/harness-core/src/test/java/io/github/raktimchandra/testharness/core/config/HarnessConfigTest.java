@@ -33,6 +33,10 @@ class HarnessConfigTest {
                   base-url: http://defaults
                 tags: [smoke, api]
                 """);
+        Files.writeString(dir.resolve("harness.yml"), """
+                api:
+                  base-url: http://project
+                """);
         Files.writeString(dir.resolve("harness-ci.yml"), """
                 ui:
                   browser: firefox
@@ -51,6 +55,13 @@ class HarnessConfigTest {
         assertThat(c.string("ui.browser")).isEqualTo("chrome");
         assertThat(c.origin("ui.browser")).isEqualTo("harness-defaults.yml");
         assertThat(c.string("tags")).isEqualTo("smoke,api");
+    }
+
+    @Test
+    void projectFileOverridesFrameworkDefaults() {
+        HarnessConfig c = load(Map.of(), new Properties());
+        assertThat(c.string("api.base-url")).isEqualTo("http://project");
+        assertThat(c.origin("api.base-url")).isEqualTo("harness.yml");
     }
 
     @Test

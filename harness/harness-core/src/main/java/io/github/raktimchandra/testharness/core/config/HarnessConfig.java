@@ -22,7 +22,8 @@ import java.util.function.Function;
  * Layered, immutable configuration. Later layers override earlier ones:
  *
  * <ol>
- *   <li>{@code harness-defaults.yml} files on the classpath (framework, then project)</li>
+ *   <li>{@code harness-defaults.yml}: framework defaults (shipped in harness-core)</li>
+ *   <li>{@code harness.yml}: project settings (shipped by the project's suites)</li>
  *   <li>{@code harness-<env>.yml} for the active environment (local, docker, ci)</li>
  *   <li>environment variables: {@code HARNESS_UI_BROWSER} overrides {@code ui.browser}</li>
  *   <li>system properties: {@code -Dharness.ui.browser=firefox}</li>
@@ -75,6 +76,7 @@ public final class HarnessConfig {
         Map<String, String> values = new TreeMap<>();
         Map<String, String> origins = new TreeMap<>();
         readAll(loader, "harness-defaults.yml", values, origins);
+        readAll(loader, "harness.yml", values, origins);
         readAll(loader, environment.fileName(), values, origins);
         for (Map.Entry<String, String> e : envVars.entrySet()) {
             if (e.getKey().startsWith("HARNESS_") && !e.getKey().equals("HARNESS_ENV")) {
