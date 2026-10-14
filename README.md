@@ -21,14 +21,14 @@ From real runs on 2026-10-14 — method, machine and raw numbers for every row a
 
 | | |
 |---|---|
-| Tests in one `verify` | **398 JVM tests + 31 Vitest + 1 Gatling simulation**, 0 failed (5 visual checks skip outside CI by design) |
-| Wall-clock, clean build + everything (2 vCPU sandbox) | **5 min 45 s** |
+| Tests in one `verify` | **402 JVM tests + 31 Vitest + 1 Gatling simulation**, 0 failed (5 visual checks skip outside CI by design) |
+| Wall-clock, clean build + everything (2 vCPU sandbox) | **5 min 16 s** |
 | Cross-browser | UI suite passes in **Chrome 154, Firefox 157 and Edge 154** in CI, both directly and on **Selenium Grid** |
 | Accessibility (axe-core, WCAG 2.0/2.1 A+AA) | **0 violations** on 9 page states × 3 browsers |
 | Contract (Pact) | **9/9** interactions from the UI's real client verified against the real API |
-| Booking flow under load (60 users, CI runner) | **p95 79 ms · p99 81 ms · 0 errors** (gates: 800 / 1500 ms / 1 %) |
+| Booking flow under load (60 users, CI runner) | **p95 73 ms · p99 78 ms · 0 errors** (gates: 800 / 1500 ms / 1 %) |
 | Grid scaling, 1 → 4 workers on one 4-vCPU runner | test span **−13 to −23 %**; 8 workers slower than 4 — CPU-bound, explained in RESULTS §8 |
-| Real defects found while building the suites | **7** — 3 in the SUT, 4 in tests/framework/infra, each with the test that found it |
+| Real defects found while building the suites | **8** — 3 in the SUT, 5 in tests/framework/infra, each with the run or test that found it |
 | Domain rules coverage (own unit tests) | 98.4 % lines · 100 % branches |
 
 ## What makes it different

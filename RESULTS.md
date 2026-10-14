@@ -121,33 +121,34 @@ confirms the switch works end to end; the full detection matrix is Phase 3.
 
 ### 7. One-command build — sandbox, 2026-10-14
 
-**Method:** as §1 (`mvn -o clean verify`, sandbox machine, local Chrome) on the code of
-commit `76d7e3b` (later Phase 2 commits change documentation only). Counts from the surefire XML (`<testcase>`
-elements); wall-clock from Maven's `Total time`.
+**Method:** as §1 (`mvn -o clean verify`, sandbox machine, local Chrome) on the final Phase 2
+code (commit `846dfec`; later commits change documentation only). Counts from the surefire
+XML (`<testcase>` elements); wall-clock from Maven's `Total time`.
 
 | Module | Tests | Failed | Errors | Skipped | Σ test time (s) |
 |---|---:|---:|---:|---:|---:|
-| sut/gate-domain | 65 | 0 | 0 | 0 | 0.5 |
-| sut/gate-api (integration 7 + **Pact provider 9**) | 16 | 0 | 0 | 0 | 8.4 |
-| harness/harness-core | 43 | 0 | 0 | 0 | 3.6 |
+| sut/gate-domain | 65 | 0 | 0 | 0 | 0.4 |
+| sut/gate-api (integration 7 + **Pact provider 9**) | 16 | 0 | 0 | 0 | 8.1 |
+| harness/harness-core | 43 | 0 | 0 | 0 | 3.9 |
 | harness/harness-reporting | 8 | 0 | 0 | 0 | 0.3 |
-| harness/harness-data | 75 | 0 | 0 | 0 | 4.9 |
-| harness/harness-api | 13 | 0 | 0 | 0 | 1.6 |
-| harness/harness-ui (incl. real Chrome: axe, visual stabilisation) | 33 | 0 | 0 | 0 | 16.2 |
-| harness/harness-bdd | 3 | 0 | 0 | 0 | 0.2 |
-| suites/api-suite (85 functional + **17 security**) | 102 | 0 | 0 | 0 | 110.1 |
-| suites/ui-suite (17 journeys + **3 a11y** + **5 visual**) | 25 | 0 | 0 | 5 | 96.5 |
-| suites/bdd-suite | 15 | 0 | 0 | 0 | 66.3 |
-| **Total (JVM)** | **398** | **0** | **0** | **5** | **308.6** |
+| harness/harness-data | 75 | 0 | 0 | 0 | 4.8 |
+| harness/harness-api | 13 | 0 | 0 | 0 | 1.3 |
+| harness/harness-ui (incl. real Chrome: axe, visual stabilisation; browser start policy) | 37 | 0 | 0 | 0 | 17.7 |
+| harness/harness-bdd | 3 | 0 | 0 | 0 | 0.1 |
+| suites/api-suite (85 functional + **17 security**) | 102 | 0 | 0 | 0 | 97.6 |
+| suites/ui-suite (17 journeys + **3 a11y** + **5 visual**) | 25 | 0 | 0 | 5 | 88.8 |
+| suites/bdd-suite | 15 | 0 | 0 | 0 | 60.0 |
+| **Total (JVM)** | **402** | **0** | **0** | **5** | **283.0** |
 | sut/gate-ui (Vitest: 22 unit + **9 Pact consumer**) | 31 | 0 | 0 | 0 | — |
 | suites/perf-suite (Gatling, §11) | 1 simulation, 300 requests | 0 KO | — | — | — |
 
-**Wall-clock: 5 min 45 s** (finished 2026-10-14T23:23:27+05:30). The 5 skipped tests are the
+**Wall-clock: 5 min 16 s** (finished 2026-10-14T23:50:20+05:30). The 5 skipped tests are the
 visual checks: the committed baselines belong to the CI platforms (`*-ci`), so on this
 machine they write candidates and skip (by design, DESIGN D26). They compare and pass in
-CI (§9).
+CI (§9). An earlier sandbox run of commit `76d7e3b` (398 JVM tests, before the browser
+start policy's 4 tests) took 5 min 45 s.
 
-### 8. Selenium Grid — workers 1 / 4 / 8 — CI run 38607826727, commit `76d7e3b`
+### 8. Selenium Grid — workers 1 / 4 / 8 — CI runs 38607826727 (`76d7e3b`) and 38613549892 (`6c03ab5`)
 
 **Method:** `grid` job of `ci.yml`. SUT, PostgreSQL, hub and Chrome/Firefox/Edge nodes in
 Docker Compose on one GitHub-hosted runner (**4 vCPU, 15 GiB**, probed in the job); the UI
@@ -157,25 +158,32 @@ whole `mvn verify` invocation; *test span* is surefire's `T E S T S` banner to `
 (`.github/scripts/test_span.py`, timestamps from Maven's logger); *Σ test time* sums the
 surefire test-case times.
 
-| Rep | Workers | Tests | Maven wall (s) | Test span (s) | Σ test time (s) | Mean per test (s) |
-|---:|---:|---:|---:|---:|---:|---:|
-| 1 | 1 | 20 | 63.9 | 60.7 | 53.7 | 2.7 |
-| 1 | 4 | 20 | 49.8 | 46.5 | 160.0 | 8.0 |
-| 1 | 8 | 20 | 53.3 | 50.2 | 313.9 | 15.7 |
-| 2 | 1 | 20 | 57.4 | 54.0 | 48.0 | 2.4 |
-| 2 | 4 | 20 | 50.0 | 46.8 | 157.5 | 7.9 |
-| 2 | 8 | 20 | 52.9 | 49.7 | 301.0 | 15.1 |
+| Run | Rep | Workers | Tests | Maven wall (s) | Test span (s) | Σ test time (s) | Mean per test (s) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| 38607826727 | 1 | 1 | 20 | 63.9 | 60.7 | 53.7 | 2.7 |
+| 38607826727 | 1 | 4 | 20 | 49.8 | 46.5 | 160.0 | 8.0 |
+| 38607826727 | 1 | 8 | 20 | 53.3 | 50.2 | 313.9 | 15.7 |
+| 38607826727 | 2 | 1 | 20 | 57.4 | 54.0 | 48.0 | 2.4 |
+| 38607826727 | 2 | 4 | 20 | 50.0 | 46.8 | 157.5 | 7.9 |
+| 38607826727 | 2 | 8 | 20 | 52.9 | 49.7 | 301.0 | 15.1 |
+| 38613549892 | 1 | 1 | 20 | 58.8 | 55.7 | 49.3 | 2.5 |
+| 38613549892 | 1 | 4 | 20 | 48.7 | 45.6 | 156.3 | 7.8 |
+| 38613549892 | 1 | 8 | 20 | 50.6 | 47.6 | 290.7 | 14.5 |
+| 38613549892 | 2 | 1 | 20 | 55.6 | 52.6 | 46.9 | 2.3 |
+| 38613549892 | 2 | 4 | 20 | 48.0 | 45.0 | 151.0 | 7.6 |
+| 38613549892 | 2 | 8 | 20 | 53.2 | 50.0 | 303.9 | 15.2 |
 
-**What this shows:** going from 1 to 4 workers cut the test span by 13–23 % (54.0–60.7 s →
-46.5–46.8 s), and 8 workers was *slower* than 4. Each test got ~3× slower at 4 workers and
+**What this shows (4 repetitions, 2 runs):** going from 1 to 4 workers cut the test span by
+13–23 % (52.6–60.7 s → 45.0–46.8 s), and 8 workers was *slower* than 4 in every repetition
+(47.6–50.2 s). Each test got ~3× slower at 4 workers and
 ~6× slower at 8, i.e. the runner is CPU-bound: one 4-vCPU machine hosts the SUT, PostgreSQL,
 the hub, three browser nodes and the test JVM. Parallelism is not the bottleneck here;
 hardware is. On a Grid whose nodes have their own CPUs the same suite would scale further,
 but **that was not measured**. An earlier run (38606130094, commit `df45ace`, Maven wall
 only, one repetition) gave 45 / 34 / 37 s — the same shape.
 
-Cross-browser on the Grid in the same run, 4 workers: **Firefox 20/20 passed** (Σ 268.4 s),
-**Edge 20/20 passed** (Σ 173.6 s).
+Cross-browser on the Grid, 4 workers: **Firefox 20/20 passed** (Σ 268.4 s / 274.4 s in the two
+runs), **Edge 20/20 passed** (Σ 173.6 s / 164.9 s).
 
 ### 9. CI — every job — run 38607826727, commit `76d7e3b`, 2026-10-14
 
@@ -192,6 +200,12 @@ Cross-browser on the Grid in the same run, 4 workers: **Firefox 20/20 passed** (
 | Docker Compose: start SUT / API suite in external mode | 102 | 0 / 0 | 79 s / 23 s |
 | Gatling performance smoke (§11) | 300 requests | 0 KO | 55 s |
 | Selenium Grid (§8) | 6 × 20 + 2 × 20 | 0 / 0 | 328 s + 134 s |
+
+**Final Phase 2 commit `6c03ab5` — run 38613549892: all 10 jobs passed** (build 260 tests,
+API 102, BDD 15, UI 25 × Chrome/Firefox/Edge, Compose 102, Grid 6 × 20 + 2 × 20, Gatling 300
+requests with 0 KO). The run before it (38611150889, docs-only commit `483d9e4`) failed in the
+Edge job: four parallel first starts of Edge ended in `SessionNotCreated` after 90 s while
+every later start passed — the reason for the browser start policy (DESIGN D13, `846dfec`).
 
 ### 10. Accessibility — axe-core, WCAG 2.0/2.1 A + AA rules
 
@@ -219,9 +233,11 @@ p95 < 800 ms, p99 < 1500 ms, errors < 1 %.
 
 | Run | Machine | Requests | KO | p50 | p95 | p99 | max | mean | Throughput | Gates |
 |---|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| CI 38613549892 (final) | CI runner | 300 | 0 | 5 ms | 73 ms | 78 ms | 83 ms | — | 10 rps | passed |
 | CI 38607826727 | CI runner | 300 | 0 | 5 ms | 79 ms | 81 ms | 91 ms | — | 10 rps | passed |
 | CI 38606130094 | CI runner | 300 | 0 | 4 ms | 70 ms | 73 ms | 88 ms | — | 10 rps | passed |
-| Sandbox §7 | sandbox | 300 | 0 | 10 ms | 101 ms | 112 ms | 179 ms | 28 ms | 10 rps | passed |
+| Sandbox §7 | sandbox | 300 | 0 | 9 ms | 99 ms | 110 ms | 182 ms | 27 ms | 10 rps | passed |
+| Sandbox, `76d7e3b` | sandbox | 300 | 0 | 10 ms | 101 ms | 112 ms | 179 ms | 28 ms | 10 rps | passed |
 
 Throughput is 10 rps because the injection profile *is* 10 requests/s on average (300
 requests over ~30 s), not because the SUT saturated. This is a regression smoke test on a
@@ -261,7 +277,7 @@ Consumer: 9 interactions generated by the UI's real client (Vitest, §7) and wri
 | harness/harness-core | 91.8 % (268/292) | 80.8 % (101/125) | — |
 | harness/harness-data | 90.7 % (156/172) | 85.0 % (51/60) | — |
 | harness/harness-api | 94.8 % (146/154) | 87.1 % (54/62) | — |
-| harness/harness-ui | 77.0 % (332/431) | 64.9 % (87/134) | +6.9 pts lines (visual, a11y) |
+| harness/harness-ui | 78.1 % (353/452) | 65.9 % (91/138) | +8.0 pts lines (visual, a11y, start policy) |
 
 ### 15. Defects found in Phase 2
 
@@ -273,6 +289,7 @@ Consumer: 9 interactions generated by the UI's real client (Vitest, §7) and wri
 | Grid job | BiDi console capture failed through the Grid (node advertised the hub's container IP) | `0455bcf` |
 | Visual checks in CI | Captures depended on window focus (focus ring) | `f8a001d` |
 | Visual checks in CI | A check depended on other tests' data above the component | `bfb55c0` |
+| Edge job in CI | Parallel first browser starts failed together (`SessionNotCreated`) | `846dfec` |
 
 ### What could not run in Phase 2, and why
 

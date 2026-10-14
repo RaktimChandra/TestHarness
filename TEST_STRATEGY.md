@@ -13,7 +13,7 @@ flowchart TB
   P["Contract (Pact) — 9 interactions, consumer + provider<br/><i>do the UI and the API agree?</i>"]
   D["SUT integration (Spring + Postgres) — 7<br/><i>do the parts work together, incl. concurrency?</i>"]
   E["Unit: domain rules — 65 · UI logic (Vitest) — 22<br/><i>is each rule right at its boundaries?</i>"]
-  F["Framework self-tests — 175<br/><i>can the tests themselves be trusted?</i>"]
+  F["Framework self-tests — 179<br/><i>can the tests themselves be trusted?</i>"]
   G["Performance smoke (Gatling) — booking flow, p95/p99/error gates<br/><i>did latency regress?</i>"]
   A --> B --> C --> P --> D --> E
   F -.underpins.- A
