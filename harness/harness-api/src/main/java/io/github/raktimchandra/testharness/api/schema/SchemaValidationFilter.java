@@ -49,6 +49,9 @@ public class SchemaValidationFilter implements OrderedFilter {
             }
             return response;
         }
+        if (SchemaRule.NONE.equals(rule.get().schema())) {
+            return response; // explicitly registered as not JSON (e.g. an HTML page)
+        }
         List<String> errors = registry.validate(rule.get().schema(), response.asString());
         if (!errors.isEmpty()) {
             String detail = String.join("\n  ", errors);

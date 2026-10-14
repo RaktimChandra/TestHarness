@@ -25,7 +25,8 @@ class SchemaValidationTest {
                 .on("GET /things/1", 200, "{\"id\":1,\"name\":\"crane\",\"createdAt\":\"2026-10-20T10:00:00+05:30\"}")
                 .on("GET /things/2", 200, "{\"id\":2,\"name\":\"\",\"createdAt\":\"yesterday\"}")
                 .on("GET /things/3", 200, "not json")
-                .on("GET /unmapped", 200, "{}");
+                .on("GET /unmapped", 200, "{}")
+                .on("GET /page", 200, "<!doctype html><p>not json</p>");
     }
 
     @AfterAll
@@ -71,6 +72,12 @@ class SchemaValidationTest {
     }
 
     @Test
+    void responsesRegisteredAsNoneAreAcceptedWithoutJsonValidation() {
+        assertThat(given(ApiSpecs.base(stub.baseUri(), schemas, config("strict"))).get("/page").statusCode())
+                .isEqualTo(200);
+    }
+
+    @Test
     void exactStatusRulesWinOverStatusClasses() {
         assertThat(schemas.ruleFor("GET", "/things/9", 404)).get().extracting(SchemaRule::status).isEqualTo("404");
         assertThat(schemas.ruleFor("GET", "/things/9", 409)).get().extracting(SchemaRule::status).isEqualTo("4xx");
@@ -100,7 +107,7 @@ class SchemaValidationTest {
     @Test
     void registryIsCachedAndMissingRegistriesFail() {
         assertThat(SchemaRegistry.load("schemas")).isSameAs(schemas);
-        assertThat(schemas.rules()).hasSize(4);
+        assertThat(schemas.rules()).hasSize(5);
         assertThatThrownBy(() -> SchemaRegistry.load("nope")).hasMessageContaining("not found");
     }
 }

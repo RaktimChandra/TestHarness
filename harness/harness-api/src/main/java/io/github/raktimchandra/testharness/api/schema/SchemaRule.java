@@ -8,8 +8,12 @@ import java.util.regex.Pattern;
  * matching {@code status} (exact, e.g. {@code 201}, or a class, e.g. {@code 4xx}) must
  * conform to {@code schema}. Path templates use {@code {name}} for a single segment; the
  * path {@code **} and the method {@code *} match anything (for catch-all error rules).
+ * The schema {@code none} registers a response that is deliberately not JSON (an HTML
+ * page), so strict mode knows it was considered rather than forgotten.
  */
 public record SchemaRule(String method, String path, String status, String schema) {
+
+    public static final String NONE = "none";
 
     public boolean matches(String requestMethod, String requestPath, int statusCode) {
         return ("*".equals(method) || method.equalsIgnoreCase(requestMethod))

@@ -4,3 +4,4 @@ rules:
   - {method: POST, path: "/things",      status: "201", schema: thing.json}
   - {method: GET,  path: "/things/{id}", status: 4xx,   schema: problem.json}
   - {method: GET,  path: "/things/{id}", status: "404", schema: problem.json}
+  - {method: GET,  path: "/page",       status: "200", schema: none}
