@@ -170,6 +170,11 @@ framework unchanged.
   retryable failures; everything else fails immediately. There is no "retry failed test".
 - **Why:** retrying assertions hides flakiness. Phase 3 measures and quarantines flaky
   tests instead.
+- **Browser start-up is infrastructure too** (Phase 2): `Drivers` retries session creation
+  once on `SessionNotCreatedException` only (`ui.session-attempts`), and creates the first
+  session per browser and target alone so driver resolution is not raced by every worker.
+  Added after four parallel first starts of Edge failed together in CI; tested without a
+  browser in `DriverStartPolicyTest`.
 
 ### D14 — One browser per thread, data isolation per test — Built
 - **Chosen:** `Drivers` holds a `ThreadLocal` session; JUnit 5 runs classes and methods

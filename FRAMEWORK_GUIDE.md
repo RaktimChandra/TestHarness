@@ -47,6 +47,7 @@ Choose the environment with `-Dharness.env=docker` or `HARNESS_ENV=docker`.
 | `ui.headless` | `true` | `false` to watch |
 | `ui.explicit-wait` / `ui.poll-interval` | `10s` / `100ms` | wait budget |
 | `ui.grid-url` | empty | a Selenium Grid instead of local browsers |
+| `ui.session-attempts` | `2` | tries to start a browser; retried only on `SessionNotCreatedException` |
 | `ui.binary.<browser>` / `ui.driver-path.<browser>` | empty | custom browser/driver executables |
 | `sut.browser-base-url` | `sut.base-url` | where *browsers* open the app (Grid: `http://gate:8080`) |
 | `visual.platform` | `<browser>-<os>` | baseline set to compare with (CI: `chrome-ci`, `firefox-ci`, `edge-ci`) |

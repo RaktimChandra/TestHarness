@@ -46,6 +46,9 @@ compiling, every test passing, and `./mvnw verify` running end to end.
 - `bfb55c0` **Tests**: the booking-form visual check depended on how many slots other tests
   created that day (2.76 % in CI); it now uses its own date.
 - `0455bcf` **Grid**: BiDi connections failed because nodes advertised the hub's container IP.
+- `846dfec` **Framework**: the first four parallel Edge starts in a CI job failed together with
+  `SessionNotCreated`; browser start-up now creates the first session per browser alone
+  and retries `SessionNotCreated` once (`ui.session-attempts`).
 
 ### Could not be run in the authoring sandbox
 - Selenium Grid and the Docker Compose stack (Docker Hub is blocked) — both run in CI
