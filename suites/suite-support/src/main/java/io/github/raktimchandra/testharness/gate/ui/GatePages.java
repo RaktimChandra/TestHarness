@@ -1,6 +1,10 @@
 package io.github.raktimchandra.testharness.gate.ui;
 
 import io.github.raktimchandra.testharness.gate.api.GateApi;
+import io.github.raktimchandra.testharness.gate.api.GateUser;
+import io.github.raktimchandra.testharness.gate.api.Models;
+import io.github.raktimchandra.testharness.reporting.Report;
+import org.openqa.selenium.JavascriptExecutor;
 import io.github.raktimchandra.testharness.ui.driver.Drivers;
 import io.github.raktimchandra.testharness.ui.driver.UiSettings;
 import io.github.raktimchandra.testharness.ui.wait.Waits;
@@ -35,5 +39,31 @@ public final class GatePages {
 
     public ClerkPage clerkPage() {
         return new ClerkPage(driver, waits, baseUrl);
+    }
+
+    /**
+     * Signs in without using the login form: obtains a token from the API and puts it where
+     * the UI keeps it. Journeys other than login itself start this way, so a broken login
+     * form fails the login tests only, not every UI test (and the suite runs faster).
+     */
+    public DriverPage driverSignedInViaApi(GateUser user) {
+        signIn(user);
+        return driverPage().open();
+    }
+
+    public ClerkPage clerkSignedInViaApi(GateUser user) {
+        signIn(user);
+        return clerkPage().open();
+    }
+
+    private void signIn(GateUser user) {
+        Report.step("Sign in " + user.username() + " via API token", () -> {
+            Models.Login login = GateApi.get().login(user.username(), user.credentials().password().reveal())
+                    .as(Models.Login.class);
+            driver.get(baseUrl + "/login");
+            waits.visible(io.github.raktimchandra.testharness.ui.page.Locators.testId("login-form"));
+            ((JavascriptExecutor) driver).executeScript("sessionStorage.setItem('gate.token', arguments[0]);",
+                    login.token());
+        });
     }
 }
