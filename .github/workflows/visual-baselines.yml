@@ -1,0 +1,43 @@
+# Generates candidate visual baselines on the CI runner image (the platform CI compares
+# against) and pushes them to the branch "visual-baselines/<run id>". A person reviews the
+# images and merges them into main: that merge is the approval step.
+name: visual-baselines
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  baselines:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      HARNESS_ENV: ci
+      GATE_SEED_PASSWORD: baseline-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Build upstream modules
+        run: ./mvnw -B -ntp install -DskipTests -pl suites/ui-suite -am
+      - name: Render baselines in Chrome, Firefox and Edge
+        run: |
+          for b in chrome firefox edge; do
+            ./mvnw -B -ntp verify -pl suites/ui-suite -Dtest=VisualRegressionTest -Dsurefire.failIfNoSpecifiedTests=false \
+              -Dharness.ui.browser=$b -Dharness.visual.platform=$b-ci -Dharness.visual.mode=update \
+              -Dharness.visual.baseline-dir=$GITHUB_WORKSPACE/suites/ui-suite/src/test/resources/visual-baselines
+          done
+          find suites/ui-suite/src/test/resources/visual-baselines -name '*.png' | sort
+      - name: Push for review
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "visual-baselines/${{ github.run_id }}"
+          git add suites/ui-suite/src/test/resources/visual-baselines
+          git commit -m "test(visual): candidate baselines from CI run ${{ github.run_id }}"
+          git push origin "visual-baselines/${{ github.run_id }}"
