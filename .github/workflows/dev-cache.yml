@@ -48,7 +48,7 @@ jobs:
           set -o pipefail
           exec > >(tee -a "$RUNNER_TEMP/m2.log") 2>&1
           # 1) Empty-jar install: resolves every module's dependencies without needing code to compile.
-          $MVN install -Dmaven.main.skip=true -Dmaven.test.skip=true -Dspring-boot.repackage.skip=true
+          $MVN install -Dmaven.main.skip=true -Dmaven.test.skip=true -Dspring-boot.repackage.skip=true -DskipPerf=true
           # 2) Plugins and their dependencies.
           $MVN dependency:go-offline -DexcludeGroupIds=io.github.raktimchandra.testharness || true
           # 3) A real build pulls test-runtime artifacts (surefire providers etc.); failures are tolerated.
@@ -65,6 +65,8 @@ jobs:
             com.github.eirslett:frontend-maven-plugin:1.15.4 \
             org.codehaus.mojo:exec-maven-plugin:3.6.2 \
             io.qameta.allure:allure-maven:2.17.0 \
+            io.netty:netty-bom:4.2.18.Final:pom \
+            io.gatling:gatling-maven-plugin:4.21.12 \
             org.jacoco:jacoco-maven-plugin:0.8.15 ; do
             $MVN dependency:get -Dartifact="$a" -Dtransitive=true || echo "WARN could not resolve $a"
           done

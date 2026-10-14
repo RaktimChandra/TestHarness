@@ -18,6 +18,20 @@
         <skipPerf>false</skipPerf>
     </properties>
 
+    <!-- Gatling 3.16 is built on Netty 4.2; the Spring Boot BOM imported by the parent pins 4.1,
+         which fails at start-up with NoClassDefFoundError: io/netty/channel/IoHandle. -->
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>io.netty</groupId>
+                <artifactId>netty-bom</artifactId>
+                <version>4.2.18.Final</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <dependencies>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -40,7 +54,6 @@
                     <simulationClass>io.github.raktimchandra.testharness.perf.BookingFlowSimulation</simulationClass>
                     <runMultipleSimulations>false</runMultipleSimulations>
                     <failOnError>true</failOnError>
-                    <resultsFolder>${project.build.directory}/gatling</resultsFolder>
                 </configuration>
                 <executions>
                     <execution>
