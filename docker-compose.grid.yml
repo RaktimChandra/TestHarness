@@ -17,6 +17,9 @@ x-node: &node
     SE_NODE_MAX_SESSIONS: ${GRID_SESSIONS:-4}
     SE_NODE_OVERRIDE_MAX_SESSIONS: "true"
     SE_VNC_NO_PASSWORD: "true"
+    # The Grid URL a node advertises is what clients use for BiDi/CDP WebSockets, so it must
+    # be reachable from the test JVM (the published hub port), not the hub's container IP.
+    SE_NODE_GRID_URL: ${GRID_PUBLIC_URL:-http://localhost:4444}
 
 services:
   selenium-hub:
