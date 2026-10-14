@@ -217,17 +217,25 @@ jobs:
       - name: UI suite on Grid (Chrome) at 1, 4 and 8 workers
         run: |
           set -o pipefail
+          TS="-Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss.SSS"
           : > "$RUNNER_TEMP/timings.txt"
-          for w in 1 4 8; do
-            start=$(date +%s)
-            $MVN verify -pl suites/ui-suite $GRID -Dharness.ui.browser=chrome \
-              -Djunit.jupiter.execution.parallel.config.fixed.parallelism=$w \
-              -Djunit.jupiter.execution.parallel.config.fixed.max-pool-size=$w 2>&1 | tee -a "$RUNNER_TEMP/grid.log"
-            secs=$(( $(date +%s) - start ))
-            tests=$(python3 -c "import glob,xml.etree.ElementTree as E;print(sum(1 for f in glob.glob('suites/ui-suite/target/surefire-reports/TEST-*.xml') for _ in E.parse(f).getroot().iter('testcase')))")
-            echo "workers=$w seconds=$secs tests=$tests" | tee -a "$RUNNER_TEMP/timings.txt"
+          echo "runner: $(nproc) vCPU, $(free -g | awk '/Mem:/{print $2}') GiB" | tee -a "$RUNNER_TEMP/timings.txt"
+          for rep in 1 2; do
+            for w in 1 4 8; do
+              log="$RUNNER_TEMP/grid-chrome-w$w-r$rep.log"
+              start=$(date +%s.%N)
+              $MVN verify -pl suites/ui-suite $GRID $TS -Dharness.ui.browser=chrome \
+                -Djunit.jupiter.execution.parallel.config.fixed.parallelism=$w \
+                -Djunit.jupiter.execution.parallel.config.fixed.max-pool-size=$w 2>&1 | tee "$log" >> "$RUNNER_TEMP/grid.log"
+              wall=$(python3 -c "import time;print(f'{time.time()-$start:.1f}')")
+              span=$(python3 .github/scripts/test_span.py "$log")
+              sum=$(python3 -c "import glob,xml.etree.ElementTree as E;print(f\"{sum(float(t.get('time') or 0) for f in glob.glob('suites/ui-suite/target/surefire-reports/TEST-*.xml') for t in E.parse(f).getroot().iter('testcase')):.1f}\")")
+              tests=$(python3 -c "import glob,xml.etree.ElementTree as E;print(sum(1 for f in glob.glob('suites/ui-suite/target/surefire-reports/TEST-*.xml') for _ in E.parse(f).getroot().iter('testcase')))")
+              echo "rep=$rep workers=$w tests=$tests maven_wall_s=$wall test_span_s=$span sum_test_time_s=$sum" | tee -a "$RUNNER_TEMP/timings.txt"
+            done
           done
-          echo "::notice title=grid timings (chrome, wall-clock of mvn verify -pl suites/ui-suite)::$(tr '\n' ' ' < "$RUNNER_TEMP/timings.txt")"
+          { echo '### Grid timings (Chrome)'; echo '```'; cat "$RUNNER_TEMP/timings.txt"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice title=grid timings (chrome)::$(tr '\n' ' ' < "$RUNNER_TEMP/timings.txt")"
       - name: Cross-browser on Grid (Firefox, Edge) at 4 workers
         run: |
           set -o pipefail
