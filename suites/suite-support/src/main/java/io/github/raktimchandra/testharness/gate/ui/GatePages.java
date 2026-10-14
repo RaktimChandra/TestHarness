@@ -26,7 +26,11 @@ public final class GatePages {
     public static GatePages current() {
         UiSettings s = Drivers.session().orElseThrow(() -> new IllegalStateException("no browser session")).settings();
         WebDriver d = Drivers.current();
-        return new GatePages(d, new Waits(d, s.explicitWait(), s.pollInterval()), GateApi.get().baseUrl());
+        // Browsers on a Selenium Grid reach the app by its container name (sut.browser-base-url),
+        // while the tests themselves call the API on the host.
+        String browserUrl = io.github.raktimchandra.testharness.core.config.HarnessConfig.get()
+                .string("sut.browser-base-url", GateApi.get().baseUrl());
+        return new GatePages(d, new Waits(d, s.explicitWait(), s.pollInterval()), browserUrl);
     }
 
     public LoginPage login() {
@@ -35,6 +39,10 @@ public final class GatePages {
 
     public DriverPage driverPage() {
         return new DriverPage(driver, waits, baseUrl);
+    }
+
+    public String baseUrl() {
+        return baseUrl;
     }
 
     public ClerkPage clerkPage() {
