@@ -1,0 +1,6 @@
+[
+  {"name": "ISO worked example", "container": "CSQU3054383", "valid": true, "lead": "PT2H"},
+  {"name": "remainder 10 maps to 0", "container": "MSCU1000070", "valid": true, "lead": "PT1H"},
+  {"name": "wrong check digit", "container": "CSQU3054384", "valid": false, "lead": "PT2H"},
+  {"name": "bad category letter", "container": "CSQX3054383", "valid": false, "lead": "PT2H"}
+]

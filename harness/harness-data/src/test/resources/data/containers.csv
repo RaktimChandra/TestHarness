@@ -1,0 +1,5 @@
+# container,valid,note — blank note becomes null
+container,valid,note
+CSQU3054383,true,worked example
+MSCU1000070,true,
+CSQU3054384,false,off by one
