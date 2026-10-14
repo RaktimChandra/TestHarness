@@ -31,6 +31,12 @@ import org.slf4j.LoggerFactory;
  *   <li><b>update</b> ({@code -Dharness.visual.mode=update}): write the rendering as the new
  *       baseline. Baselines are reviewed and committed like code — that is the approval step.</li>
  * </ul>
+ *
+ * <p>Before every capture the page is <b>stabilised</b>: the focused element is blurred and
+ * carets, transitions and animations are frozen. Focus rings ({@code :focus-visible}) paint only
+ * while the browser window has OS focus, which varies with parallel headless sessions, so
+ * leaving them in made one baseline differ by 2–3.5 % between CI jobs. Focus styling is therefore
+ * outside what visual checks assert (keyboard access is covered by the UI journeys).
  */
 public final class VisualCheck {
 
@@ -48,6 +54,7 @@ public final class VisualCheck {
 
     /** Compares the element against baseline {@code name}, ignoring the given child regions. */
     public Outcome matches(String name, WebElement element, By... ignore) {
+        stabilise();
         BufferedImage actual = read(element.getScreenshotAs(OutputType.BYTES));
         List<Rectangle> regions = regions(element, ignore);
         Path baseline = settings.baselineDir().resolve(settings.platform()).resolve(name + ".png");
@@ -86,6 +93,24 @@ public final class VisualCheck {
                             name, r.ratio() * 100, settings.maxMismatch() * 100, dir.resolve(name + "-diff.png")));
         }
         return Outcome.MATCHED;
+    }
+
+    /** Script that removes run-to-run rendering noise unrelated to the design. */
+    static final String STABILISE = """
+            if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+            if (!document.getElementById('harness-visual-stabilise')) {
+              const s = document.createElement('style');
+              s.id = 'harness-visual-stabilise';
+              s.textContent = '*,*::before,*::after{caret-color:transparent!important;'
+                + 'transition:none!important;animation:none!important}';
+              document.head.appendChild(s);
+            }
+            """;
+
+    private void stabilise() {
+        if (driver instanceof org.openqa.selenium.JavascriptExecutor js) {
+            js.executeScript(STABILISE);
+        }
     }
 
     private List<Rectangle> regions(WebElement root, By... ignore) {

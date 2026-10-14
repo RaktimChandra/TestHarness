@@ -89,6 +89,18 @@ class VisualCheckTest {
     }
 
     @Test
+    void thePageIsStabilisedBeforeEachCapture() throws Exception {
+        WebDriver js = mock(WebDriver.class, org.mockito.Mockito.withSettings()
+                .extraInterfaces(org.openqa.selenium.JavascriptExecutor.class));
+        WebElement e = element(png(Color.WHITE, false));
+        new VisualCheck(js, settings(true, false)).matches("stable", e);
+        var order = org.mockito.Mockito.inOrder(js, e);
+        order.verify((org.openqa.selenium.JavascriptExecutor) js).executeScript(
+                org.mockito.ArgumentMatchers.contains("activeElement.blur()"));
+        order.verify(e).getScreenshotAs(OutputType.BYTES);
+    }
+
+    @Test
     void missingBaselineSkipsLocallyAndFailsWhenRequired() throws Exception {
         WebElement e = element(png(Color.WHITE, false));
         assertThatThrownBy(() -> new VisualCheck(driver, settings(false, false)).matches("new-page", e))

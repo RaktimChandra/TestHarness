@@ -1,0 +1,10 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>focus ring fixture</title>
+<style>
+  body { margin: 0; font: 16px sans-serif; }
+  #box { padding: 16px; width: 300px; }
+  input { width: 240px; padding: 6px; }
+  input:focus, input:focus-visible { outline: 6px solid #e0a000; outline-offset: 2px; }
+</style></head>
+<body><div id="box" data-testid="box"><label for="name">Name</label> <input id="name" data-testid="name" value="fixed"></div></body>
+</html>

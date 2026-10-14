@@ -81,6 +81,25 @@ class RealBrowserTest {
     }
 
     @Test
+    void visualCapturesAreStabilisedSoFocusRingsDoNotLeakIntoBaselines(WebDriver driver, Waits waits) throws Exception {
+        driver.get(RealBrowserTest.class.getResource("/focus-ring.html").toURI().toString());
+        var settings = new io.github.raktimchandra.testharness.ui.visual.VisualSettings(evidence.resolve("baselines"),
+                evidence.resolve("out"), "test", 0.0, 0.1, true, false);
+        var box = waits.visible(Locators.testId("box"));
+        new io.github.raktimchandra.testharness.ui.visual.VisualCheck(driver, settings).matches("unfocused", box);
+
+        driver.navigate().refresh();
+        box = waits.visible(Locators.testId("box"));
+        waits.clickable(Locators.testId("name")).click(); // focus ring + caret
+        var compare = new io.github.raktimchandra.testharness.ui.visual.VisualSettings(evidence.resolve("baselines"),
+                evidence.resolve("out"), "test", 0.0, 0.1, false, true);
+        java.nio.file.Files.copy(evidence.resolve("baselines/test/unfocused.png"),
+                evidence.resolve("baselines/test/focused.png"));
+        assertThat(new io.github.raktimchandra.testharness.ui.visual.VisualCheck(driver, compare).matches("focused", box))
+                .isEqualTo(io.github.raktimchandra.testharness.ui.visual.VisualCheck.Outcome.MATCHED);
+    }
+
+    @Test
     void timeoutsAreFastAndDescriptive(WebDriver driver, Waits waits) throws Exception {
         driver.get(page());
         long start = System.nanoTime();
