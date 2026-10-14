@@ -18,6 +18,10 @@ rules:
   - {method: PUT,  path: "/api/test-support/clock",             status: "200", schema: clock.json}
   - {method: POST, path: "/api/test-support/users",             status: "201", schema: created-user.json}
   - {method: GET,  path: "/actuator/health",                    status: "200", schema: health.json}
+  # The single-page UI's routes return HTML, deliberately not JSON.
+  - {method: GET,  path: "/login",                              status: "200", schema: none}
+  - {method: GET,  path: "/driver",                             status: "200", schema: none}
+  - {method: GET,  path: "/clerk",                              status: "200", schema: none}
   # Every error, on any endpoint, must be an RFC 9457 problem with a machine-readable code.
   - {method: "*",  path: "**",                                  status: 4xx,   schema: problem.json}
   - {method: "*",  path: "**",                                  status: 5xx,   schema: problem.json}
