@@ -68,6 +68,19 @@ class RealBrowserTest {
     }
 
     @Test
+    void axeFindsTheKnownViolationsOnAFixturePage(WebDriver driver) throws Exception {
+        driver.get(RealBrowserTest.class.getResource("/a11y-bad.html").toURI().toString());
+        var scanner = new io.github.raktimchandra.testharness.ui.a11y.A11yScanner(driver, "test", evidence);
+        var report = scanner.scan("fixture");
+        assertThat(report.violations()).extracting(v -> v.rule())
+                .contains("image-alt", "label", "color-contrast");
+        assertThat(evidence.resolve("fixture-test.json")).exists();
+        assertThatThrownBy(() -> scanner.assertWithin("fixture",
+                new io.github.raktimchandra.testharness.ui.a11y.A11yGate(0, 0, -1, -1)))
+                .hasMessageContaining("Accessibility gate failed on 'fixture'");
+    }
+
+    @Test
     void timeoutsAreFastAndDescriptive(WebDriver driver, Waits waits) throws Exception {
         driver.get(page());
         long start = System.nanoTime();
