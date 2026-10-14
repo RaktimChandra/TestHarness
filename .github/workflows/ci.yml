@@ -16,6 +16,9 @@ permissions:
 env:
   HARNESS_ENV: ci
   MVN: ./mvnw -B -ntp --fail-at-end
+  # In CI no secret may fall back to a dev default (see DESIGN.md D8). The seeded users'
+  # password is generated per run unless the repository defines a secret.
+  GATE_SEED_PASSWORD: ${{ secrets.GATE_SEED_PASSWORD || format('ci-{0}-{1}', github.run_id, github.run_attempt) }}
 
 jobs:
   build:
