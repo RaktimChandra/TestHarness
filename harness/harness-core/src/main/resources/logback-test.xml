@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  TestHarness logging: readable console lines plus one JSON object per line in
+  target/logs/harness.jsonl (run id, test id and test name come from the MDC).
+  Shipped in harness-core so suites, the framework and the embedded SUT log the same way.
+-->
+<configuration>
+    <property name="LOG_DIR" value="${harness.log.dir:-target/logs}"/>
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} %-5level [%thread] %logger{24} %X{testName:-} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="JSON" class="ch.qos.logback.core.FileAppender">
+        <file>${LOG_DIR}/harness.jsonl</file>
+        <append>true</append>
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <includeCallerData>false</includeCallerData>
+            <fieldNames>
+                <timestamp>ts</timestamp>
+                <version>[ignore]</version>
+                <levelValue>[ignore]</levelValue>
+            </fieldNames>
+        </encoder>
+    </appender>
+
+    <logger name="io.github.raktimchandra" level="INFO"/>
+    <logger name="org.testcontainers" level="INFO"/>
+    <logger name="tc" level="INFO"/>
+    <logger name="com.github.dockerjava" level="WARN"/>
+    <logger name="org.openqa.selenium" level="WARN"/>
+    <logger name="org.springframework" level="WARN"/>
+    <logger name="org.flywaydb" level="WARN"/>
+    <logger name="com.zaxxer.hikari" level="WARN"/>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="JSON"/>
+    </root>
+</configuration>

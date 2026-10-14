@@ -1,0 +1,20 @@
+# Framework defaults. Projects override these in their own harness-defaults.yml and
+# harness-<env>.yml files, then with HARNESS_* environment variables and -Dharness.* properties.
+api:
+  connect-timeout: 5s
+  read-timeout: 30s
+  log-bodies-on-failure: true
+  schema-validation: strict      # strict | lenient | off
+ui:
+  browser: chrome                # chrome | firefox | edge
+  headless: true
+  window: 1366x900
+  implicit-wait: 0s              # never use implicit waits; explicit waits only
+  explicit-wait: 10s
+  poll-interval: 100ms
+  page-load-timeout: 30s
+  grid-url: ""                   # set to use a Selenium Grid instead of local drivers
+data:
+  seed: ""                       # fixed Faker seed for reproducible data; random when blank
+report:
+  attach-on-success: false
