@@ -271,7 +271,9 @@
                         <argLine>@{argLine} -XX:+EnableDynamicAgentLoading -Dfile.encoding=UTF-8</argLine>
                         <trimStackTrace>false</trimStackTrace>
                         <systemPropertyVariables>
-                            <allure.results.directory>${project.build.directory}/allure-results</allure.results.directory>
+                            <!-- One results folder for the whole build, so one report covers every suite. -->
+                            <allure.results.directory>${maven.multiModuleProjectDirectory}/target/allure-results</allure.results.directory>
+                            <harness.report.history-dir>${maven.multiModuleProjectDirectory}/.allure/history</harness.report.history-dir>
                         </systemPropertyVariables>
                     </configuration>
                 </plugin>
@@ -313,6 +315,21 @@
 
         <plugins>
             <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>jacoco-agent</id>
+                        <goals><goal>prepare-agent</goal></goals>
+                    </execution>
+                    <execution>
+                        <id>jacoco-report</id>
+                        <phase>verify</phase>
+                        <goals><goal>report</goal></goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <version>${enforcer-plugin.version}</version>
@@ -339,4 +356,88 @@
             </plugin>
         </plugins>
     </build>
+
+    <profiles>
+        <!--
+          Render one Allure report for every suite and keep its trend history for the next
+          run:   mvnw -N -Preport verify     (report: target/allure-report/index.html)
+          The Allure CLI is unpacked from the Maven repository and run through its Java
+          entry point, so the same command works on Windows, macOS and Linux.
+        -->
+        <profile>
+            <id>report</id>
+            <properties>
+                <allure.cli.home>${project.build.directory}/allure-cli/allure-${allure-commandline.version}</allure.cli.home>
+            </properties>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-dependency-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>allure-cli</id>
+                                <phase>verify</phase>
+                                <goals><goal>unpack</goal></goals>
+                                <configuration>
+                                    <artifactItems>
+                                        <artifactItem>
+                                            <groupId>io.qameta.allure</groupId>
+                                            <artifactId>allure-commandline</artifactId>
+                                            <version>${allure-commandline.version}</version>
+                                            <type>zip</type>
+                                            <outputDirectory>${project.build.directory}/allure-cli</outputDirectory>
+                                        </artifactItem>
+                                    </artifactItems>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>allure-generate</id>
+                                <phase>verify</phase>
+                                <goals><goal>exec</goal></goals>
+                                <configuration>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <arguments>
+                                        <argument>-cp</argument>
+                                        <argument>${allure.cli.home}/lib/*${path.separator}${allure.cli.home}/lib/config</argument>
+                                        <argument>io.qameta.allure.CommandLine</argument>
+                                        <argument>generate</argument>
+                                        <argument>--clean</argument>
+                                        <argument>-o</argument>
+                                        <argument>${project.build.directory}/allure-report</argument>
+                                        <argument>${project.build.directory}/allure-results</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <executions>
+                            <execution>
+                                <id>keep-history</id>
+                                <phase>verify</phase>
+                                <goals><goal>copy-resources</goal></goals>
+                                <configuration>
+                                    <outputDirectory>${maven.multiModuleProjectDirectory}/.allure/history</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>${project.build.directory}/allure-report/history</directory>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
