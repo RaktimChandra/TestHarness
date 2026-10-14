@@ -1,0 +1,13 @@
+[
+  {"name": "ISO worked example",                      "value": "CSQU3054383",   "status": 201, "code": null},
+  {"name": "remainder 10 maps to check digit 0",      "value": "MSCU1000070",   "status": 201, "code": null},
+  {"name": "lower case is normalised",                "value": "maeu1000002",   "status": 201, "code": null},
+  {"name": "surrounding spaces are trimmed",          "value": "  ZIMU1234569 ", "status": 201, "code": null},
+  {"name": "wrong check digit",                       "value": "CSQU3054384",   "status": 400, "code": "INVALID_CONTAINER_NUMBER"},
+  {"name": "category letter must be U, J or Z",       "value": "CSQX3054383",   "status": 400, "code": "INVALID_CONTAINER_NUMBER"},
+  {"name": "owner code must be letters",              "value": "C5QU3054383",   "status": 400, "code": "INVALID_CONTAINER_NUMBER"},
+  {"name": "ten characters is too short",             "value": "CSQU305438",    "status": 400, "code": "INVALID_CONTAINER_NUMBER"},
+  {"name": "twelve characters is too long",           "value": "CSQU30543831",  "status": 400, "code": "INVALID_CONTAINER_NUMBER"},
+  {"name": "non-ASCII digits are rejected",           "value": "CSQU٣054383",   "status": 400, "code": "INVALID_CONTAINER_NUMBER"},
+  {"name": "blank is a validation error",             "value": "   ",           "status": 400, "code": "VALIDATION_FAILED"}
+]
