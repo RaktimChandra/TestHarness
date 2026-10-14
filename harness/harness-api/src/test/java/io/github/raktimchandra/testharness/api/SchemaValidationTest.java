@@ -87,6 +87,17 @@ class SchemaValidationTest {
     }
 
     @Test
+    void catchAllRulesMatchAnyMethodAndPathButLoseToSpecificOnes() {
+        SchemaRule any = new SchemaRule("*", "**", "5xx", "problem.json");
+        assertThat(any.matches("PATCH", "/x/y/z", 503)).isTrue();
+        assertThat(any.matches("PATCH", "/x/y/z", 404)).isFalse();
+        assertThat(new SchemaRule("GET", "/a", "4xx", "p").specificity())
+                .isGreaterThan(any.specificity());
+        assertThat(new SchemaRule("*", "**", "404", "p").specificity())
+                .isGreaterThan(new SchemaRule("GET", "/a", "4xx", "p").specificity());
+    }
+
+    @Test
     void registryIsCachedAndMissingRegistriesFail() {
         assertThat(SchemaRegistry.load("schemas")).isSameAs(schemas);
         assertThat(schemas.rules()).hasSize(4);

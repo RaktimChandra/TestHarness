@@ -6,13 +6,14 @@ import java.util.regex.Pattern;
 /**
  * One line of {@code schemas/registry.yml}: responses to {@code method path} with a status
  * matching {@code status} (exact, e.g. {@code 201}, or a class, e.g. {@code 4xx}) must
- * conform to {@code schema}. Path templates use {@code {name}} for a single segment.
+ * conform to {@code schema}. Path templates use {@code {name}} for a single segment; the
+ * path {@code **} and the method {@code *} match anything (for catch-all error rules).
  */
 public record SchemaRule(String method, String path, String status, String schema) {
 
     public boolean matches(String requestMethod, String requestPath, int statusCode) {
-        return method.equalsIgnoreCase(requestMethod)
-                && pathPattern().matcher(requestPath).matches()
+        return ("*".equals(method) || method.equalsIgnoreCase(requestMethod))
+                && ("**".equals(path) || pathPattern().matcher(requestPath).matches())
                 && statusMatches(statusCode);
     }
 
@@ -24,9 +25,13 @@ public record SchemaRule(String method, String path, String status, String schem
         return Integer.parseInt(s) == code;
     }
 
-    /** Exact statuses beat status classes, so a specific rule can override a generic one. */
-    int specificity() {
-        return status.toLowerCase(Locale.ROOT).endsWith("xx") ? 0 : 1;
+    /**
+     * Higher wins: an exact status beats a status class, and a concrete path beats the
+     * catch-all, so specific rules always override generic ones.
+     */
+    public int specificity() {
+        int s = status.toLowerCase(Locale.ROOT).endsWith("xx") ? 0 : 2;
+        return s + ("**".equals(path) ? 0 : 1);
     }
 
     Pattern pathPattern() {
