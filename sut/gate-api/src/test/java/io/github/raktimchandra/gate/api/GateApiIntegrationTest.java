@@ -40,8 +40,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
-    "gate.test-support.enabled=true", "gate.test-support.key=it-key", "gate.race-window=150ms"})
+    "gate.test-support.enabled=true", "gate.test-support.key=it-key", "gate.race-window=150ms",
+    // Pinned so the test does not depend on a GATE_SEED_PASSWORD in the environment (CI sets one).
+    "gate.seed.password=" + GateApiIntegrationTest.PASSWORD})
 class GateApiIntegrationTest {
+
+    static final String PASSWORD = "integration-test-pass";
 
     @Container
     @ServiceConnection
@@ -189,7 +193,7 @@ class GateApiIntegrationTest {
 
     private JsonNode login(String username) {
         ResponseEntity<JsonNode> r = http.postForEntity("/api/auth/login",
-                Map.of("username", username, "password", "gate-demo-pass"), JsonNode.class);
+                Map.of("username", username, "password", PASSWORD), JsonNode.class);
         assertThat(r.getStatusCode()).isEqualTo(HttpStatus.OK);
         return r.getBody();
     }
