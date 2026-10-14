@@ -30,8 +30,8 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       MVN: mvn -B -ntp -Dui.node=system -Dexec.skip=true
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: '21'
@@ -45,6 +45,8 @@ jobs:
       - name: Resolve Maven dependencies and plugins
         if: inputs.m2
         run: |
+          set -o pipefail
+          exec > >(tee -a "$RUNNER_TEMP/m2.log") 2>&1
           $MVN -DskipTests install
           $MVN dependency:go-offline -DexcludeGroupIds=io.github.raktimchandra.testharness || true
           $MVN verify -DskipTests=false -Dsurefire.failIfNoSpecifiedTests=false || true
@@ -93,3 +95,9 @@ jobs:
           google-chrome --version >> browsers.txt; firefox --version >> browsers.txt
           ls -lh browsers-*.tgz
           gh release upload dev-cache browsers-chrome.tgz browsers-firefox.tgz browsers.txt --clobber -R "$GITHUB_REPOSITORY"
+
+      - name: Summarise failure
+        if: failure()
+        uses: ./.github/actions/log-tail
+        with:
+          file: ${{ runner.temp }}/m2.log
