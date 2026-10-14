@@ -27,6 +27,15 @@ import org.openqa.selenium.WebDriver;
 @DisplayName("Visual regression")
 class VisualRegressionTest extends UiTest {
 
+    /**
+     * The slot list above the booking form shows every slot on the chosen date, so its height
+     * (and the form's sub-pixel position, which changes how borders anti-alias) depends on what
+     * other tests created that day. This test therefore books on a date nothing else uses:
+     * 30 days ahead, beyond the demo seeder's horizon. Found when the same form differed by
+     * 2.76 % between a visual-only run and a full parallel run (CI run 38599597303).
+     */
+    private static final int OWN_DAY_OFFSET = 30;
+
     private VisualCheck visual(WebDriver driver) {
         String browser = Drivers.session().orElseThrow().settings().browser().id();
         return new VisualCheck(driver, VisualSettings.from(HarnessConfig.get(), browser));
@@ -50,7 +59,8 @@ class VisualRegressionTest extends UiTest {
     @Test
     void booking_form_with_a_check_digit_error(WebDriver driver, Waits waits) {
         GateUser user = fx.newDriver();
-        Models.Slot slot = fx.slotTomorrowAt(LocalTime.of(11, 0), 1);
+        Models.Slot slot = fx.slotOn(java.time.LocalDate.now(GateFixtures.TERMINAL).plusDays(OWN_DAY_OFFSET),
+                LocalTime.of(11, 0), 1);
         DriverPage page = pages().driverSignedInViaApi(user);
         page.slots().showDate(slot.start().toLocalDate()).select(slot.id());
         page.enterContainer("CSQU3054384");
