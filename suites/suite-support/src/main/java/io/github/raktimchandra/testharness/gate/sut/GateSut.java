@@ -33,6 +33,7 @@ public final class GateSut {
 
     private static final Logger log = LoggerFactory.getLogger(GateSut.class);
     private static volatile GateSut instance;
+    private static volatile RuntimeException startFailure;
 
     private final String baseUrl;
     private final String testSupportKey;
@@ -47,13 +48,27 @@ public final class GateSut {
         this.app = app;
     }
 
+    /**
+     * The SUT for this JVM. If start-up fails, the failure is remembered and re-thrown at
+     * once to every later caller, so one broken environment produces one clear error rather
+     * than a slow retry per test.
+     */
     public static GateSut get() {
         GateSut s = instance;
         if (s == null) {
             synchronized (GateSut.class) {
+                if (startFailure != null) {
+                    throw new IllegalStateException("Gate SUT failed to start earlier in this run; see the first error",
+                            startFailure);
+                }
                 s = instance;
                 if (s == null) {
-                    s = start(HarnessConfig.get());
+                    try {
+                        s = start(HarnessConfig.get());
+                    } catch (RuntimeException e) {
+                        startFailure = e;
+                        throw e;
+                    }
                     instance = s;
                 }
             }
@@ -89,11 +104,14 @@ public final class GateSut {
         }
         props.put("spring.main.banner-mode", "off");
         props.put("management.endpoints.web.exposure.include", "health,info");
+        // Passed as command-line arguments: those outrank application.yml, whereas
+        // SpringApplicationBuilder.properties(...) would only set (lowest-precedence) defaults.
+        String[] args = props.entrySet().stream().map(e -> "--" + e.getKey() + "=" + e.getValue())
+                .toArray(String[]::new);
         ConfigurableApplicationContext ctx = new SpringApplicationBuilder(GateApplication.class)
                 .web(WebApplicationType.SERVLET)
-                .properties(props)
                 .logStartupInfo(false)
-                .run();
+                .run(args);
         int port = ((WebServerApplicationContext) ctx).getWebServer().getPort();
         String url = "http://localhost:" + port;
         Runtime.getRuntime().addShutdownHook(new Thread(() -> SpringApplication.exit(ctx), "gate-sut-shutdown"));
