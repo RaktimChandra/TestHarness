@@ -1,0 +1,60 @@
+spring:
+  application:
+    name: gate-api
+  datasource:
+    url: ${GATE_DB_URL:jdbc:postgresql://localhost:5432/gate}
+    username: ${GATE_DB_USER:gate}
+    password: ${GATE_DB_PASSWORD:gate}
+    hikari:
+      maximum-pool-size: 20
+  flyway:
+    locations: classpath:db/migration
+  jackson:
+    default-property-inclusion: always
+    serialization:
+      write-dates-as-timestamps: false
+  mvc:
+    problemdetails:
+      enabled: true
+  threads:
+    virtual:
+      enabled: true
+
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+  error:
+    include-stacktrace: never
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: Gate Appointment
+    description: System under test bundled with TestHarness
+
+gate:
+  terminal-zone: ${GATE_TERMINAL_ZONE:Asia/Kolkata}
+  seed:
+    password: ${GATE_SEED_PASSWORD:gate-demo-pass}
+  jwt:
+    secret: ${GATE_JWT_SECRET:}
+  test-support:
+    enabled: ${GATE_TEST_SUPPORT_ENABLED:false}
+    key: ${GATE_TEST_SUPPORT_KEY:}
+
+logging:
+  level:
+    root: INFO
+    io.github.raktimchandra.gate: INFO
