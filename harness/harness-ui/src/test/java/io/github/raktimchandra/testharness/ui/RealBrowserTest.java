@@ -1,0 +1,78 @@
+package io.github.raktimchandra.testharness.ui;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import io.github.raktimchandra.testharness.ui.driver.Drivers;
+import io.github.raktimchandra.testharness.ui.evidence.UiEvidence;
+import io.github.raktimchandra.testharness.ui.junit.BrowserExtension;
+import io.github.raktimchandra.testharness.ui.page.Locators;
+import io.github.raktimchandra.testharness.ui.wait.Waits;
+import java.net.URISyntaxException;
+import java.nio.file.Path;
+import java.time.Duration;
+import org.junit.jupiter.api.Tag;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriver;
+
+/**
+ * Exercises the UI layer against a real browser and a static page that changes itself after
+ * a delay — proving explicit waits, BiDi console capture and failure evidence end to end.
+ */
+@Tag("browser")
+@ExtendWith(BrowserExtension.class)
+class RealBrowserTest {
+
+    @TempDir
+    Path evidence;
+
+    private static String page() throws URISyntaxException {
+        return RealBrowserTest.class.getResource("/delayed.html").toURI().toString();
+    }
+
+    @Test
+    void explicitWaitsFollowAsynchronousChanges(WebDriver driver, Waits waits) throws Exception {
+        driver.get(page());
+        waits.text(Locators.testId("status"), "ready");
+        waits.clickable(Locators.testId("go")).click();
+        waits.text(Locators.testId("status"), "clicked");
+        assertThat(waits.count(Locators.testIdPrefix("item-"), 3)).hasSize(3);
+    }
+
+    @Test
+    void consoleMessagesAndJavaScriptErrorsAreCaptured(WebDriver driver, Waits waits) throws Exception {
+        driver.get(page());
+        waits.text(Locators.testId("status"), "ready");
+        var console = Drivers.session().orElseThrow().console();
+        waits.withTimeout(Duration.ofSeconds(5)).until("console capture",
+                d -> console.lines().stream().anyMatch(l -> l.contains("page booted"))
+                        && console.lines().stream().anyMatch(l -> l.contains("deliberate failure")));
+        assertThat(console.available()).isTrue();
+        assertThat(console.render()).contains("[console.", "[js-error]");
+    }
+
+    @Test
+    void evidenceIsWrittenForDiagnosis(WebDriver driver, Waits waits) throws Exception {
+        driver.get(page());
+        waits.text(Locators.testId("status"), "ready");
+        UiEvidence.Captured c = UiEvidence.capture(driver, Drivers.session().orElseThrow().console(),
+                "Some Test / with:odd chars", evidence);
+        assertThat(c.screenshot()).isTrue();
+        assertThat(c.source()).isTrue();
+        assertThat(c.directory().getFileName().toString()).isEqualTo("Some_Test_with_odd_chars");
+        assertThat(c.directory().resolve("screenshot.png")).isNotEmptyFile();
+        assertThat(c.directory().resolve("page.html")).content().contains("data-testid=\"status\"");
+    }
+
+    @Test
+    void timeoutsAreFastAndDescriptive(WebDriver driver, Waits waits) throws Exception {
+        driver.get(page());
+        long start = System.nanoTime();
+        assertThatThrownBy(() -> waits.withTimeout(Duration.ofMillis(400)).visible(Locators.testId("never")))
+                .isInstanceOf(TimeoutException.class).hasMessageContaining("never");
+        assertThat(Duration.ofNanos(System.nanoTime() - start)).isLessThan(Duration.ofSeconds(5));
+    }
+}
