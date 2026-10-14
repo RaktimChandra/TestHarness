@@ -1,0 +1,4 @@
+# CI runners: headless browsers in containers need the sandbox relaxed.
+ui:
+  headless: true
+  no-sandbox: true

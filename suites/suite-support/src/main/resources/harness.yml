@@ -1,0 +1,8 @@
+# Project defaults for the Gate Appointment suites (override per environment below,
+# with HARNESS_* environment variables, or with -Dharness.* properties).
+sut:
+  mode: embedded            # embedded: start PostgreSQL (Testcontainers) + the app in-process
+  terminal-zone: Asia/Kolkata
+  seeded-bugs: ""           # comma-separated SeededBug names; used by the fault-seeding experiment
+db:
+  image: postgres:16-alpine

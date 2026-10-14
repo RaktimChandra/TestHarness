@@ -1,0 +1,4 @@
+# Docker Compose environment: the SUT runs in a container published on localhost:8080.
+sut:
+  mode: external
+  base-url: http://localhost:8080

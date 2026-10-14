@@ -1,0 +1,3 @@
+# Developer machine. Set ui.headless: false here to watch the browser.
+ui:
+  headless: true
