@@ -1,0 +1,38 @@
+# Build output
+target/
+build/
+out/
+*.class
+
+# Node / UI
+node_modules/
+dist/
+.vite/
+coverage/
+
+# IDE
+.idea/
+*.iml
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.classpath
+.project
+.settings/
+
+# Test artefacts (generated per run; published by CI instead)
+allure-results/
+allure-report/
+.allure/
+screenshots/
+*.log
+test-output/
+
+# Environment & secrets
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
