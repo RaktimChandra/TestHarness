@@ -81,6 +81,15 @@ jobs:
             all=$(echo "$m" | grep -oP '(?<=<version>)[^<]+' | grep -viE 'alpha|beta|rc|-m[0-9]|snapshot' | tail -25 | tr '\n' ' ')
             echo "$a=$v | recent stable: $all" | tee -a versions.txt
           done
+      - name: Transitive versions that BOM imports may override
+        run: |
+          for pom in io/gatling/gatling-netty-util/3.16.0/gatling-netty-util-3.16.0.pom \
+                     io/gatling/gatling-http-client/3.16.0/gatling-http-client-3.16.0.pom \
+                     io/gatling/gatling-core/3.16.0/gatling-core-3.16.0.pom; do
+            curl -fsS "https://repo.maven.apache.org/maven2/$pom" | tr -d ' \n' \
+              | grep -oP '<groupId>io\.netty</groupId><artifactId>[^<]+</artifactId><version>[^<]+' \
+              | sed 's/<[^>]*>/ /g' | sed "s#^#$pom: #" | tee -a versions.txt || true
+          done
       - name: Runner tooling
         run: |
           {
