@@ -44,14 +44,14 @@ class LoginJourneyTest extends UiTest {
 
     @Test
     void a_deep_link_without_a_session_redirects_to_login(WebDriver browser) {
-        browser.get(api.baseUrl() + "/clerk");
+        browser.get(pages().baseUrl() + "/clerk");
         assertThat(pages().login().waitUntilLoaded().currentPath()).isEqualTo("/login");
     }
 
     @Test
     void a_driver_who_opens_the_clerk_page_is_sent_back_to_their_own(WebDriver browser) {
         pages().driverSignedInViaApi(fx.newDriver());
-        browser.get(api.baseUrl() + "/clerk");
+        browser.get(pages().baseUrl() + "/clerk");
         assertThat(pages().driverPage().waitUntilLoaded().currentPath()).isEqualTo("/driver");
     }
 
