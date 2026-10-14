@@ -90,6 +90,13 @@ jobs:
               | grep -oP '<groupId>io\.netty</groupId><artifactId>[^<]+</artifactId><version>[^<]+' \
               | sed 's/<[^>]*>/ /g' | sed "s#^#$pom: #" | tee -a versions.txt || true
           done
+      - name: Selenium Grid image tags
+        run: |
+          for img in hub node-chrome node-firefox node-edge; do
+            curl -fsS "https://hub.docker.com/v2/repositories/selenium/$img/tags?page_size=100&name=4.5" \
+              | python3 -c "import sys,json; print('selenium/$img:', ' '.join(sorted({t['name'] for t in json.load(sys.stdin)['results']})))" \
+              | tee -a versions.txt || true
+          done
       - name: Runner tooling
         run: |
           {
