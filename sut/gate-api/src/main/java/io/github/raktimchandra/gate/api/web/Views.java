@@ -7,6 +7,7 @@ import io.github.raktimchandra.gate.domain.CapacityPolicy;
 import io.github.raktimchandra.gate.domain.SlotTimes;
 import java.time.Instant;
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import org.springframework.stereotype.Component;
 
 /** Maps persistence records to API views, rendering times in the terminal zone. */
@@ -37,7 +38,8 @@ public class Views {
         return new Dtos.UserView(u.username(), u.role(), u.displayName(), u.truckPlate());
     }
 
+    /** Every timestamp the API emits has whole-second precision: one format for all clients. */
     public OffsetDateTime time(Instant instant) {
-        return times.toTerminalTime(instant);
+        return times.toTerminalTime(instant.truncatedTo(ChronoUnit.SECONDS));
     }
 }

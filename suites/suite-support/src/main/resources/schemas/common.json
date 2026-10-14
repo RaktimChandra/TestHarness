@@ -3,10 +3,10 @@
   "$id": "classpath:schemas/common.json",
   "$defs": {
     "terminalTime": {
-      "description": "ISO-8601 date-time with an explicit UTC offset (the terminal's local time).",
+      "description": "ISO-8601 date-time, whole seconds, with an explicit UTC offset (the terminal's local time).",
       "type": "string",
       "format": "date-time",
-      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2}(\\.\\d+)?)?([+-]\\d{2}:\\d{2}|Z)$"
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}([+-]\\d{2}:\\d{2}|Z)$"
     },
     "reference": {"type": "string", "pattern": "^GA-[0-9A-HJKMNP-TV-Z]{8}$"},
     "lane": {"type": "string", "pattern": "^[A-Z0-9-]{1,12}$"},
