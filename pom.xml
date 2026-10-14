@@ -67,7 +67,7 @@
         <frontend-plugin.version>1.15.4</frontend-plugin.version>
         <exec-plugin.version>3.6.2</exec-plugin.version>
         <jacoco.version>0.8.15</jacoco.version>
-        <node.version>v22.20.0</node.version>
+        <node.version>v22.23.3</node.version>
 
         <!-- Populated by jacoco:prepare-agent where enabled; empty otherwise. -->
         <argLine/>
