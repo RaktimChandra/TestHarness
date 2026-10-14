@@ -57,12 +57,29 @@ jobs:
           org.postgresql:postgresql
           org.flywaydb:flyway-core
           org.springdoc:springdoc-openapi-starter-webmvc-ui
+          io.cucumber:cucumber-java
+          io.qameta.allure:allure-junit5
+          org.testcontainers:postgresql
+          org.testcontainers:testcontainers-postgresql
+          com.fasterxml.jackson:jackson-bom
+          org.slf4j:slf4j-api
+          ch.qos.logback:logback-classic
+          com.github.romankh3:image-comparison
+          io.github.bonigarcia:webdrivermanager
+          org.awaitility:awaitility
+          org.mockito:mockito-core
+          org.wiremock:wiremock-standalone
+          com.nimbusds:nimbus-jose-jwt
+          org.apache.maven.plugins:maven-assembly-plugin
+          org.apache.maven.plugins:maven-jar-plugin
           "
           for a in $arts; do
             g=${a%%:*}; n=${a##*:}
             p=$(echo "$g" | tr . /)
-            v=$(curl -fsS "https://repo.maven.apache.org/maven2/$p/$n/maven-metadata.xml" | grep -oP '(?<=<release>)[^<]+' || echo "?")
-            echo "$a=$v" | tee -a versions.txt
+            m=$(curl -fsS "https://repo.maven.apache.org/maven2/$p/$n/maven-metadata.xml" || true)
+            v=$(echo "$m" | grep -oP '(?<=<release>)[^<]+' || echo "?")
+            all=$(echo "$m" | grep -oP '(?<=<version>)[^<]+' | grep -viE 'alpha|beta|rc|-m[0-9]|snapshot' | tail -25 | tr '\n' ' ')
+            echo "$a=$v | recent stable: $all" | tee -a versions.txt
           done
       - name: Runner tooling
         run: |
