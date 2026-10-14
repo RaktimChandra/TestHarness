@@ -1,37 +1,50 @@
 #!/usr/bin/env python3
-"""Summarise the latest Gatling run (stats.json) for a CI job: per-request percentiles and errors."""
-import glob
-import json
+"""Summarise a Gatling run from its console output (the final "Global Information" block).
+
+Gatling 3.16 no longer writes stats.json and its simulation.log is binary, so the stable,
+documented console summary is parsed instead.
+
+usage: gatling_summary.py <label> <maven log file>
+"""
 import os
+import re
 import sys
 
 
 def main() -> int:
-    label = sys.argv[1]
-    runs = sorted(glob.glob(sys.argv[2] if len(sys.argv) > 2 else "**/target/gatling/*/js/stats.json", recursive=True),
-                  key=os.path.getmtime)
-    if not runs:
-        print(f"::warning title={label}::no Gatling stats.json found")
+    label, log = sys.argv[1], sys.argv[2]
+    text = open(log, encoding="utf-8", errors="replace").read()
+    blocks = text.split("---- Global Information")
+    if len(blocks) < 2:
+        print(f"::warning title={label}::no Gatling global summary in {log}")
         return 0
-    data = json.load(open(runs[-1], encoding="utf-8"))
-    rows = [("all requests", data["stats"])] + [(c["stats"]["name"], c["stats"]) for c in data["contents"].values()]
-    lines = [f"### {label}", "", "| request | count | KO | p50 ms | p95 ms | p99 ms | max ms |",
-             "|---|---:|---:|---:|---:|---:|---:|"]
-    for name, s in rows:
-        lines.append(f"| {name} | {s['numberOfRequests']['total']} | {s['numberOfRequests']['ko']} | "
-                     f"{s['percentiles1']['total']} | {s['percentiles3']['total']} | {s['percentiles4']['total']} | "
-                     f"{s['maxResponseTime']['total']} |")
-    text = "\n".join(lines) + "\n"
+    block = blocks[-1].split("========")[0]
+    values = {}
+    for line in block.splitlines():
+        m = re.match(r"> (.+?)\s*\|\s*([\d.]+)\s*\|\s*([\d.]+|-)\s*\|\s*([\d.]+|-)", line)
+        if m:
+            values[m.group(1).strip()] = (m.group(2), m.group(4))
+    requests = {}
+    tables = text.split("---- Requests ----")
+    if len(tables) > 1:
+        for line in tables[-1].split("\n\n")[0].splitlines():
+            m = re.match(r"> (.+?)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)", line)
+            if m and m.group(1).strip() != "Global":
+                requests[m.group(1).strip()] = (m.group(2), m.group(4))
+    total, ko = values.get("request count", ("0", "0"))
+    ko = "0" if ko == "-" else ko
+    get = lambda k: values.get(k, ("?",))[0]
+    rows = [("requests", total), ("failed (KO)", ko), ("p50 ms", get("response time 50th percentile (ms)")),
+            ("p95 ms", get("response time 95th percentile (ms)")), ("p99 ms", get("response time 99th percentile (ms)")),
+            ("max ms", get("max response time (ms)")), ("mean throughput rps", get("mean throughput (rps)"))]
+    md = [f"### {label}", "", "| metric | value |", "|---|---:|"] + [f"| {k} | {v} |" for k, v in rows]
+    md += ["", "| request | total | KO |", "|---|---:|---:|"] + [f"| {k} | {t} | {f} |" for k, (t, f) in requests.items()]
+    out = "\n".join(md) + "\n"
     if os.environ.get("GITHUB_STEP_SUMMARY"):
-        open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8").write(text)
-    print(text)
-    a = data["stats"]
-    total = a["numberOfRequests"]["total"]
-    ko = a["numberOfRequests"]["ko"]
-    print(f"::notice title={label} gatling::requests={total} ko={ko} errorPct={100.0 * ko / max(total, 1):.2f} "
-          f"p50={a['percentiles1']['total']} p95={a['percentiles3']['total']} p99={a['percentiles4']['total']} "
-          f"max={a['maxResponseTime']['total']} rps={a['meanNumberOfRequestsPerSecond']['total']:.1f} | "
-          + "; ".join(f"{n}:p95={s['percentiles3']['total']}" for n, s in rows[1:]))
+        open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8").write(out)
+    print(out)
+    print(f"::notice title={label} gatling::" + " ".join(f"{k.replace(' ', '_')}={v}" for k, v in rows)
+          + " | " + "; ".join(f"{k}={t}/{f}" for k, (t, f) in requests.items()))
     return 0
 
 

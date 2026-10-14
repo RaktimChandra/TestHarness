@@ -184,7 +184,7 @@ jobs:
           $MVN verify -pl suites/perf-suite 2>&1 | tee "$RUNNER_TEMP/perf.log"
       - name: Gatling summary
         if: always()
-        run: python3 .github/scripts/gatling_summary.py "perf" "suites/perf-suite/target/gatling/*/js/stats.json"
+        run: python3 .github/scripts/gatling_summary.py "perf" "$RUNNER_TEMP/perf.log"
       - uses: ./.github/actions/log-tail
         if: failure()
         with:
