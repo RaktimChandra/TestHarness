@@ -13,9 +13,8 @@ spring:
     default-property-inclusion: always
     serialization:
       write-dates-as-timestamps: false
-  mvc:
-    problemdetails:
-      enabled: true
+  # spring.mvc.problemdetails.enabled stays off on purpose: Spring's built-in advice would
+  # handle validation/405/type errors before ApiExceptionHandler and omit the stable "code".
   threads:
     virtual:
       enabled: true
