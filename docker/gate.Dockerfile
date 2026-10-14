@@ -22,6 +22,7 @@ RUN useradd --system --uid 10001 gate
 COPY --from=build /gate.jar /app/gate.jar
 USER gate
 EXPOSE 8080
+# /dev/tcp is a bash feature (the image's sh is dash), and it avoids installing curl.
 HEALTHCHECK --interval=5s --timeout=3s --start-period=40s --retries=12 \
-  CMD ["sh", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /actuator/health HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
+  CMD ["bash", "-c", "exec 3<>/dev/tcp/127.0.0.1/8080 && printf 'GET /actuator/health HTTP/1.0\\r\\n\\r\\n' >&3 && grep -q UP <&3"]
 ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75", "-jar", "/app/gate.jar"]

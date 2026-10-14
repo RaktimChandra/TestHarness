@@ -119,7 +119,9 @@ jobs:
           java-version: '21'
           cache: maven
       - name: Start the SUT with Docker Compose
-        run: docker compose up -d --build --wait --wait-timeout 300
+        run: |
+          set -o pipefail
+          docker compose up -d --build --wait --wait-timeout 300 2>&1 | tee "$RUNNER_TEMP/compose.log"
       - name: Build upstream modules
         run: $MVN install -DskipTests -pl suites/api-suite -am
       - name: API suite against the container
@@ -131,7 +133,14 @@ jobs:
         run: python3 .github/scripts/test_summary.py "compose-api" "suites/api-suite/**/TEST-*.xml"
       - name: Container logs on failure
         if: failure()
-        run: docker compose logs --no-color > "$RUNNER_TEMP/compose.log" 2>&1 || true
+        run: |
+          docker compose ps -a >> "$RUNNER_TEMP/compose.log" 2>&1 || true
+          docker compose logs --no-color --tail 120 >> "$RUNNER_TEMP/compose.log" 2>&1 || true
+      - uses: ./.github/actions/log-tail
+        if: failure()
+        with:
+          file: ${{ runner.temp }}/compose.log
+          lines: '150'
       - uses: ./.github/actions/log-tail
         if: failure()
         with:
