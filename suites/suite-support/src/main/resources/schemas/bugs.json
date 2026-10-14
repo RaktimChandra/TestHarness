@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["active", "available"],
+  "additionalProperties": false,
+  "properties": {
+    "active": {"type": "array", "items": {"type": "string"}, "uniqueItems": true},
+    "available": {
+      "type": "array",
+      "minItems": 6,
+      "items": {
+        "type": "object",
+        "required": ["name", "description", "location"],
+        "additionalProperties": false,
+        "properties": {
+          "name": {"type": "string"}, "description": {"type": "string"}, "location": {"type": "string"}
+        }
+      }
+    }
+  }
+}

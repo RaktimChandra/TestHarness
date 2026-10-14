@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["token", "tokenType", "expiresAt", "user"],
+  "additionalProperties": false,
+  "properties": {
+    "token": {"type": "string", "pattern": "^[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+\\.[A-Za-z0-9_-]+$"},
+    "tokenType": {"const": "Bearer"},
+    "expiresAt": {"$ref": "classpath:schemas/common.json#/$defs/terminalTime"},
+    "user": {"$ref": "classpath:schemas/common.json#/$defs/user"}
+  }
+}

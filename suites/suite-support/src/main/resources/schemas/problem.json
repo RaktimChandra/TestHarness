@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "RFC 9457 problem details plus a stable machine-readable code.",
+  "type": "object",
+  "required": ["status", "title", "code"],
+  "additionalProperties": false,
+  "properties": {
+    "type": {"type": "string"},
+    "title": {"type": "string"},
+    "status": {"type": "integer", "minimum": 400, "maximum": 599},
+    "detail": {"type": ["string", "null"]},
+    "instance": {"type": ["string", "null"]},
+    "code": {"type": "string", "pattern": "^[A-Z_]+$"},
+    "errors": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["field", "message"],
+        "additionalProperties": false,
+        "properties": {"field": {"type": "string"}, "message": {"type": "string"}}
+      }
+    }
+  }
+}

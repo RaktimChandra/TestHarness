@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "classpath:schemas/common.json",
+  "$defs": {
+    "terminalTime": {
+      "description": "ISO-8601 date-time with an explicit UTC offset (the terminal's local time).",
+      "type": "string",
+      "format": "date-time",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}(:\\d{2}(\\.\\d+)?)?([+-]\\d{2}:\\d{2}|Z)$"
+    },
+    "reference": {"type": "string", "pattern": "^GA-[0-9A-HJKMNP-TV-Z]{8}$"},
+    "lane": {"type": "string", "pattern": "^[A-Z0-9-]{1,12}$"},
+    "role": {"enum": ["DRIVER", "CLERK"]},
+    "status": {"enum": ["BOOKED", "CANCELLED", "CHECKED_IN"]},
+    "direction": {"enum": ["DROP_OFF", "PICK_UP"]},
+    "user": {
+      "type": "object",
+      "required": ["username", "role", "displayName", "truckPlate"],
+      "additionalProperties": false,
+      "properties": {
+        "username": {"type": "string", "minLength": 1},
+        "role": {"$ref": "#/$defs/role"},
+        "displayName": {"type": "string", "minLength": 1},
+        "truckPlate": {"type": ["string", "null"]}
+      }
+    },
+    "slot": {
+      "type": "object",
+      "required": ["id", "lane", "start", "end", "capacity", "booked", "remaining"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {"type": "integer", "minimum": 1},
+        "lane": {"$ref": "#/$defs/lane"},
+        "start": {"$ref": "#/$defs/terminalTime"},
+        "end": {"$ref": "#/$defs/terminalTime"},
+        "capacity": {"type": "integer", "minimum": 1, "maximum": 50},
+        "booked": {"type": "integer", "minimum": 0},
+        "remaining": {"type": "integer", "minimum": 0}
+      }
+    },
+    "booking": {
+      "type": "object",
+      "required": ["reference", "status", "direction", "containerNumber", "driver", "slot", "createdAt", "updatedAt",
+                   "checkedInAt"],
+      "additionalProperties": false,
+      "properties": {
+        "reference": {"$ref": "#/$defs/reference"},
+        "status": {"$ref": "#/$defs/status"},
+        "direction": {"$ref": "#/$defs/direction"},
+        "containerNumber": {"type": "string", "minLength": 11, "maxLength": 11},
+        "driver": {
+          "type": "object",
+          "required": ["username", "displayName"],
+          "additionalProperties": false,
+          "properties": {"username": {"type": "string"}, "displayName": {"type": "string"}}
+        },
+        "slot": {
+          "type": "object",
+          "required": ["id", "lane", "start", "end"],
+          "additionalProperties": false,
+          "properties": {
+            "id": {"type": "integer", "minimum": 1},
+            "lane": {"$ref": "#/$defs/lane"},
+            "start": {"$ref": "#/$defs/terminalTime"},
+            "end": {"$ref": "#/$defs/terminalTime"}
+          }
+        },
+        "createdAt": {"$ref": "#/$defs/terminalTime"},
+        "updatedAt": {"$ref": "#/$defs/terminalTime"},
+        "checkedInAt": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/terminalTime"}]}
+      }
+    }
+  }
+}

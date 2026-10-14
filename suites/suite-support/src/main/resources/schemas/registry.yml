@@ -1,0 +1,23 @@
+# Contract for every Gate API response the suites can observe. Strict mode fails a test
+# whose response is not covered here. Exact rules beat catch-alls (see SchemaRule.specificity).
+rules:
+  - {method: POST, path: "/api/auth/login",                     status: "200", schema: login.json}
+  - {method: GET,  path: "/api/auth/me",                        status: "200", schema: user.json}
+  - {method: GET,  path: "/api/slots",                          status: "200", schema: slot-list.json}
+  - {method: POST, path: "/api/slots",                          status: "201", schema: slot.json}
+  - {method: GET,  path: "/api/slots/{id}",                     status: "200", schema: slot.json}
+  - {method: POST, path: "/api/bookings",                       status: "201", schema: booking.json}
+  - {method: GET,  path: "/api/bookings",                       status: "200", schema: booking-list.json}
+  - {method: GET,  path: "/api/bookings/{reference}",           status: "200", schema: booking.json}
+  - {method: PUT,  path: "/api/bookings/{reference}/slot",      status: "200", schema: booking.json}
+  - {method: POST, path: "/api/bookings/{reference}/cancel",    status: "200", schema: booking.json}
+  - {method: POST, path: "/api/bookings/{reference}/check-in",  status: "200", schema: booking.json}
+  - {method: GET,  path: "/api/test-support/bugs",              status: "200", schema: bugs.json}
+  - {method: PUT,  path: "/api/test-support/bugs",              status: "200", schema: bugs.json}
+  - {method: GET,  path: "/api/test-support/clock",             status: "200", schema: clock.json}
+  - {method: PUT,  path: "/api/test-support/clock",             status: "200", schema: clock.json}
+  - {method: POST, path: "/api/test-support/users",             status: "201", schema: created-user.json}
+  - {method: GET,  path: "/actuator/health",                    status: "200", schema: health.json}
+  # Every error, on any endpoint, must be an RFC 9457 problem with a machine-readable code.
+  - {method: "*",  path: "**",                                  status: 4xx,   schema: problem.json}
+  - {method: "*",  path: "**",                                  status: 5xx,   schema: problem.json}
