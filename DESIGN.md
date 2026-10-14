@@ -170,6 +170,11 @@ framework unchanged.
   retryable failures; everything else fails immediately. There is no "retry failed test".
 - **Why:** retrying assertions hides flakiness. Phase 3 measures and quarantines flaky
   tests instead.
+- **Browser start-up is infrastructure too** (Phase 2): `Drivers` retries session creation
+  once on `SessionNotCreatedException` only (`ui.session-attempts`), and creates the first
+  session per browser and target alone so driver resolution is not raced by every worker.
+  Added after four parallel first starts of Edge failed together in CI; tested without a
+  browser in `DriverStartPolicyTest`.
 
 ### D14 — One browser per thread, data isolation per test — Built
 - **Chosen:** `Drivers` holds a `ThreadLocal` session; JUnit 5 runs classes and methods
@@ -228,6 +233,114 @@ framework unchanged.
 
 ---
 
+## Phase 2 — Grid, visual, accessibility, contracts, performance, security
+
+### D25 — Selenium Grid in Compose; browsers address the SUT by service name — Built
+- **Chosen:** `docker-compose.grid.yml` overlays a hub and Chrome, Firefox and Edge nodes
+  (`selenium/*:4.51.0-20261010`) on the SUT stack. Tests run on the host and send HTTP to
+  `sut.base-url` (`localhost:8080`), but the browsers live in node containers, so pages are
+  opened at a separate `sut.browser-base-url` (`http://gate:8080`). Nodes advertise
+  `SE_NODE_GRID_URL=http://localhost:4444` so BiDi WebSockets (console capture, D15)
+  resolve from the test JVM.
+- **Alternatives:** Selenoid / Moon (third-party, less current); running tests inside the
+  Compose network (hides the host↔container split the Windows setup actually has).
+- **Why / evidence:** the split URL found a real test bug (two deep-link tests used the API
+  URL — invisible locally, `ERR_CONNECTION_REFUSED` on Grid). Without the advertised URL
+  every BiDi connection failed (the hub handed out its container IP;
+  SeleniumHQ/selenium#15610).
+- **Measured:** RESULTS.md §Phase 2, "Grid".
+
+### D26 — Visual regression: own perceptual diff, per-platform baselines, CI-rendered and reviewed — Built
+- **Chosen:** `ImageDiff` compares element screenshots with the YIQ colour distance used by
+  pixelmatch (threshold `visual.pixel-tolerance` = 0.1 of the maximum YIQ delta), then fails
+  if more than `visual.max-mismatch` (0.2 %) of compared pixels differ. Child elements whose
+  content legitimately changes (dates, generated lanes, references, usernames) are passed
+  as ignore-regions. On failure the report carries baseline, actual and a red diff image.
+- **Baselines** are per *platform* (`chrome-ci`, `firefox-ci`, `edge-ci`): font rendering
+  differs between browsers and operating systems, so one baseline per browser would
+  either fail on every other machine or need a tolerance loose enough to miss real
+  changes. `visual-baselines.yml` renders candidates on the CI image and pushes them to a
+  `visual-baselines/<run>` branch; a person reviews the PNGs and merges — **merging is the
+  approval step**. Locally a missing baseline writes a candidate and skips; in the `ci` environment
+  `visual.require-baseline` defaults to true, so a missing baseline fails.
+- **Stabilisation before every capture:** blur the focused element; freeze carets,
+  transitions and animations. `:focus-visible` paints only when the window has OS focus,
+  which varies between parallel headless sessions (2.0–3.5 % differences in CI before this).
+  Trade-off: focus styling is not asserted visually.
+- **Deterministic layout:** the booking-form check uses a date no other test uses; the slot
+  list above the form otherwise changed its sub-pixel position and border anti-aliasing
+  (2.76 % in CI; reproduced locally at 0.78 %; 0 px after the fix in two full runs).
+- **Alternatives:** Applitools / Percy (hosted, paid, not reproducible offline); pixel-exact
+  comparison (fails on harmless anti-aliasing); pixelmatch's anti-aliasing detection —
+  *not implemented*, which is why layout determinism is enforced in the tests instead.
+- **Simplified:** no anti-aliasing detection; five components, not every screen.
+
+### D27 — Accessibility: axe-core on every page *state*, gate on critical and serious — Built
+- **Chosen:** `A11yScanner` runs axe-core (`com.deque.html.axe-core:selenium` 4.13.0)
+  restricted to the WCAG 2.0/2.1 A and AA tags, writes `target/a11y/<page>-<browser>.json`
+  and fails on any *critical* or *serious* violation (`A11yGate`, thresholds configurable;
+  moderate/minor are reported, not gated). Nine states are scanned — including the
+  validation error, the reschedule panel, the confirm dialog and the check-in notice —
+  because dialogs and error messages are where accessibility usually breaks.
+- **Proof the scanner works:** `RealBrowserTest` scans a fixture page with known faults and
+  asserts `image-alt`, `label` and `color-contrast` are reported and the gate fails.
+- **Limits:** automated rules find a subset of WCAG failures; no screen-reader or
+  keyboard-only walkthrough is automated. Best-practice (non-WCAG) rules are not run.
+
+### D28 — Consumer-driven contracts from the UI's real client, committed with a drift check — Built
+- **Chosen:** Pact V4. The consumer test (`client.pact.test.js`, Pact JS in Vitest) calls the
+  UI's own `api/client.js` against the Pact mock server — so the contract is what the UI
+  really sends and parses, not a hand-written copy. The pact file is committed under
+  `contracts/pacts/`; CI regenerates it and fails on `git diff` (drift check). The provider
+  (`PactProviderTest` in `gate-api`) verifies it against the real app and PostgreSQL;
+  provider states create fixed ids and pin the clock to 2026-11-20 09:00 terminal time so
+  the contract's dates never expire.
+- **Alternatives:** a Pact Broker / PactFlow (the right choice for many teams and repos;
+  overhead for one repo); Spring Cloud Contract (provider-driven, JVM-only consumer).
+- **Found:** mixed timestamp precision in the SUT (D32).
+
+### D29 — Performance smoke with Gatling's Java DSL and hard gates — Built
+- **Chosen:** `BookingFlowSimulation` drives login → list slots → book → read → cancel with
+  an open ramp (default 60 users over 30 s) against the embedded SUT, and fails the build if
+  p95 ≥ 800 ms, p99 ≥ 1500 ms or errors ≥ 1 % (all overridable with `-Dperf.*`). Test data
+  (30 drivers, 10 slots) is created through the API before load starts.
+- **Reporting:** Gatling 3.16 writes no `stats.json` and a binary `simulation.log`, so CI
+  parses the console's final *Global Information* block and per-request table.
+- **Netty pin:** Gatling 3.16 needs Netty 4.2 while Spring Boot 3.5 manages 4.1; the
+  perf module imports `netty-bom` 4.2.18 (otherwise `NoClassDefFoundError: io/netty/channel/IoHandle`).
+- **Simplified — this is a smoke test, not a capacity test:** the SUT shares the runner
+  with the load generator, so numbers show regressions between runs on the same machine,
+  not production capacity.
+
+### D30 — Security smoke tests, not a penetration test — Built
+- **Chosen:** `SecuritySmokeTest` (17 tests, `@Tag("security")`): `alg=none` and
+  foreign-key JWTs, wrong schemes and empty tokens; cross-driver read/move/cancel (IDOR);
+  driver use of clerk operations; mass assignment of `status`/owner; hostile references
+  (path traversal, encoded slashes, SQL); SQL injection in login; script payloads never
+  reflected; security headers; errors without stack traces; test-support API unreachable
+  without its key.
+- **Not covered (honestly):** no DAST scanner (e.g. ZAP), no fuzzing, no dependency CVE
+  scan yet (Phase 5 CI), no rate-limit / brute-force tests.
+- **Found:** firewall and Tomcat rejections were not RFC 9457 problems (D33).
+
+### D31 — Strict schema mode can register a deliberately non-JSON response as `none` — Built
+- The SPA routes (`/login`, `/driver`, `/clerk`) return HTML. Instead of switching strict
+  validation off for UI-adjacent tests, the registry says so explicitly
+  (`schema: none`); anything else unregistered still fails.
+
+### D32 — Every timestamp has whole-second precision — Built (SUT fix)
+- Found by Pact provider verification: slot times had whole seconds, but audit fields and
+  token expiry carried micro/nanoseconds, so one client format could not parse all of
+  them. All times are now truncated to seconds and the shared schema enforces the format.
+
+### D33 — Rejected URLs answer with the same problem+json contract — Built (SUT fix)
+- Found by the security tests: paths with `;`, an encoded `%` or an encoded `/` were
+  refused by Spring's `StrictHttpFirewall` or by Tomcat with a bare/HTML 400. A
+  `RequestRejectedHandler` writes a `VALIDATION_FAILED` problem, and Tomcat passes `%2F`
+  through so the firewall (which still rejects it) handles it consistently.
+
+---
+
 ## Build and tooling
 
 ### D22 — Version lines follow the brief, at their latest patch — Built
@@ -250,6 +363,10 @@ sandbox). Lifecycle plugins (clean, resources, install, …) are pinned because 
 
 ## Known limits (honest list)
 - Edge has not been run outside CI (no Edge binary in the authoring sandbox).
+- Selenium Grid and the Docker Compose stack have only run in CI (Docker Hub is blocked in
+  the authoring sandbox).
+- Visual diff has no anti-aliasing detection (D26); tests must keep layouts deterministic.
+- Performance numbers come from a shared runner and are for regression detection (D29).
 - The race-condition bug uses a configurable pause (`gate.race-window`, 150 ms) to make the
   race reproducible on any machine; without it the race is real but intermittent.
 - Coverage numbers in RESULTS.md are per-module unit/integration coverage; per-test

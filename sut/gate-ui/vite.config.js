@@ -17,5 +17,7 @@ export default defineConfig({
     environment: 'jsdom',
     setupFiles: ['./src/test-setup.js'],
     include: ['src/**/*.test.{js,jsx}'],
+    // Pact runs one mock server at a time; keep contract tests in a single worker.
+    fileParallelism: false,
   },
 });

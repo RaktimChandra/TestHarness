@@ -110,6 +110,92 @@ Remove-Item Env:HARNESS_ENV
 docker compose down -v
 ```
 
+## 6. Run the UI suite on Selenium Grid (Docker) — Terminals A and B
+
+**Terminal B** — start the app, database, Grid hub and Chrome/Firefox/Edge nodes, and wait
+until their health checks pass (the first start downloads the browser images and takes a
+while):
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.grid.yml up -d --build --wait --wait-timeout 400
+```
+
+The Grid UI is at http://localhost:4444 — it should list three nodes; under *Sessions* you
+can watch a running browser. To follow the logs in this window:
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.grid.yml logs -f
+```
+
+**Terminal A** — tell the framework where the app and the Grid are:
+
+```powershell
+$env:HARNESS_ENV = "docker"
+```
+
+```powershell
+.\mvnw.cmd verify -pl suites/ui-suite -am "-Dharness.ui.grid-url=http://localhost:4444" "-Dharness.sut.browser-base-url=http://gate:8080" "-DexcludedGroups=visual" "-Dharness.ui.browser=firefox"
+```
+
+(`browser-base-url` is the address the browsers *inside Docker* use; visual checks are
+excluded because their baselines are rendered on the CI runner, not in the node images.)
+
+```powershell
+Remove-Item Env:HARNESS_ENV
+```
+
+**Terminal B** — stop following the logs with Ctrl+C, then remove everything:
+
+```powershell
+docker compose -f docker-compose.yml -f docker-compose.grid.yml down -v
+```
+
+## 7. Performance smoke test (Gatling) — Terminal A
+
+Runs as part of `verify`. On its own, with the default budget (60 users over 30 s):
+
+```powershell
+.\mvnw.cmd verify -pl suites/perf-suite -am
+```
+
+With a bigger load and a stricter gate:
+
+```powershell
+.\mvnw.cmd verify -pl suites/perf-suite -am "-Dperf.users=200" "-Dperf.ramp=60" "-Dperf.p95=500"
+```
+
+Open the newest `suites\perf-suite\target\gatling\bookingflowsimulation-*\index.html` in a
+browser. To build everything *except* the load test, add `"-DskipPerf"` to any command.
+
+## 8. Accessibility and visual results — Terminal A
+
+After a UI run, axe-core results are in `suites\ui-suite\target\a11y\*.json` and in the
+Allure report. Visual checks compare against the CI baselines; on your machine they write
+*candidates* to `suites\ui-suite\target\visual\new\` and are reported as skipped — that
+is expected. To check your own machine's rendering is stable, create local baselines once:
+
+```powershell
+.\mvnw.cmd verify -pl suites/ui-suite -am "-Dtest=VisualRegressionTest" "-Dsurefire.failIfNoSpecifiedTests=false" "-Dharness.visual.mode=update"
+```
+
+and run the suite again: the five checks now compare and should pass. Do not commit those
+PNGs; committed baselines come from the `visual-baselines` workflow (FRAMEWORK_GUIDE.md).
+
+## 9. Contract tests (Pact) — Terminal A
+
+The UI build regenerates the consumer contract; the API build verifies it:
+
+```powershell
+.\mvnw.cmd verify -pl sut/gate-ui,sut/gate-api -am
+```
+
+```powershell
+git status contracts
+```
+
+If `git status` shows `contracts\pacts\gate-ui-gate-api.json` as modified, you changed what
+the UI sends or expects — commit the file with your change (CI fails if they differ).
+
 ## Troubleshooting
 
 | Symptom | Fix |
@@ -119,3 +205,5 @@ docker compose down -v
 | UI tests fail to start a browser | Install/update Chrome; Selenium Manager downloads the matching driver automatically. |
 | Port 8080 or 5432 busy (Compose) | Stop the other program, or change the left-hand port in `docker-compose.yml`. |
 | Need to reproduce a run's random data | Use the seed printed in the log: `"-Dharness.data.seed=<seed>"`. |
+| Grid run: `ERR_CONNECTION_REFUSED` in the browser | `-Dharness.sut.browser-base-url=http://gate:8080` is missing — browsers in Docker cannot use `localhost:8080`. |
+| Grid run: "Browser console capture unavailable" | The nodes must advertise `http://localhost:4444` (`SE_NODE_GRID_URL`, set in `docker-compose.grid.yml`); if your Grid is elsewhere set `GRID_PUBLIC_URL` before `docker compose up`. |

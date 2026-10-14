@@ -8,6 +8,12 @@ compiles against, code in this repository.
 - [API tests](#api-tests)
 - [UI tests](#ui-tests)
 - [BDD scenarios](#bdd-scenarios)
+- [Visual regression](#visual-regression)
+- [Accessibility](#accessibility)
+- [Contract tests (Pact)](#contract-tests-pact)
+- [Performance smoke (Gatling)](#performance-smoke-gatling)
+- [Security smoke tests](#security-smoke-tests)
+- [Selenium Grid](#selenium-grid)
 - [Test data](#test-data)
 - [Reporting and evidence](#reporting-and-evidence)
 - [Rules the build enforces](#rules-the-build-enforces)
@@ -41,7 +47,14 @@ Choose the environment with `-Dharness.env=docker` or `HARNESS_ENV=docker`.
 | `ui.headless` | `true` | `false` to watch |
 | `ui.explicit-wait` / `ui.poll-interval` | `10s` / `100ms` | wait budget |
 | `ui.grid-url` | empty | a Selenium Grid instead of local browsers |
+| `ui.session-attempts` | `2` | tries to start a browser; retried only on `SessionNotCreatedException` |
 | `ui.binary.<browser>` / `ui.driver-path.<browser>` | empty | custom browser/driver executables |
+| `sut.browser-base-url` | `sut.base-url` | where *browsers* open the app (Grid: `http://gate:8080`) |
+| `visual.platform` | `<browser>-<os>` | baseline set to compare with (CI: `chrome-ci`, `firefox-ci`, `edge-ci`) |
+| `visual.mode` | `compare` | `update` writes the current rendering as the baseline |
+| `visual.max-mismatch` / `visual.pixel-tolerance` | `0.002` / `0.1` | allowed share of differing pixels / per-pixel YIQ tolerance |
+| `visual.require-baseline` | `true` in `ci`, else `false` | a missing baseline fails instead of skipping |
+| `a11y.max-critical` / `-serious` / `-moderate` / `-minor` | `0` / `0` / `-1` / `-1` | violations allowed per impact (`-1` = report only) |
 | `data.seed` | random | fix the Faker seed to replay a run |
 
 Secrets are **only** environment variables, read with `config.secret("NAME", localFallback)`.
@@ -173,6 +186,95 @@ Tag a scenario `@ui` and the framework hooks start a browser before it and quit 
 after (capturing evidence on failure). Filter with
 `-Dcucumber.filter.tags="@smoke and not @ui"`.
 
+## Visual regression
+
+```java
+@Test
+void login_error(WebDriver driver, Waits waits) {
+    var login = pages().login().open();
+    login.enter("driver1", "wrong-password").submit();
+    login.error();
+    new VisualCheck(driver, VisualSettings.from(HarnessConfig.get(), "chrome"))
+            .matches("login-form-error", waits.visible(testId("login-form")),
+                     testId("login-username"));          // ignore-region: masked child
+}
+```
+
+- Screenshot **one component**, not the page; mask anything that changes between runs.
+- Keep the layout around it deterministic (e.g. give the test its own date if a list
+  above it shows other tests' data) — the diff has no anti-aliasing detection.
+- The page is stabilised for you before capture (focus blurred, carets/animations off).
+- New or changed baseline: run the **visual-baselines** workflow (Actions → visual-baselines
+  → Run workflow, on your branch), review the PNGs on the `visual-baselines/<run>` branch it
+  pushes, and merge it. Locally: `-Dharness.visual.mode=update` writes your machine's
+  baselines under its own platform name (not committed).
+- A failure leaves `target/visual/diff/<platform>/<name>-actual.png` and `-diff.png`
+  (red = changed) and attaches baseline, actual and diff to the Allure report.
+
+## Accessibility
+
+```java
+private final A11yGate gate = A11yGate.from(HarnessConfig.get());
+
+@Test
+void driver_page_with_bookings_validation_and_dialog(WebDriver driver, Waits waits) {
+    DriverPage page = pages().driverSignedInViaApi(fx.newDriver());
+    var scanner = new A11yScanner(driver, "chrome", Path.of("target", "a11y"));
+    scanner.assertWithin("driver", gate);               // scan + gate
+    page.enterContainer("CSQU3054384");
+    scanner.assertWithin("driver-validation-error", gate); // scan the error *state* too
+}
+```
+
+Each scan writes `target/a11y/<page>-<browser>.json`; `.github/scripts/a11y_summary.py`
+turns them into a per-page × impact table. Only WCAG 2.0/2.1 A and AA rules run.
+
+## Contract tests (Pact)
+
+- **Consumer** (`sut/gate-ui/src/api/client.pact.test.js`): call the real client against
+  the Pact mock server; one interaction per request/response the UI depends on. Use
+  matchers (`like`, `eachLike`, `regex`, `datetime`, `integer`) for values that vary,
+  exact values only where the UI branches on them.
+  `./mvnw verify -pl sut/gate-ui` (or `npm test` in `sut/gate-ui` if you have Node)
+  regenerates `contracts/pacts/gate-ui-gate-api.json` — commit it; CI fails if the
+  committed file differs from the regenerated one.
+- **Provider** (`sut/gate-api/.../PactProviderTest`): every `given(...)` state in the
+  contract needs a `@State` method that creates exactly that data.
+  `./mvnw verify -pl sut/gate-api -am` runs it.
+
+## Performance smoke (Gatling)
+
+```bash
+./mvnw verify -pl suites/perf-suite -am                       # default budget
+./mvnw verify -pl suites/perf-suite -am -Dperf.users=200 -Dperf.ramp=60 -Dperf.p95=500
+./mvnw verify -DskipPerf                                       # build everything else
+```
+
+The HTML report is under `suites/perf-suite/target/gatling/<run>/index.html`. Gates
+(p95, p99, error %) fail the build; change them with `-Dperf.*`, not by editing the
+simulation.
+
+## Security smoke tests
+
+`SecuritySmokeTest` in the API suite (`-Dgroups=security` to run only these). Add a test
+when you add an endpoint that takes an identifier (IDOR), a role (authorisation) or free
+text (injection/reflection). Expected behaviour is always the normal error contract —
+a 401/403/404/400 *problem* — never a 500 or a stack trace.
+
+## Selenium Grid
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.grid.yml up -d --build --wait
+HARNESS_ENV=docker ./mvnw verify -pl suites/ui-suite -am \
+  -Dharness.ui.grid-url=http://localhost:4444 \
+  -Dharness.sut.browser-base-url=http://gate:8080 \
+  -Dharness.ui.browser=firefox -DexcludedGroups=visual
+```
+
+Visual checks are excluded on Grid because the baselines are rendered on the CI runner's
+browsers, not the node images. Watch a session live at http://localhost:4444 (Sessions →
+camera icon; the nodes run noVNC without a password).
+
 ## Test data
 
 | Need | Use |
@@ -213,6 +315,9 @@ jwebserver -d <absolute path>/target/allure-report -p 8000
 | `LockSupport.park*` only in `core.retry.Pause` | `PARKING_ONLY_IN_PAUSE` | one audited place that blocks |
 | No `System.out` / `System.err` | `NO_STANDARD_STREAMS` | logs are structured |
 | Implicit waits = 0 | `DriverFactory` | explicit waits only |
-| Every API response matches a schema | `SchemaValidationFilter` (strict) | contracts checked everywhere |
+| Every API response matches a schema | `SchemaValidationFilter` (strict); non-JSON must be registered as `none` | contracts checked everywhere |
+| No critical/serious WCAG violations | `A11yGate` | accessibility regressions fail the build |
+| Committed Pact file = regenerated file | CI `git diff --exit-code -- contracts/` | the provider verifies what the UI really sends |
+| p95 / p99 / error-rate budgets | `BookingFlowSimulation` assertions | latency regressions fail the build |
 | No secret fallbacks in CI | `HarnessConfig.secret` | a missing CI secret fails loudly |
 | Retry needs a cap and a predicate | `Retry.Builder.build()` | no unbounded or blanket retries |

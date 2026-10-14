@@ -1,0 +1,1267 @@
+{
+  "consumer": {
+    "name": "gate-ui"
+  },
+  "interactions": [
+    {
+      "description": "a booking for a full slot",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "slot 9003 is full"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "containerNumber": "MSCU1000070",
+            "direction": "DROP_OFF",
+            "slotId": 9003
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Authorization": [
+            "Bearer driver-token"
+          ],
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^Bearer .+$"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/api/bookings"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "code": "SLOT_FULL",
+            "detail": "Slot is full",
+            "status": 409
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/problem+json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.detail": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 409
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a booking for slot 9001",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "slot 9001 exists with room"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "containerNumber": "CSQU3054383",
+            "direction": "DROP_OFF",
+            "slotId": 9001
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Authorization": [
+            "Bearer driver-token"
+          ],
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^Bearer .+$"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/api/bookings"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "containerNumber": "CSQU3054383",
+            "createdAt": "2026-11-20T09:00:00+05:30",
+            "direction": "DROP_OFF",
+            "driver": {
+              "displayName": "Anika Rao",
+              "username": "driver1"
+            },
+            "reference": "GA-PACT0001",
+            "slot": {
+              "end": "2026-12-01T10:30:00+05:30",
+              "id": 9001,
+              "lane": "PACT",
+              "start": "2026-12-01T10:00:00+05:30"
+            },
+            "status": "BOOKED",
+            "updatedAt": "2026-11-20T09:00:00+05:30"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.containerNumber": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^[A-Z]{3}[UJZ][0-9]{7}$"
+                }
+              ]
+            },
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.direction": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^(DROP_OFF|PICK_UP)$"
+                }
+              ]
+            },
+            "$.driver.displayName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.driver.username": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.reference": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^GA-[0-9A-HJKMNP-TV-Z]{8}$"
+                }
+              ]
+            },
+            "$.slot.end": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.slot.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.slot.lane": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.slot.start": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.updatedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            }
+          }
+        },
+        "status": 201
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a cancellation of GA-PACT0001",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "driver1 has booking GA-PACT0001 in slot 9001"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": [
+            "Bearer driver-token"
+          ]
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^Bearer .+$"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/api/bookings/GA-PACT0001/cancel"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "containerNumber": "CSQU3054383",
+            "createdAt": "2026-11-20T09:00:00+05:30",
+            "direction": "DROP_OFF",
+            "driver": {
+              "displayName": "Anika Rao",
+              "username": "driver1"
+            },
+            "reference": "GA-PACT0001",
+            "slot": {
+              "end": "2026-12-01T10:30:00+05:30",
+              "id": 9001,
+              "lane": "PACT",
+              "start": "2026-12-01T10:00:00+05:30"
+            },
+            "status": "CANCELLED",
+            "updatedAt": "2026-11-20T09:00:00+05:30"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.containerNumber": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^[A-Z]{3}[UJZ][0-9]{7}$"
+                }
+              ]
+            },
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.direction": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^(DROP_OFF|PICK_UP)$"
+                }
+              ]
+            },
+            "$.driver.displayName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.driver.username": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.reference": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^GA-[0-9A-HJKMNP-TV-Z]{8}$"
+                }
+              ]
+            },
+            "$.slot.end": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.slot.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.slot.lane": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.slot.start": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.updatedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a check-in of GA-PACT0002 by a clerk",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "booking GA-PACT0002 is inside its check-in window"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": [
+            "Bearer clerk-token"
+          ]
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^Bearer .+$"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/api/bookings/GA-PACT0002/check-in"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "checkedInAt": "2026-11-20T09:05:00+05:30",
+            "containerNumber": "CSQU3054383",
+            "createdAt": "2026-11-20T09:00:00+05:30",
+            "direction": "DROP_OFF",
+            "driver": {
+              "displayName": "Anika Rao",
+              "username": "driver1"
+            },
+            "reference": "GA-PACT0002",
+            "slot": {
+              "end": "2026-12-01T10:30:00+05:30",
+              "id": 9001,
+              "lane": "PACT",
+              "start": "2026-12-01T10:00:00+05:30"
+            },
+            "status": "CHECKED_IN",
+            "updatedAt": "2026-11-20T09:00:00+05:30"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.checkedInAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.containerNumber": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^[A-Z]{3}[UJZ][0-9]{7}$"
+                }
+              ]
+            },
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.direction": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^(DROP_OFF|PICK_UP)$"
+                }
+              ]
+            },
+            "$.driver.displayName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.driver.username": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.reference": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^GA-[0-9A-HJKMNP-TV-Z]{8}$"
+                }
+              ]
+            },
+            "$.slot.end": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.slot.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.slot.lane": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.slot.start": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.updatedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a login with a wrong password",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the demo users exist"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "password": "wrong",
+            "username": "driver1"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "method": "POST",
+        "path": "/api/auth/login"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "code": "UNAUTHENTICATED",
+            "status": 401
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/problem+json"
+          ]
+        },
+        "status": 401
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a login with valid credentials",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "the demo users exist"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "password": "gate-demo-pass",
+            "username": "driver1"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "method": "POST",
+        "path": "/api/auth/login"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "expiresAt": "2026-12-01T18:00:00+05:30",
+            "token": "header.payload.signature",
+            "tokenType": "Bearer",
+            "user": {
+              "displayName": "Anika Rao",
+              "role": "DRIVER",
+              "username": "driver1"
+            }
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$.expiresAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.token": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.user.displayName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for my bookings",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "driver1 has booking GA-PACT0001 in slot 9001"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": [
+            "Bearer driver-token"
+          ]
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^Bearer .+$"
+                }
+              ]
+            }
+          }
+        },
+        "method": "GET",
+        "path": "/api/bookings"
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "containerNumber": "CSQU3054383",
+              "createdAt": "2026-11-20T09:00:00+05:30",
+              "direction": "DROP_OFF",
+              "driver": {
+                "displayName": "Anika Rao",
+                "username": "driver1"
+              },
+              "reference": "GA-PACT0001",
+              "slot": {
+                "end": "2026-12-01T10:30:00+05:30",
+                "id": 9001,
+                "lane": "PACT",
+                "start": "2026-12-01T10:00:00+05:30"
+              },
+              "status": "BOOKED",
+              "updatedAt": "2026-11-20T09:00:00+05:30"
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$[*].containerNumber": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^[A-Z]{3}[UJZ][0-9]{7}$"
+                }
+              ]
+            },
+            "$[*].createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$[*].direction": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^(DROP_OFF|PICK_UP)$"
+                }
+              ]
+            },
+            "$[*].driver.displayName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].driver.username": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].reference": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^GA-[0-9A-HJKMNP-TV-Z]{8}$"
+                }
+              ]
+            },
+            "$[*].slot.end": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$[*].slot.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].slot.lane": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].slot.start": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$[*].status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].updatedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a request for the slots on a date",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "slot 9001 exists with room"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": [
+            "Bearer driver-token"
+          ]
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^Bearer .+$"
+                }
+              ]
+            }
+          }
+        },
+        "method": "GET",
+        "path": "/api/slots",
+        "query": {
+          "date": [
+            "2026-12-01"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "content": [
+            {
+              "booked": 0,
+              "capacity": 4,
+              "end": "2026-12-01T10:30:00+05:30",
+              "id": 9001,
+              "lane": "PACT",
+              "remaining": 4,
+              "start": "2026-12-01T10:00:00+05:30"
+            }
+          ],
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$[*].booked": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].capacity": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].end": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$[*].id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].lane": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$[*].remaining": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$[*].start": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    },
+    {
+      "description": "a reschedule of GA-PACT0001 to slot 9002",
+      "pending": false,
+      "providerStates": [
+        {
+          "name": "driver1 has booking GA-PACT0001 in slot 9001"
+        }
+      ],
+      "request": {
+        "body": {
+          "content": {
+            "slotId": 9002
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Authorization": [
+            "Bearer driver-token"
+          ],
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^Bearer .+$"
+                }
+              ]
+            }
+          }
+        },
+        "method": "PUT",
+        "path": "/api/bookings/GA-PACT0001/slot"
+      },
+      "response": {
+        "body": {
+          "content": {
+            "containerNumber": "CSQU3054383",
+            "createdAt": "2026-11-20T09:00:00+05:30",
+            "direction": "DROP_OFF",
+            "driver": {
+              "displayName": "Anika Rao",
+              "username": "driver1"
+            },
+            "reference": "GA-PACT0001",
+            "slot": {
+              "end": "2026-12-01T10:30:00+05:30",
+              "id": 9002,
+              "lane": "PACT",
+              "start": "2026-12-01T10:00:00+05:30"
+            },
+            "status": "BOOKED",
+            "updatedAt": "2026-11-20T09:00:00+05:30"
+          },
+          "contentType": "application/json",
+          "encoded": false
+        },
+        "headers": {
+          "Content-Type": [
+            "application/json"
+          ]
+        },
+        "matchingRules": {
+          "body": {
+            "$": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.containerNumber": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^[A-Z]{3}[UJZ][0-9]{7}$"
+                }
+              ]
+            },
+            "$.createdAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.direction": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^(DROP_OFF|PICK_UP)$"
+                }
+              ]
+            },
+            "$.driver.displayName": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.driver.username": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.reference": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^GA-[0-9A-HJKMNP-TV-Z]{8}$"
+                }
+              ]
+            },
+            "$.slot.end": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.slot.id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.slot.lane": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.slot.start": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.updatedAt": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "format": "yyyy-MM-dd'T'HH:mm:ssXXX",
+                  "match": "datetime"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      },
+      "type": "Synchronous/HTTP"
+    }
+  ],
+  "metadata": {
+    "pact-js": {
+      "version": "17.1.4"
+    },
+    "pactRust": {
+      "ffi": "0.5.8",
+      "models": "1.3.16"
+    },
+    "pactSpecification": {
+      "version": "4.0"
+    }
+  },
+  "provider": {
+    "name": "gate-api"
+  }
+}
