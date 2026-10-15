@@ -16,7 +16,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Runs only the tests listed in {@code harness.select} (a file with one test key per line;
+ * Runs only the tests listed in {@code -Dharness.select} (config key {@code select}) (a file with one test key per line;
  * {@code #} comments allowed; a line without {@code #} selects a whole class or feature). It is
  * how re-running failed tests and test impact analysis pick tests, for JUnit and Cucumber alike.
  */
@@ -27,7 +27,7 @@ public class SelectionFilter implements PostDiscoveryFilter {
     private final Optional<Set<String>> selected;
 
     public SelectionFilter() {
-        this(HarnessConfig.get().find("harness.select").map(SelectionFilter::readKeys));
+        this(HarnessConfig.get().find("select").map(SelectionFilter::readKeys));
     }
 
     SelectionFilter(Optional<Set<String>> selected) {

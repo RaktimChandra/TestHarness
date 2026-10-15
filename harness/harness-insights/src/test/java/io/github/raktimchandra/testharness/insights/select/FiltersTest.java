@@ -65,6 +65,26 @@ class FiltersTest {
     }
 
     @Test
+    void filtersReadTheirSettingsFromHarnessSystemProperties(@org.junit.jupiter.api.io.TempDir java.nio.file.Path dir)
+            throws Exception {
+        java.nio.file.Path select = dir.resolve("select.txt");
+        java.nio.file.Files.writeString(select, "# comment\n" + K + "passes\n");
+        System.setProperty("harness.select", select.toString());
+        System.setProperty("harness.shard", "1/1");
+        io.github.raktimchandra.testharness.core.config.HarnessConfig.reset();
+        try {
+            // Regression: -Dharness.select reaches the config as key "select"; the first version looked
+            // up "harness.select", so a selected run silently ran every test.
+            assertThat(methods(new SelectionFilter())).containsExactly("passes");
+            assertThat(methods(new ShardFilter())).hasSize(6);
+        } finally {
+            System.clearProperty("harness.select");
+            System.clearProperty("harness.shard");
+            io.github.raktimchandra.testharness.core.config.HarnessConfig.reset();
+        }
+    }
+
+    @Test
     void shardSpecIsValidated() {
         assertThat(ShardFilter.parse("2/4")).containsExactly(2, 4);
         assertThatThrownBy(() -> ShardFilter.parse("5/4")).isInstanceOf(IllegalArgumentException.class);

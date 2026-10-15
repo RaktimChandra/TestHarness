@@ -19,7 +19,7 @@ public class ShardFilter implements PostDiscoveryFilter {
     private final Optional<int[]> shard;
 
     public ShardFilter() {
-        this(HarnessConfig.get().find("harness.shard").map(ShardFilter::parse));
+        this(HarnessConfig.get().find("shard").map(ShardFilter::parse));
     }
 
     ShardFilter(Optional<int[]> shard) {
