@@ -1,0 +1,138 @@
+{
+  "bug": "TIMEZONE_SLOT_TIMES",
+  "suites": {
+    "a11y": {
+      "tests": 3,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "seconds": 34.0,
+      "detected": false,
+      "failures": [],
+      "note": ""
+    },
+    "api": {
+      "tests": 85,
+      "failed": 6,
+      "skipped": 0,
+      "exit_code": 1,
+      "seconds": 34.0,
+      "detected": true,
+      "failures": [
+        {
+          "test": "Auth API > seeded_users_log_in_and_receive_a_bearer_token(String, String)[1]",
+          "type": "AssertionError",
+          "message": "Expecting actual:"
+        },
+        {
+          "test": "Auth API > seeded_users_log_in_and_receive_a_bearer_token(String, String)[2]",
+          "type": "AssertionError",
+          "message": "Expecting actual:"
+        },
+        {
+          "test": "Booking API > the_booking_reports_the_slot_time_exactly_as_the_slot_does",
+          "type": "AssertionFailedError",
+          "message": "expected: 10:30"
+        },
+        {
+          "test": "Slots API > listing_by_date_includes_new_slots_in_start_order",
+          "type": "AssertionFailedError",
+          "message": "Expecting actual:"
+        },
+        {
+          "test": "Slots API > a_slot_requested_in_utc_is_reported_in_terminal_time",
+          "type": "AssertionFailedError",
+          "message": "expected: 2026-10-16T08:30:00Z"
+        },
+        {
+          "test": "Slots API > slot_times_are_the_terminal_wall_clock_with_its_offset",
+          "type": "AssertionFailedError",
+          "message": "[same instant as requested]"
+        }
+      ],
+      "note": ""
+    },
+    "bdd": {
+      "tests": 15,
+      "failed": 1,
+      "skipped": 0,
+      "exit_code": 1,
+      "seconds": 33.0,
+      "detected": true,
+      "failures": [
+        {
+          "test": "RunBddSuite > A driver books from the booking screen",
+          "type": "AssertionError",
+          "message": "Expecting actual:"
+        }
+      ],
+      "note": ""
+    },
+    "contract": {
+      "tests": 9,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "seconds": 25.0,
+      "detected": false,
+      "failures": [],
+      "note": ""
+    },
+    "perf": {
+      "tests": 0,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "seconds": 48.0,
+      "detected": false,
+      "failures": [],
+      "note": "> request count                                                                      |       300 |       300 |         -\n> min response time (ms)                                                             |         2 |         2 |         -\n> max response time (ms)                                                             |        95 |        95 |         -\n> mean response time (ms)                                                            |        19 |        19 |         -\n> response time std deviation (ms)                                                   |        30 |        30 |         -\n> response time 50th percentile (ms)                                                 |         5 |         5 |         -\n> response time 75th percentile (ms)                                                 |         8 |         8 |         -\n> response time 95th percentile (ms)                                                 |        78 |        78 |         -\n> response time 99th percentile (ms)                                                 |        84 |        84 |         -\n> mean throughput (rps)                                                              |        10 |        10 |         -\n---- Response Time Distribution ----------------------------------------------------------------------------------------\n> OK: t < 800 ms                                                                                            300   (100%)"
+    },
+    "security": {
+      "tests": 17,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "seconds": 26.0,
+      "detected": false,
+      "failures": [],
+      "note": ""
+    },
+    "ui": {
+      "tests": 17,
+      "failed": 3,
+      "skipped": 0,
+      "exit_code": 1,
+      "seconds": 54.0,
+      "detected": true,
+      "failures": [
+        {
+          "test": "Booking journey > the_slot_table_shows_the_terminal_time_and_live_remaining_places",
+          "type": "AssertionFailedError",
+          "message": "expected: \"14:30\u201315:00\""
+        },
+        {
+          "test": "Booking journey > a_driver_books_a_slot_and_sees_it_in_their_bookings",
+          "type": "AssertionError",
+          "message": "Expecting actual:"
+        },
+        {
+          "test": "Reschedule, cancel and check-in journeys > a_driver_reschedules_to_another_slot",
+          "type": "AssertionFailedError",
+          "message": "Expecting value to be true but was false"
+        }
+      ],
+      "note": ""
+    },
+    "visual": {
+      "tests": 5,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "seconds": 29.0,
+      "detected": false,
+      "failures": [],
+      "note": ""
+    }
+  }
+}

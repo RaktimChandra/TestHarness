@@ -1,0 +1,113 @@
+{
+  "bug": "MISSING_AUTHORISATION_CHECK",
+  "suites": {
+    "a11y": {
+      "tests": 3,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "seconds": 35.0,
+      "detected": false,
+      "failures": [],
+      "note": ""
+    },
+    "api": {
+      "tests": 85,
+      "failed": 3,
+      "skipped": 0,
+      "exit_code": 1,
+      "seconds": 36.0,
+      "detected": true,
+      "failures": [
+        {
+          "test": "reschedule > another_driver_cannot_reschedule_it",
+          "type": "AssertionError",
+          "message": "Expected HTTP 404 but was 200."
+        },
+        {
+          "test": "cancel > another_driver_cannot_cancel_it",
+          "type": "AssertionError",
+          "message": "Expected HTTP 404 but was 200."
+        },
+        {
+          "test": "Search and object-level access > a_driver_cannot_read_another_drivers_booking",
+          "type": "AssertionError",
+          "message": "Expected HTTP 404 but was 200."
+        }
+      ],
+      "note": ""
+    },
+    "bdd": {
+      "tests": 15,
+      "failed": 1,
+      "skipped": 0,
+      "exit_code": 1,
+      "seconds": 34.0,
+      "detected": true,
+      "failures": [
+        {
+          "test": "RunBddSuite > Drivers cannot see each other's bookings",
+          "type": "AssertionError",
+          "message": "Expected HTTP 404 but was 200."
+        }
+      ],
+      "note": ""
+    },
+    "contract": {
+      "tests": 9,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "seconds": 27.0,
+      "detected": false,
+      "failures": [],
+      "note": ""
+    },
+    "perf": {
+      "tests": 0,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "seconds": 48.0,
+      "detected": false,
+      "failures": [],
+      "note": "> request count                                                                      |       300 |       300 |         -\n> min response time (ms)                                                             |         3 |         3 |         -\n> max response time (ms)                                                             |       100 |       100 |         -\n> mean response time (ms)                                                            |        20 |        20 |         -\n> response time std deviation (ms)                                                   |        29 |        29 |         -\n> response time 50th percentile (ms)                                                 |         6 |         6 |         -\n> response time 75th percentile (ms)                                                 |         9 |         9 |         -\n> response time 95th percentile (ms)                                                 |        79 |        79 |         -\n> response time 99th percentile (ms)                                                 |        84 |        84 |         -\n> mean throughput (rps)                                                              |        10 |        10 |         -\n---- Response Time Distribution ----------------------------------------------------------------------------------------\n> OK: t < 800 ms                                                                                            300   (100%)"
+    },
+    "security": {
+      "tests": 17,
+      "failed": 1,
+      "skipped": 0,
+      "exit_code": 1,
+      "seconds": 28.0,
+      "detected": true,
+      "failures": [
+        {
+          "test": "Security smoke > a_driver_cannot_read_change_or_cancel_another_drivers_booking",
+          "type": "AssertionError",
+          "message": "Expected HTTP 404 but was 200."
+        }
+      ],
+      "note": ""
+    },
+    "ui": {
+      "tests": 17,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "seconds": 58.0,
+      "detected": false,
+      "failures": [],
+      "note": ""
+    },
+    "visual": {
+      "tests": 5,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "seconds": 33.0,
+      "detected": false,
+      "failures": [],
+      "note": ""
+    }
+  }
+}
