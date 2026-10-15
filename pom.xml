@@ -30,6 +30,7 @@
         <module>harness/harness-api</module>
         <module>harness/harness-ui</module>
         <module>harness/harness-bdd</module>
+        <module>harness/harness-insights</module>
         <module>suites/suite-support</module>
         <module>suites/api-suite</module>
         <module>suites/ui-suite</module>
@@ -125,6 +126,11 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>harness-bdd</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>harness-insights</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
