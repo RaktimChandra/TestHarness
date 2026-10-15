@@ -3,8 +3,8 @@
 **A test automation framework that proves its own value.** TestHarness ships with a
 realistic system under test — a container-terminal *Gate Appointment* app — that contains
 six documented, switchable defects. API, UI, BDD, contract, accessibility, visual,
-security and performance tests run against it in one command, and (from Phase 3) a
-fault-seeding experiment measures which suite catches which defect.
+security and performance tests run against it in one command, and a fault-seeding
+experiment measures which suite catches which defect.
 
 Java 21 · Selenium 4 + Grid · REST Assured · Cucumber 7 · JUnit 5 (parallel) · AssertJ ·
 Testcontainers · Allure · axe-core · Pact · Gatling · Spring Boot 3 · PostgreSQL · React ·
@@ -16,13 +16,18 @@ GitHub Actions
 
 ## Results (measured)
 
-From real runs on 2026-10-14 — method, machine and raw numbers for every row are in
+From real runs on 2026-10-14 and 2026-10-15 — method, machine and raw numbers for every row are in
 [RESULTS.md](RESULTS.md). Nothing in this table is estimated.
 
 | | |
 |---|---|
-| Tests in one `verify` | **402 JVM tests + 31 Vitest + 1 Gatling simulation**, 0 failed (5 visual checks skip outside CI by design) |
-| Wall-clock, clean build + everything (2 vCPU sandbox) | **5 min 16 s** |
+| Tests in one `verify` | **458 JVM tests + 31 Vitest + 1 Gatling simulation**, 0 failed (5 visual checks skip outside CI by design) |
+| Wall-clock, clean build + everything (2 vCPU sandbox) | **5 min 51 s** |
+| Fault seeding: 6 bugs × 8 suite types (CI) | **6/6 caught** by at least one suite · API 100 % · BDD 83 % · contract, security, UI 33 % each · the race bug caught by **one test of 151** |
+| Mutation score, domain rules (PIT, STRONGER) | **95.1 % → 100 %** (143 mutants) after turning the 7 survivors into tests |
+| Test impact analysis, per-test JaCoCo | **6/6 seeded bugs still caught** by the selected subset; wall-clock saved **3.8–21.6 %** (and why so little) |
+| Flaky-test detection (20 runs, one commit, CI) | deliberately flaky test scored **0.368** and was auto-quarantined; its stable control scored 0 |
+| Self-healing locators | **1 heal in 26 UI tests** — the demo that renames a `data-testid` — reported with the exact fix, never silent |
 | Cross-browser | UI suite passes in **Chrome 154, Firefox 157 and Edge 154** in CI, both directly and on **Selenium Grid** |
 | Accessibility (axe-core, WCAG 2.0/2.1 A+AA) | **0 violations** on 9 page states × 3 browsers |
 | Contract (Pact) | **9/9** interactions from the UI's real client verified against the real API |
@@ -60,6 +65,25 @@ From real runs on 2026-10-14 — method, machine and raw numbers for every row a
   (focus rings, neighbouring data) were diagnosed and fixed, not hidden behind a tolerance.
 - **Accessibility on every state.** axe-core scans dialogs, errors and panels, not just
   landing pages, and the build fails on critical or serious violations.
+- **Defect detection measured per suite.** Each seeded bug is switched on in CI and every
+  suite type runs against it; a suite gets credit only if it was green without the bug.
+  The result included a strategy mistake (Pact was expected to catch the timezone bug; it
+  can't) — kept in the docs, not hidden.
+- **Flakiness from history, not from retries.** Every result goes to JSON Lines and
+  optionally PostgreSQL; a test that flips on the *same commit* is scored, classified
+  (locator / timeout / assertion / environment / data) and quarantined into a non-blocking
+  job by a JUnit discovery filter — no `@Disabled` edits, no retry-until-green.
+- **Self-healing that tells on itself.** Ranked fallbacks (test id, id, accessible name, text,
+  position); a healed step is labelled `healed` in Allure with the exact fix, ambiguous
+  matches are never used, and a CI mode turns any heal into a failure.
+- **Test impact analysis with its limits measured.** Per-test JaCoCo coverage of the SUT
+  maps tests to files; selecting from a diff caught every seeded bug but saved far less
+  time than vendors suggest, and RESULTS says why.
+- **AI as a drafting tool, never a committer.** Any OpenAI-compatible or Anthropic endpoint
+  via an API key; drafts Gherkin from a user story (parsed, banner-marked, `@draft`, written
+  outside the source tree) and summarises failed runs. Everything works without it.
+- **One CLI.** `./th run --suite ui --browser firefox --tags smoke`, `./th rerun-failed`,
+  `./th report`, `./th history flaky`, `./th tia select`, `./th ai gherkin`.
 - **Measured, not claimed, parallel speed-up.** Grid timings at 1/4/8 workers with test
   span and per-test time separated — including the result that more workers made it slower.
 
@@ -75,9 +99,12 @@ flowchart LR
     SUP["suite-support<br/>SUT launcher · Gate client<br/>schemas · page objects"]
   end
   subgraph FW["harness/ (SUT-agnostic framework)"]
-    HAPI["api"] --- HUI["ui<br/>+ visual · a11y"] --- BDD["bdd"]
+    HAPI["api"] --- HUI["ui<br/>+ visual · a11y · healing"] --- BDD["bdd"]
     DATA["data"] --- REP["reporting"] --- CORE["core"]
+    INS["insights<br/>history · flakiness · quarantine<br/>TIA · AI drafts"] --- CLI["cli (th)"]
   end
+  HIST[("run history<br/>JSONL · PostgreSQL")]
+  INS -. "records every result" .-> HIST
   subgraph SUT["sut/ (Gate Appointment)"]
     WEB["React UI"] --> API["Spring Boot API"] --> DOM["domain rules<br/>+ seeded bugs"]
     API --> PG[(PostgreSQL)]
@@ -111,6 +138,17 @@ accessibility and visual checks), BDD and Gatling suites.
 ```bash
 ./mvnw -N -Preport verify          # render the Allure report for everything that ran
 jwebserver -d "$PWD/target/allure-report" -p 8000   # then open http://localhost:8000
+```
+
+Or through the `th` command (Windows: `th.cmd`), after `./mvnw install -DskipTests` once:
+
+```bash
+./th run --suite api                      # one suite (api | ui | bdd | perf | all)
+./th run --suite ui --browser firefox --tags smoke
+./th rerun-failed                         # only what failed last time, per module
+./th report                               # generate + open the Allure report
+./th history flaky --jsonl suites         # flakiness leaderboard from recorded history
+./th --help                               # everything else (tia, ai, history quarantine)
 ```
 
 Windows, step by step and one command at a time: [docs/WINDOWS.md](docs/WINDOWS.md).
@@ -178,8 +216,8 @@ Switch them on for a run with `-Dharness.sut.seeded-bugs=OFF_BY_ONE_CAPACITY,RAC
 | Phase | Status |
 |---|---|
 | 1 — SUT, framework core, API/UI/BDD suites, CI, docs | **done** |
-| 2 — Selenium Grid in Compose, visual regression, axe-core a11y, Pact, Gatling, security smoke | **done** (this release) |
-| 3 — fault-seeding experiment, flaky-test intelligence, honest self-healing locators, test impact analysis, PIT, AI-assisted test design | planned |
+| 2 — Selenium Grid in Compose, visual regression, axe-core a11y, Pact, Gatling, security smoke | **done** |
+| 3 — fault-seeding experiment, flaky-test intelligence, honest self-healing locators, test impact analysis, PIT, AI-assisted test design | **done** (this release) |
 | 4 — React quality dashboard, CLI, "new test in 5 minutes" guide, PortSync adapter | planned |
 | 5 — full CI/CD with quality gates, TeamCity Kotlin DSL, CIForge pipeline | planned |
 
