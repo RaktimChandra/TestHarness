@@ -16,7 +16,7 @@
 
     <properties>
         <!-- Raised after each round of mutant-killing tests; see RESULTS.md. -->
-        <pit.threshold>0</pit.threshold>
+        <pit.threshold>95</pit.threshold>
     </properties>
 
     <dependencies>
