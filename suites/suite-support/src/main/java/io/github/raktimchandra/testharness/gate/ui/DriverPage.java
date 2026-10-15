@@ -3,6 +3,7 @@ package io.github.raktimchandra.testharness.gate.ui;
 import static io.github.raktimchandra.testharness.ui.page.Locators.testId;
 
 import io.github.raktimchandra.testharness.reporting.Report;
+import io.github.raktimchandra.testharness.ui.heal.Target;
 import io.github.raktimchandra.testharness.ui.page.BasePage;
 import io.github.raktimchandra.testharness.ui.wait.Waits;
 import java.util.regex.Matcher;
@@ -18,7 +19,8 @@ public class DriverPage extends BasePage<DriverPage> {
     static final By CONTAINER = testId("book-container");
     static final By CONTAINER_HINT = testId("book-container-error");
     static final By DIRECTION = testId("book-direction");
-    static final By SUBMIT = testId("book-submit");
+    static final Target SUBMIT = Target.named("Book slot button").testId("book-submit")
+            .accessibleName("button", "Book slot").text("button", "Book slot");
     static final By SELECTED = testId("book-selected-slot");
     static final By NOTICE = testId("driver-notice");
     static final By ERROR = testId("book-error");
