@@ -5,6 +5,7 @@ import io.github.raktimchandra.testharness.reporting.Report;
 import io.github.raktimchandra.testharness.ui.driver.Drivers;
 import io.github.raktimchandra.testharness.ui.driver.UiSettings;
 import io.github.raktimchandra.testharness.ui.evidence.UiEvidence;
+import io.github.raktimchandra.testharness.ui.heal.Healing;
 import io.github.raktimchandra.testharness.ui.wait.Waits;
 import java.nio.file.Path;
 import org.junit.jupiter.api.extension.AfterEachCallback;
@@ -27,6 +28,7 @@ public class BrowserExtension implements BeforeEachCallback, AfterTestExecutionC
     public void beforeEach(ExtensionContext context) {
         UiSettings settings = UiSettings.from(HarnessConfig.get());
         Drivers.start(settings);
+        Healing.startTest(context.getRequiredTestClass().getSimpleName() + "." + context.getRequiredTestMethod().getName());
         Report.parameter("browser", settings.browser().id());
     }
 
