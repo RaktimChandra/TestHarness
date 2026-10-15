@@ -1,0 +1,93 @@
+# The fault-seeding experiment: every suite type runs once with no bug and once with each
+# seeded bug switched on. A suite "catches" a bug if it fails with the bug and passes without.
+# Results (JSON + Markdown) are pushed to the branch fault-seeding/<run id> for review.
+name: fault-seeding
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  MVN: ./mvnw -B -ntp
+  HARNESS_ENV: ci
+  GATE_SEED_PASSWORD: fs-${{ github.run_id }}
+
+jobs:
+  seed:
+    name: ${{ matrix.bug }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        bug: [NONE, OFF_BY_ONE_CAPACITY, CHECK_DIGIT_EDGE_CASE, TIMEZONE_SLOT_TIMES, RACE_ON_LAST_SLOT,
+              MISSING_AUTHORISATION_CHECK, API_SKIPS_CONTAINER_VALIDATION]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Build
+        run: $MVN install -DskipTests -DskipPerf
+      - name: Run every suite type with the bug switched on
+        run: |
+          BUG="${{ matrix.bug }}"; [ "$BUG" = NONE ] && BUG=""
+          R="$RUNNER_TEMP/results"; mkdir -p "$R"
+          suite() {  # name, module, extra args...
+            name=$1; module=$2; shift 2
+            rm -rf "$module/target/surefire-reports"
+            start=$(date +%s)
+            set +e
+            $MVN verify -pl "$module" -Dharness.sut.seeded-bugs="$BUG" -Dgate.seeded-bugs="$BUG" \
+              -Dsurefire.failIfNoSpecifiedTests=false "$@" > "$RUNNER_TEMP/$name.log" 2>&1
+            rc=$?
+            set -e
+            mkdir -p "$R/$name"
+            cp "$module"/target/surefire-reports/TEST-*.xml "$R/$name/" 2>/dev/null || true
+            echo "$rc" > "$R/$name/exit-code"; echo $(( $(date +%s) - start )) > "$R/$name/seconds"
+            echo "$name: exit $rc in $(cat "$R/$name/seconds") s"
+          }
+          suite contract sut/gate-api -Dtest=PactProviderTest
+          suite api      suites/api-suite -DexcludedGroups=security
+          suite security suites/api-suite -Dgroups=security
+          suite ui       suites/ui-suite -DexcludedGroups=a11y,visual,healing-demo
+          suite a11y     suites/ui-suite -Dgroups=a11y
+          suite visual   suites/ui-suite -Dgroups=visual -Dharness.visual.platform=chrome-ci
+          suite bdd      suites/bdd-suite
+          suite perf     suites/perf-suite
+          grep -h -A12 "Global Information" "$RUNNER_TEMP/perf.log" | tail -12 > "$R/perf/note" || true
+          python3 .github/scripts/fault_results.py "${{ matrix.bug }}" "$R" "$RUNNER_TEMP/${{ matrix.bug }}.json"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: fault-${{ matrix.bug }}
+          path: ${{ runner.temp }}/${{ matrix.bug }}.json
+
+  matrix:
+    needs: seed
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: fault-*
+          merge-multiple: true
+          path: results
+      - name: Detection matrix
+        run: |
+          python3 .github/scripts/fault_matrix.py results out | tee -a "$GITHUB_STEP_SUMMARY"
+          mkdir -p out/raw && cp results/*.json out/raw/
+      - name: Push results for review
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "fault-seeding/${{ github.run_id }}"
+          mkdir -p experiments/fault-seeding
+          cp -r out/* experiments/fault-seeding/
+          git add experiments/fault-seeding
+          git commit -m "experiment: fault-seeding results from run ${{ github.run_id }}"
+          git push origin "fault-seeding/${{ github.run_id }}"
