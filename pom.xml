@@ -37,6 +37,7 @@
         <module>suites/ui-suite</module>
         <module>suites/bdd-suite</module>
         <module>suites/perf-suite</module>
+        <module>suites/flaky-demo</module>
     </modules>
 
     <properties>
