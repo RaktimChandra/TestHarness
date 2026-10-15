@@ -48,11 +48,11 @@ jobs:
           set -o pipefail
           exec > >(tee -a "$RUNNER_TEMP/m2.log") 2>&1
           # 1) Empty-jar install: resolves every module's dependencies without needing code to compile.
-          $MVN install -Dmaven.main.skip=true -Dmaven.test.skip=true -Dspring-boot.repackage.skip=true -DskipPerf=true -Pmutation
+          $MVN install -Dmaven.main.skip=true -Dmaven.test.skip=true -Dspring-boot.repackage.skip=true -DskipPerf=true
           # 2) Plugins and their dependencies.
           $MVN dependency:go-offline -DexcludeGroupIds=io.github.raktimchandra.testharness || true
           # 3) A real build pulls test-runtime artifacts (surefire providers etc.); failures are tolerated.
-          $MVN -fae verify -Dsurefire.failIfNoSpecifiedTests=false || true
+          $MVN -fae verify -Pmutation -Dsurefire.failIfNoSpecifiedTests=false || true
           for a in \
             org.apache.maven.surefire:surefire-junit-platform:3.5.4 \
             org.apache.maven.surefire:surefire-junit-platform:3.5.4:jar \
