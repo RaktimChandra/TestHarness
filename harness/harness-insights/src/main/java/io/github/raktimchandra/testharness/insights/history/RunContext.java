@@ -8,7 +8,14 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-/** Where and on what a run happened: commit, branch, suite and environment labels. */
+/**
+ * Where and on what a run happened: commit, branch, suite and environment labels.
+ *
+ * <p>A run with seeded bugs switched on ({@code harness.sut.seeded-bugs}) is not the code at its
+ * commit, so its commit identity becomes {@code <sha>+seeded:<bugs>}. Otherwise every
+ * fault-seeding or TIA experiment run would look like a same-commit flip and poison the
+ * flakiness scores with deliberate failures.
+ */
 public record RunContext(String runId, String commitSha, String branch, String suite, String environment) {
 
     public static RunContext detect(HarnessConfig config) {
@@ -16,6 +23,10 @@ public record RunContext(String runId, String commitSha, String branch, String s
                 .or(() -> env("GITHUB_SHA"))
                 .or(() -> git("rev-parse", "HEAD"))
                 .orElse("unknown");
+        String seeded = config.string("sut.seeded-bugs", "").strip();
+        if (!seeded.isEmpty()) {
+            commit = commit + "+seeded:" + seeded;
+        }
         String branch = config.find("history.branch")
                 .or(() -> env("GITHUB_HEAD_REF"))
                 .or(() -> env("GITHUB_REF_NAME"))
