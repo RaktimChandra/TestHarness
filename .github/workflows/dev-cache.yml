@@ -48,7 +48,7 @@ jobs:
           set -o pipefail
           exec > >(tee -a "$RUNNER_TEMP/m2.log") 2>&1
           # 1) Empty-jar install: resolves every module's dependencies without needing code to compile.
-          $MVN install -Dmaven.main.skip=true -Dmaven.test.skip=true -Dspring-boot.repackage.skip=true -DskipPerf=true
+          $MVN install -Dmaven.main.skip=true -Dmaven.test.skip=true -Dspring-boot.repackage.skip=true -DskipPerf=true -Pmutation
           # 2) Plugins and their dependencies.
           $MVN dependency:go-offline -DexcludeGroupIds=io.github.raktimchandra.testharness || true
           # 3) A real build pulls test-runtime artifacts (surefire providers etc.); failures are tolerated.
@@ -67,7 +67,15 @@ jobs:
             io.qameta.allure:allure-maven:2.17.0 \
             io.netty:netty-bom:4.2.18.Final:pom \
             io.gatling:gatling-maven-plugin:4.21.12 \
-            org.jacoco:jacoco-maven-plugin:0.8.15 ; do
+            org.jacoco:jacoco-maven-plugin:0.8.15 \
+            org.jacoco:org.jacoco.core:0.8.15 \
+            info.picocli:picocli:4.7.7 \
+            org.pitest:pitest-maven:1.30.1 \
+            org.pitest:pitest-junit5-plugin:1.2.3 \
+            org.pitest:pitest-entry:1.30.1 \
+            au.com.dius.pact.consumer:junit5:4.6.21 \
+            au.com.dius.pact.provider:junit5:4.6.21 \
+            org.apache.maven.plugins:maven-jar-plugin:3.4.2 ; do
             $MVN dependency:get -Dartifact="$a" -Dtransitive=true || echo "WARN could not resolve $a"
           done
           rm -rf ~/.m2/repository/io/github/raktimchandra

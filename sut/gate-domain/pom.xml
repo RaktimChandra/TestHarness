@@ -14,6 +14,11 @@
     <name>SUT :: gate-domain</name>
     <description>Framework-free business rules of the Gate Appointment system (the mutation-testing target).</description>
 
+    <properties>
+        <!-- Raised after each round of mutant-killing tests; see RESULTS.md. -->
+        <pit.threshold>0</pit.threshold>
+    </properties>
+
     <dependencies>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
@@ -26,4 +31,48 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <profiles>
+        <!--
+          Mutation testing:  mvnw -Pmutation verify -pl sut/gate-domain
+          Report: sut/gate-domain/target/pit-reports/index.html (and mutations.xml).
+          The build fails if the mutation score drops below the threshold.
+        -->
+        <profile>
+            <id>mutation</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <executions>
+                            <execution>
+                                <id>pit</id>
+                                <phase>verify</phase>
+                                <goals><goal>mutationCoverage</goal></goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <targetClasses>
+                                <param>io.github.raktimchandra.gate.domain.*</param>
+                            </targetClasses>
+                            <targetTests>
+                                <param>io.github.raktimchandra.gate.domain.*</param>
+                            </targetTests>
+                            <mutators>
+                                <mutator>STRONGER</mutator>
+                            </mutators>
+                            <outputFormats>
+                                <outputFormat>HTML</outputFormat>
+                                <outputFormat>XML</outputFormat>
+                            </outputFormats>
+                            <timestampedReports>false</timestampedReports>
+                            <threads>2</threads>
+                            <mutationThreshold>${pit.threshold}</mutationThreshold>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+    </profiles>
 </project>
