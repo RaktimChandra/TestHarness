@@ -1,0 +1,82 @@
+# Demonstrates flaky-test intelligence end to end: the deliberately flaky demo test and its
+# stable control run N times on one commit with history stored in PostgreSQL; the CLI then
+# scores flakiness, writes the quarantine, and the quarantine filters are exercised.
+# Results are pushed to flaky-demo/<run id> for review.
+name: flaky-demo
+
+on:
+  workflow_dispatch:
+    inputs:
+      runs:
+        description: how many runs of the demo module
+        default: '20'
+
+permissions:
+  contents: write
+
+env:
+  MVN: ./mvnw -B -ntp
+  HARNESS_ENV: ci
+  GATE_SEED_PASSWORD: flaky-${{ github.run_id }}
+  HARNESS_HISTORY_DB_PASSWORD: history
+  JDBC: jdbc:postgresql://localhost:5432/history
+
+jobs:
+  demo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: history
+          POSTGRES_USER: harness
+          POSTGRES_PASSWORD: history
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U harness" --health-interval 2s --health-timeout 2s --health-retries 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Build
+        run: $MVN install -DskipTests -DskipPerf
+      - name: Run the demo module ${{ inputs.runs }} times on this commit
+        run: |
+          mkdir -p out
+          for i in $(seq 1 ${{ inputs.runs }}); do
+            $MVN verify -pl suites/flaky-demo -DskipFlakyDemo=false -Dmaven.test.failure.ignore=true \
+              -Dharness.history.jdbc-url=$JDBC -Dharness.history.run-id=demo-$i > "out/run-$i.log" 2>&1
+            echo "run $i: $(grep -E 'Tests run: 2, ' out/run-$i.log | tail -1)"
+          done
+          cat suites/flaky-demo/target/test-history/*.jsonl > out/history.jsonl
+      - name: Score flakiness and compute the quarantine
+        run: |
+          ./th history flaky --jdbc-url $JDBC | tee out/flaky-leaderboard.txt
+          ./th history quarantine --jdbc-url $JDBC --write quarantine.json | tee out/quarantine.txt
+          cp quarantine.json out/
+      - name: Quarantine filters with the computed list
+        run: |
+          for mode in exclude only; do
+            $MVN verify -pl suites/flaky-demo -DskipFlakyDemo=false -Dmaven.test.failure.ignore=true \
+              -Dharness.quarantine.mode=$mode -Dharness.history.enabled=false > "out/quarantine-$mode.log" 2>&1
+            echo "quarantine.mode=$mode: $(grep -E 'Tests run: [0-9]+, Failures' out/quarantine-$mode.log | tail -1)" \
+              | tee -a out/quarantine-modes.txt
+            grep -h "testcase" suites/flaky-demo/target/surefire-reports/TEST-*.xml | sed 's/.*name="\([^"]*\)".*/  ran: \1/' \
+              | tee -a out/quarantine-modes.txt
+          done
+          echo "::notice title=flaky demo::$(head -3 out/flaky-leaderboard.txt | tail -2 | tr -s ' ' | tr '\n' ' ') | $(tr '\n' ' ' < out/quarantine-modes.txt)"
+      - name: Push results for review
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "flaky-demo/${{ github.run_id }}"
+          mkdir -p experiments/flaky-demo
+          cp out/flaky-leaderboard.txt out/quarantine.txt out/quarantine.json out/quarantine-modes.txt \
+             out/history.jsonl experiments/flaky-demo/
+          git add -f experiments/flaky-demo
+          git commit -m "experiment: flaky-test demo results from run ${{ github.run_id }}"
+          git push origin "flaky-demo/${{ github.run_id }}"
