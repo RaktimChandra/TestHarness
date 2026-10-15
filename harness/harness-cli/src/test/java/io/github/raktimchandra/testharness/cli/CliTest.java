@@ -81,6 +81,17 @@ class CliTest {
     }
 
     @Test
+    void dashDPropertiesAnywhereBecomeSystemProperties() {
+        String[] rest = HarnessCli.applySystemProperties(new String[] {"ai", "-Dharness.cli.test=yes", "explain"});
+        try {
+            assertThat(rest).containsExactly("ai", "explain");
+            assertThat(System.getProperty("harness.cli.test")).isEqualTo("yes");
+        } finally {
+            System.clearProperty("harness.cli.test");
+        }
+    }
+
+    @Test
     void aiGherkinExplainsThatNoProviderIsConfigured() {
         Out o = run("ai", "gherkin", "--story", "As a driver I want to cancel");
         assertThat(o.code()).isEqualTo(2);
