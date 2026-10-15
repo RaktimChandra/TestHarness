@@ -13,7 +13,7 @@ flowchart TB
   P["Contract (Pact) — 9 interactions, consumer + provider<br/><i>do the UI and the API agree?</i>"]
   D["SUT integration (Spring + Postgres) — 7<br/><i>do the parts work together, incl. concurrency?</i>"]
   E["Unit: domain rules — 65 · UI logic (Vitest) — 22<br/><i>is each rule right at its boundaries?</i>"]
-  F["Framework self-tests — 179<br/><i>can the tests themselves be trusted?</i>"]
+  F["Framework self-tests — 230 · mutation testing on the domain rules<br/><i>can the tests themselves be trusted?</i>"]
   G["Performance smoke (Gatling) — booking flow, p95/p99/error gates<br/><i>did latency regress?</i>"]
   A --> B --> C --> P --> D --> E
   F -.underpins.- A
@@ -116,10 +116,29 @@ right or wrong.
 | `MISSING_AUTHORISATION_CHECK` | domain unit, API (IDOR read/reschedule/cancel, search privacy), security smoke (cross-driver access), BDD (privacy scenario) |
 | `API_SKIPS_CONTAINER_VALIDATION` | API (invalid check digit/category/length → 400), BDD outline — **not** UI (the UI validates client-side, which is exactly why the bug hides from UI testing) |
 
+### Measured (Phase 3, CI run 38726144795)
+
+The fault-seeding experiment ran eight suite types with each bug switched on
+([RESULTS.md](RESULTS.md) §Phase 3, [experiments/fault-seeding](experiments/fault-seeding/fault-seeding.md)).
+Domain unit and SUT integration tests were not part of the matrix (they test the bugs directly).
+
+| Seeded bug | Expected (above) | Measured: caught by | Where the strategy was wrong |
+|---|---|---|---|
+| `OFF_BY_ONE_CAPACITY` | API, BDD | contract, API, BDD | the contract's "slot full" interaction also catches it (bonus) |
+| `CHECK_DIGIT_EDGE_CASE` | API, BDD, UI | contract, API, security, UI, BDD | part of it is incidental: random containers hit remainder-10 about 1 in 11 times |
+| `TIMEZONE_SLOT_TIMES` | API, UI, BDD `@ui`, **Pact** | API, UI, BDD | **Pact missed it**: timestamps are matched by format, so a shifted time still passes |
+| `RACE_ON_LAST_SLOT` | API (and integration) | API — one test | as expected; nothing else can see concurrency |
+| `MISSING_AUTHORISATION_CHECK` | API, security, BDD | API, security, BDD | as expected |
+| `API_SKIPS_CONTAINER_VALIDATION` | API, BDD — not UI | API, BDD | as expected; the UI hides it |
+
+Accessibility, visual and Gatling caught none of the six, which is correct for functional
+bugs. **Every bug was caught by at least one suite; the API suite caught all six.**
+
 ## Principles applied everywhere
 - **Isolation by data, not by teardown:** each test makes its own users and its own lane.
 - **No fixed sleeps:** explicit waits only (enforced by ArchUnit).
-- **No silent retries of assertions:** flakiness is measured (Phase 3), not hidden.
+- **No silent retries of assertions:** flakiness is measured from history and flaky tests are
+  quarantined into a non-blocking job, never retried until green.
 - **Contract on every response:** strict schema validation, including every error.
 - **Independent oracles:** test-side ISO 6346 shares no code with the SUT.
 - **Evidence on failure:** screenshot, HTML, URL, browser console, request/response bodies.

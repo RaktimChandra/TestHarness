@@ -1,0 +1,113 @@
+{
+  "bug": "OFF_BY_ONE_CAPACITY",
+  "suites": {
+    "a11y": {
+      "tests": 3,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "seconds": 35.0,
+      "detected": false,
+      "failures": [],
+      "note": ""
+    },
+    "api": {
+      "tests": 85,
+      "failed": 3,
+      "skipped": 0,
+      "exit_code": 1,
+      "seconds": 35.0,
+      "detected": true,
+      "failures": [
+        {
+          "test": "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one",
+          "type": "AssertionError",
+          "message": "Expected size: 1 but was: 2 in:"
+        },
+        {
+          "test": "Booking API > capacity_is_enforced_at_the_boundary",
+          "type": "AssertionError",
+          "message": "Expected HTTP 409 but was 201."
+        },
+        {
+          "test": "reschedule > to_a_full_slot_is_rejected_and_nothing_changes",
+          "type": "AssertionError",
+          "message": "Expected HTTP 409 but was 200."
+        }
+      ],
+      "note": ""
+    },
+    "bdd": {
+      "tests": 15,
+      "failed": 1,
+      "skipped": 0,
+      "exit_code": 1,
+      "seconds": 33.0,
+      "detected": true,
+      "failures": [
+        {
+          "test": "RunBddSuite > A slot cannot take more trucks than its capacity",
+          "type": "AssertionError",
+          "message": "[HTTP status]"
+        }
+      ],
+      "note": ""
+    },
+    "contract": {
+      "tests": 9,
+      "failed": 1,
+      "skipped": 0,
+      "exit_code": 1,
+      "seconds": 24.0,
+      "detected": true,
+      "failures": [
+        {
+          "test": "PactProviderTest > interactionHonoursTheContract(PactVerificationContext, HttpRequest)[1]",
+          "type": "AssertionError",
+          "message": "gate-ui - Upon a booking for a full slot"
+        }
+      ],
+      "note": ""
+    },
+    "perf": {
+      "tests": 0,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "seconds": 47.0,
+      "detected": false,
+      "failures": [],
+      "note": "> request count                                                                      |       300 |       300 |         -\n> min response time (ms)                                                             |         2 |         2 |         -\n> max response time (ms)                                                             |        90 |        90 |         -\n> mean response time (ms)                                                            |        20 |        20 |         -\n> response time std deviation (ms)                                                   |        29 |        29 |         -\n> response time 50th percentile (ms)                                                 |         5 |         5 |         -\n> response time 75th percentile (ms)                                                 |         8 |         8 |         -\n> response time 95th percentile (ms)                                                 |        78 |        78 |         -\n> response time 99th percentile (ms)                                                 |        82 |        82 |         -\n> mean throughput (rps)                                                              |        10 |        10 |         -\n---- Response Time Distribution ----------------------------------------------------------------------------------------\n> OK: t < 800 ms                                                                                            300   (100%)"
+    },
+    "security": {
+      "tests": 17,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "seconds": 26.0,
+      "detected": false,
+      "failures": [],
+      "note": ""
+    },
+    "ui": {
+      "tests": 17,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "seconds": 49.0,
+      "detected": false,
+      "failures": [],
+      "note": ""
+    },
+    "visual": {
+      "tests": 5,
+      "failed": 0,
+      "skipped": 0,
+      "exit_code": 0,
+      "seconds": 31.0,
+      "detected": false,
+      "failures": [],
+      "note": ""
+    }
+  }
+}

@@ -341,6 +341,99 @@ framework unchanged.
 
 ---
 
+## Phase 3 — measuring the suites, and tools that use the measurements
+
+### D34 — Fault seeding as a CI experiment, credited only against a green baseline — Built
+- **Chosen:** `fault-seeding.yml` runs eight suite types (contract, API functional, security, UI
+  journeys, accessibility, visual, BDD, Gatling) once with no bug and once per seeded bug, in
+  parallel jobs. A suite *catches* a bug only if it has failures with the bug **and** passed on
+  the baseline, so a flaky or broken suite cannot take credit. Results are committed to
+  `experiments/fault-seeding/` with every failing test and its message.
+- **Not in the matrix:** domain unit tests switch bugs on themselves (they test both states by
+  design) and the SUT integration tests; including them would measure nothing new.
+- **Measured:** RESULTS.md §Phase 3.
+
+### D35 — Run history as JSON Lines first, PostgreSQL second — Built
+- **Chosen:** a ServiceLoader-registered JUnit `TestExecutionListener` (`HistoryListener`)
+  records every result (key, display name, status, duration, failure class and cause, commit,
+  branch, suite, environment) to `target/test-history/*.jsonl`, and also to PostgreSQL when
+  `history.jdbc-url` is set. Inserts are idempotent, so history can be rebuilt from archived
+  files. A history problem is logged and never fails a build.
+- **Why both:** files need no infrastructure on a laptop; the database is what CI and the
+  dashboard query.
+
+### D36 — Flakiness = flips on the same commit; quarantine is a discovery filter — Built
+- **Score** = pass↔fail flips between consecutive runs **of the same commit** ÷ transitions.
+  Passing on one commit and failing on the next is a regression and is not counted; always
+  failing is broken, not flaky. A test needs ≥ 5 runs and a score ≥ 0.2 (configurable) to be
+  quarantined.
+- **Quarantine** is a `PostDiscoveryFilter` reading `quarantine.json`:
+  `quarantine.mode=exclude` for blocking jobs, `only` for the non-blocking quarantine job,
+  `off` (default) locally so developers still see every failure. Quarantined tests keep
+  running and keep producing history, so they leave quarantine when they become stable.
+- **Alternatives:** JUnit `@Disabled` edits (manual, silent), retry-until-green (hides real
+  intermittent bugs — the race in this SUT would be hidden by a retry).
+- **Found while building:** parameterised tests are *containers* at discovery time, so the
+  first filter version let them through every filter.
+- **Found while running the experiments:** a run with seeded bugs switched on is not the code
+  at its commit. Recorded under the plain SHA, every deliberate failure from the fault-seeding
+  and TIA experiments looked like a same-commit flip (the local leaderboard briefly showed 20
+  "flaky" tests). Such runs are now recorded as `<sha>+seeded:<bugs>`.
+
+### D37 — Failure causes from the exception chain — Built
+- `FailureClassifier` buckets a failure as locator, timeout, assertion, environment, data or
+  unknown by exception *class names* along the cause chain (no Selenium/JDBC dependency), in a
+  deliberate order: environment first (a dead browser also times out), then locator (a wait that
+  never found its element is a locator problem, not a slow page), then data, timeout, assertion.
+
+### D38 — Self-healing that reports instead of hiding — Built
+- **Chosen:** `Target` = name + ranked strategies (data-testid, id, accessible name computed by
+  the browser, text, nearest-below). The primary must match exactly one element — two matches is
+  a test bug and fails, never heals. A fallback is used only on exactly one match. A heal is
+  logged as a warning, shown as a yellow step, tagged `healed`, written to
+  `target/healing/healing.jsonl`, and carries a fix read from the element actually found (its
+  current data-testid). `ui.healing=fail` diagnoses but fails; `off` disables fallbacks.
+- **Alternatives:** ML-based healing products (opaque; heal by similarity score and can click
+  the wrong element), or no healing (a renamed test id fails with "no such element" and no
+  hint).
+- **Evidence:** the real-app demo renames `book-submit` in the live page; the page object books
+  through the accessible-name fallback and the report names `book-button` as the fix. In a full
+  UI run, the demo is the only heal.
+
+### D39 — Test impact analysis from per-test coverage of the in-process SUT — Built
+- **Chosen:** with `tia.record=true` and sequential execution, `TiaRecorder` resets and dumps the
+  JaCoCo agent around each test. Because the embedded SUT runs inside the test JVM, server code
+  reached over HTTP or through the browser is attributed to the test that caused it. `TiaMapper`
+  keeps only SUT classes; `TiaSelector` maps a diff to tests with conservative rules (build,
+  framework, test and resource files → everything; frontend → all UI/BDD; SUT files no test
+  executes → flagged as untested) and explains every decision.
+- **Refuses** to record with parallel tests: coverage of concurrent tests cannot be separated,
+  and a wrong map is worse than none.
+- **Limits:** the first test that boots the SUT is attributed the start-up code; JavaScript has
+  no per-test coverage (frontend changes select all UI tests).
+- **Found by the experiment:** selection and sharding read `harness.select`/`harness.shard`
+  while `HarnessConfig` strips the prefix — a "selected" run silently ran everything.
+
+### D40 — Mutation testing on the domain rules only — Built
+- PIT with the `STRONGER` mutator set on `gate-domain` (the rules the seeded bugs live in),
+  in a `mutation` profile, failing below 95 %. Not on the whole SUT: mutating Spring wiring
+  produces mostly equivalent or untestable mutants and takes many times longer.
+
+### D41 — AI assistance is optional, provider-agnostic and draft-only — Built
+- Two wire protocols cover most providers (OpenAI-compatible chat completions — also Ollama,
+  LM Studio, Groq — and Anthropic messages); `ai.provider`, `ai.model`, `ai.base-url`, key only
+  from `HARNESS_AI_API_KEY`. No model name is guessed.
+- **Gherkin drafts** reuse the suite's existing step phrases, are parsed with the Gherkin
+  parser, get a banner saying who wrote them and that a person must review them, carry
+  `@draft`, and are written only to `target/ai-drafts/` — never into the source tree.
+- **Failure summaries** are deterministic without a model (grouped by classified cause, with
+  evidence paths and console tails); a model adds a section marked "DRAFT … unverified".
+  Screenshots are sent only with `--send-screenshots`.
+- **Not done:** no run against a real provider in this repository (no key in the authoring
+  environment); request/response formats are tested against stub servers.
+
+---
+
 ## Build and tooling
 
 ### D22 — Version lines follow the brief, at their latest patch — Built
@@ -367,6 +460,9 @@ sandbox). Lifecycle plugins (clean, resources, install, …) are pinned because 
   the authoring sandbox).
 - Visual diff has no anti-aliasing detection (D26); tests must keep layouts deterministic.
 - Performance numbers come from a shared runner and are for regression detection (D29).
+- Test impact analysis attributes SUT start-up code to the first test that boots it, and has no
+  per-test JavaScript coverage (D39).
+- The AI features have not been exercised against a real model provider (D41).
 - The race-condition bug uses a configurable pause (`gate.race-window`, 150 ms) to make the
   race reproducible on any machine; without it the race is real but intermittent.
 - Coverage numbers in RESULTS.md are per-module unit/integration coverage; per-test

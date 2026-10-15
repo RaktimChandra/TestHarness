@@ -3,6 +3,73 @@
 All notable changes, one section per phase. Each phase ends with the whole project
 compiling, every test passing, and `./mvnw verify` running end to end.
 
+## [1.0.0-phase3] — 2026-10-15 — Measuring the suites: fault seeding, flakiness, healing, TIA, mutation, AI drafts
+
+### Added
+- **Fault-seeding experiment** (`.github/workflows/fault-seeding.yml`, `.github/scripts/fault_*.py`):
+  every seeded bug × eight suite types plus a no-bug baseline in CI; a suite is credited
+  only against its own green baseline. Results and the detection matrix in
+  `experiments/fault-seeding/` (RESULTS §17) and a blog draft in `docs/blog/`.
+- **`harness-insights` module:**
+  - run history for every JUnit and Cucumber test (`HistoryListener`, auto-registered) to
+    JSON Lines and optionally PostgreSQL (`HistoryStore`, idempotent upserts);
+  - failure-cause classification (locator, timeout, assertion, environment, data) from the
+    exception chain;
+  - flakiness score from same-commit flips, a quarantine file, and three JUnit Platform
+    discovery filters — quarantine (`off`/`exclude`/`only`), selection from a file, and
+    stable CRC32 sharding;
+  - test impact analysis: per-test JaCoCo coverage of the in-process SUT (`TiaRecorder`),
+    a test → file map, and a conservative selector;
+  - provider-agnostic AI drafting (OpenAI-compatible or Anthropic Messages via
+    `HARNESS_AI_API_KEY`): Gherkin from a user story, validated with the Gherkin parser,
+    banner-marked, `@draft`, written only to `target/ai-drafts/`; failure summaries that work
+    without a model.
+- **Honest self-healing locators** (`harness-ui` `heal` package): `Target`s with ranked
+  fallbacks (data-testid, id, accessible name, text, position below a label); a heal is
+  labelled `healed` in Allure with a suggested fix and written to `healing.jsonl`;
+  ambiguous matches are never used; `ui.healing=fail` turns any heal into a failure.
+  Demo on the real app (`SelfHealingDemoTest`).
+- **Deliberately flaky demo** (`suites/flaky-demo`, off by default) and
+  `.github/workflows/flaky-demo.yml`: 20 runs on one commit with PostgreSQL history, then
+  leaderboard, quarantine and both quarantine modes (RESULTS §20).
+- **Mutation testing**: `-Pmutation` runs PIT (STRONGER) on `sut/gate-domain` with a 95 %
+  gate; the 7 first-run survivors became `SurvivingMutantsTest` (RESULTS §18). New CI job
+  `mutation` with a job summary of the score and any survivors.
+- **`th` command** (`harness-cli`, picocli; `./th`, `th.cmd`): `run` (suite, tags, browser,
+  environment, Grid, quarantine, shard, selection, seeded bugs, `--dry-run`),
+  `rerun-failed`, `report`, `history ingest|flaky|quarantine`, `tia map|select`,
+  `ai gherkin|explain`; `-Dname=value` anywhere sets a system property.
+- **TIA experiment** (`tools/tia_experiment.py`, `experiments/tia/`, RESULTS §19).
+
+### Fixed — found while building or running Phase 3
+- **Framework** (caught by its own tests before `8810cc9` landed): parameterised tests are
+  containers at discovery time, so the first filter version let them through quarantine,
+  selection and sharding.
+- `1565a4e` **Framework**: the selection and shard filters read `harness.select` /
+  `harness.shard`, but configuration strips the `harness.` prefix; `-Dharness.select=…`
+  silently selected everything. Found by the TIA experiment's first run; regression test
+  added.
+- `72f79e5` **Framework**: runs with seeded bugs were recorded under the plain commit SHA,
+  so the experiments' deliberate failures looked like same-commit flips (the local
+  leaderboard showed 20 "flaky" tests). They are now `<sha>+seeded:<bugs>`.
+- `95f8686` **Tests**: 7 surviving mutants exposed untested behaviour in the domain rules
+  (message text, per-argument duration checks, slot length bounds, bug switches' defaults).
+- **CLI**: a directory given to `--jsonl` read every `.jsonl` file, including healing records,
+  and failed; only files whose records have a `runId` are read now.
+- `d261ce8` **CI**: the dependency-cache workflow ran PIT during the empty-jar install step.
+
+### Measured
+458 JVM tests + 31 Vitest + 1 Gatling simulation, 0 failures, 5 min 51 s (RESULTS §16).
+Fault seeding 6/6 bugs caught (API 100 %); PIT 95.1 % → 100 %; TIA 6/6 caught with
+3.8–21.6 % time saved; flaky demo score 0.368, quarantined.
+
+### Could not be run in the authoring sandbox
+- The AI features against a real model provider (no API key); verified against stub servers
+  for both wire formats.
+- The PostgreSQL-backed flaky demo, Grid and Compose (Docker Hub blocked) — CI only.
+- GitHub Actions artifact downloads (blocked) — experiment workflows push their results to
+  branches instead, copied unchanged into `experiments/`.
+
 ## [1.0.0-phase2] — 2026-10-14 — Grid, visual, accessibility, contracts, performance, security
 
 ### Added

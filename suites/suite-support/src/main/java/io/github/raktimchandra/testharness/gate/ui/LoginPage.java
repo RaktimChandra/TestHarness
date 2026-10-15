@@ -4,6 +4,7 @@ import static io.github.raktimchandra.testharness.ui.page.Locators.testId;
 
 import io.github.raktimchandra.testharness.gate.api.GateUser;
 import io.github.raktimchandra.testharness.reporting.Report;
+import io.github.raktimchandra.testharness.ui.heal.Target;
 import io.github.raktimchandra.testharness.ui.page.BasePage;
 import io.github.raktimchandra.testharness.ui.wait.Waits;
 import org.openqa.selenium.By;
@@ -12,8 +13,12 @@ import org.openqa.selenium.WebDriver;
 public class LoginPage extends BasePage<LoginPage> {
 
     static final By USERNAME = testId("login-username");
-    static final By PASSWORD = testId("login-password");
-    static final By SUBMIT = testId("login-submit");
+    static final Target USERNAME_FIELD = Target.named("Username field").testId("login-username")
+            .accessibleName("input", "Username");
+    static final Target PASSWORD_FIELD = Target.named("Password field").testId("login-password")
+            .accessibleName("input", "Password");
+    static final Target SUBMIT = Target.named("Sign in button").testId("login-submit")
+            .accessibleName("button", "Sign in").text("button", "Sign in");
     static final By ERROR = testId("login-error");
 
     LoginPage(WebDriver driver, Waits waits, String baseUrl) {
@@ -31,8 +36,8 @@ public class LoginPage extends BasePage<LoginPage> {
     }
 
     public LoginPage enter(String username, String password) {
-        type(USERNAME, username);
-        type(PASSWORD, password);
+        type(USERNAME_FIELD, username);
+        type(PASSWORD_FIELD, password);
         return this;
     }
 

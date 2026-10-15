@@ -190,6 +190,30 @@ jobs:
         with:
           file: ${{ runner.temp }}/perf.log
 
+  mutation:
+    name: Mutation testing (PIT) - domain rules
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: PIT on sut/gate-domain (fails below the 95 % threshold)
+        run: $MVN -Pmutation verify -pl sut/gate-domain
+      - name: Mutation summary
+        if: always()
+        run: python3 .github/scripts/pit_summary.py sut/gate-domain/target/pit-reports/mutations.xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pit-report
+          path: sut/gate-domain/target/pit-reports
+          if-no-files-found: ignore
+
   grid:
     name: Selenium Grid - UI suite at 1/4/8 workers + cross-browser
     needs: build

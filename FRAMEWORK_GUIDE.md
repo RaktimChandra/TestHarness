@@ -14,6 +14,12 @@ compiles against, code in this repository.
 - [Performance smoke (Gatling)](#performance-smoke-gatling)
 - [Security smoke tests](#security-smoke-tests)
 - [Selenium Grid](#selenium-grid)
+- [The `th` command](#the-th-command)
+- [History, flakiness and quarantine](#history-flakiness-and-quarantine)
+- [Self-healing locators](#self-healing-locators)
+- [Test impact analysis](#test-impact-analysis)
+- [Mutation testing](#mutation-testing)
+- [AI drafts (optional)](#ai-drafts-optional)
 - [Test data](#test-data)
 - [Reporting and evidence](#reporting-and-evidence)
 - [Rules the build enforces](#rules-the-build-enforces)
@@ -28,8 +34,12 @@ compiles against, code in this repository.
 | `harness/harness-api` | `ApiSpecs`, `SchemaRegistry` + validation filter, `TokenCache`, `ResponseAssert` | no |
 | `harness/harness-ui` | `Drivers`, `DriverFactory`, `Waits`, `BasePage`, `Component`, `Locators`, `Inputs`, `BrowserExtension`, `UiEvidence` | no |
 | `harness/harness-bdd` | `ScenarioContext`, `ScenarioHooks` | no |
+| `harness/harness-insights` | history, flakiness, quarantine/selection/shard filters, failure classes, test impact analysis, AI drafts | no |
+| `harness/harness-cli` | the `th` command | no |
 | `suites/suite-support` | `GateSut` launcher, `GateApi`, `GateFixtures`, models, schemas, page objects | **yes** |
-| `suites/*-suite` | the tests | yes |
+| `suites/*-suite` | the tests (`flaky-demo` only runs with `-DskipFlakyDemo=false`) | yes |
+| `tools/` | experiment scripts (`tia_experiment.py`) | — |
+| `experiments/` | committed results of the experiments | — |
 
 ## Configuration
 
@@ -55,6 +65,14 @@ Choose the environment with `-Dharness.env=docker` or `HARNESS_ENV=docker`.
 | `visual.max-mismatch` / `visual.pixel-tolerance` | `0.002` / `0.1` | allowed share of differing pixels / per-pixel YIQ tolerance |
 | `visual.require-baseline` | `true` in `ci`, else `false` | a missing baseline fails instead of skipping |
 | `a11y.max-critical` / `-serious` / `-moderate` / `-minor` | `0` / `0` / `-1` / `-1` | violations allowed per impact (`-1` = report only) |
+| `ui.healing` | `report` | `report` (heal and mark), `fail` (diagnose and fail), `off` |
+| `history.enabled` / `history.dir` | `true` / `target/test-history` | JSON Lines history of every result |
+| `history.jdbc-url` / `history.db-user` | empty / `harness` | also store history in PostgreSQL (password: `HARNESS_HISTORY_DB_PASSWORD`) |
+| `quarantine.mode` / `quarantine.file` | `off` / `quarantine.json` | `exclude` (blocking jobs) or `only` (quarantine job) |
+| `select` | empty | file of test keys to run (`-Dharness.select=...`) |
+| `shard` | empty | `k/n`: run only this shard (`-Dharness.shard=2/4`) |
+| `tia.record` / `tia.dir` | `false` / `target/tia` | record per-test coverage (needs sequential tests) |
+| `ai.provider` / `ai.model` / `ai.base-url` | `none` / — / provider default | optional model for drafts (`HARNESS_AI_API_KEY`) |
 | `data.seed` | random | fix the Faker seed to replay a run |
 
 Secrets are **only** environment variables, read with `config.secret("NAME", localFallback)`.
@@ -275,6 +293,114 @@ Visual checks are excluded on Grid because the baselines are rendered on the CI 
 browsers, not the node images. Watch a session live at http://localhost:4444 (Sessions →
 camera icon; the nodes run noVNC without a password).
 
+## The `th` command
+
+`./th` (Windows: `th.cmd`) builds the CLI on first use and wraps the common tasks:
+
+```bash
+./th run --suite ui --browser firefox --tags smoke      # -> mvnw verify -pl suites/ui-suite ...
+./th run --suite api,bdd --env docker --workers 8
+./th run --suite ui --shard 2/4 --quarantine exclude
+./th run --suite api --dry-run                           # print the Maven command only
+./th rerun-failed                                        # only what failed last time
+./th report                                              # generate Allure and open it
+./th history flaky --jsonl suites/api-suite/target/test-history
+./th tia select --base origin/main
+./th ai explain                                          # summary of the last failures
+./th <command> --help
+```
+
+A **test key** names a test everywhere (history, quarantine, selection, impact analysis):
+`io.example.SlotApiTest#capacity_is_enforced` for JUnit, `features/booking_rules.feature:17`
+for a Cucumber scenario or example row.
+
+## History, flakiness and quarantine
+
+Every suite records its results automatically to `target/test-history/<suite>-<run>.jsonl`.
+To keep history across runs, give it a PostgreSQL database:
+
+```bash
+docker run -d --name history -e POSTGRES_USER=harness -e POSTGRES_PASSWORD=harness -e POSTGRES_DB=history \
+  -p 5433:5432 postgres:16-alpine
+./mvnw verify -Dharness.history.jdbc-url=jdbc:postgresql://localhost:5433/history
+./th history ingest --jdbc-url jdbc:postgresql://localhost:5433/history suites/*/target/test-history
+./th history flaky --jdbc-url jdbc:postgresql://localhost:5433/history
+./th history quarantine --jdbc-url jdbc:postgresql://localhost:5433/history --write quarantine.json
+```
+
+Flakiness only counts pass↔fail flips between runs **of the same commit**. With
+`quarantine.json` committed, blocking CI jobs run with `-Dharness.quarantine.mode=exclude` and a
+non-blocking job runs `-Dharness.quarantine.mode=only`. Locally the default is `off`.
+
+Each failure is classified (locator, timeout, assertion, environment, data, unknown) in the
+history, the leaderboard and the failure summary.
+
+The deliberately flaky demo lives in `suites/flaky-demo` and runs only with
+`-DskipFlakyDemo=false`.
+
+## Self-healing locators
+
+Describe important controls as a `Target` with fallbacks; page objects then `click`, `type` and
+`find` targets like locators:
+
+```java
+static final Target SUBMIT = Target.named("Book slot button")
+        .testId("book-submit")                    // the contract (rank 0)
+        .accessibleName("button", "Book slot")    // fallback 1: what assistive tech sees
+        .text("button", "Book slot");             // fallback 2
+
+click(SUBMIT);
+```
+
+If `book-submit` is renamed, the click still works through the accessible name, and the test
+is marked **healed**: a yellow step and a `healed` tag in Allure, a warning in the log, and a
+line in `target/healing/healing.jsonl` with the fix ("the element's data-testid is now
+`book-button`: update the Target…"). A primary locator that matches two elements fails
+immediately; ambiguous fallbacks are never used. Run CI with `-Dharness.ui.healing=fail` if a
+heal should block a merge.
+
+## Test impact analysis
+
+```bash
+# 1. Record which SUT files each test executes (sequential; ~3.5 min on a 2-vCPU machine)
+./mvnw verify -pl suites/api-suite,suites/ui-suite,suites/bdd-suite \
+  -Dharness.tia.record=true -Djunit.jupiter.execution.parallel.enabled=false
+# 2. Build the map
+./th tia map --commit "$(git rev-parse HEAD)"
+# 3. Select the tests for your change and run them
+./th tia select --base origin/main
+./th run --suite api,ui,bdd --select target/tia/selection.txt
+```
+
+The selector explains every file it was given; changes to build, framework or test code select
+everything, frontend changes select all UI and BDD tests, and a changed SUT file that no test
+executes is reported as **untested**. The experiment behind it is `tools/tia_experiment.py`.
+
+## Mutation testing
+
+```bash
+./mvnw -Pmutation verify -pl sut/gate-domain     # report: sut/gate-domain/target/pit-reports/index.html
+```
+
+The build fails below 95 % (`pit.threshold`). A surviving mutant is a behaviour no test pins
+down: write the test that kills it (see `SurvivingMutantsTest`).
+
+## AI drafts (optional)
+
+Nothing needs a model. To use one:
+
+```bash
+export HARNESS_AI_API_KEY=...                 # never in a file
+./th ai gherkin -Dharness.ai.provider=openai -Dharness.ai.model=<model> \
+  --story "As a driver I want to be told when a slot I wanted frees up"
+```
+
+(`-D` options can also go in `harness.yml` under `ai:`; for Ollama use `ai.provider=openai`,
+`ai.base-url=http://localhost:11434/v1`, no key.) The draft is written to
+`target/ai-drafts/<story>.feature` with a banner and `@draft`; it is parsed, but never run or
+committed. `./th ai explain` writes `target/ai-drafts/failure-summary.md`; with a model it adds a
+section marked as an unverified draft.
+
 ## Test data
 
 | Need | Use |
@@ -321,3 +447,5 @@ jwebserver -d <absolute path>/target/allure-report -p 8000
 | p95 / p99 / error-rate budgets | `BookingFlowSimulation` assertions | latency regressions fail the build |
 | No secret fallbacks in CI | `HarnessConfig.secret` | a missing CI secret fails loudly |
 | Retry needs a cap and a predicate | `Retry.Builder.build()` | no unbounded or blanket retries |
+| A locator matches exactly one element | `Healer` | ambiguity is a test bug; heals are always reported |
+| Domain mutation score ≥ 95 % | PIT `mutation` profile | untested behaviour in the rules fails the build |
