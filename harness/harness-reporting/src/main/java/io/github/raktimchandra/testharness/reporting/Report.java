@@ -36,6 +36,17 @@ public final class Report {
         Allure.step(message, Status.PASSED);
     }
 
+    /** A label on the current test result, e.g. {@code label("tag", "healed")}; filterable in Allure. */
+    public static void label(String name, String value) {
+        Allure.label(name, value);
+    }
+
+    /** A step marked as broken (yellow in Allure): something the reader must look at, though the test went on. */
+    public static void warning(String message) {
+        log.warn("WARNING {}", message);
+        Allure.step(message, Status.BROKEN);
+    }
+
     public static void parameter(String name, Object value) {
         Allure.parameter(name, value);
     }
