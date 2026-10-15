@@ -37,11 +37,15 @@ public final class HistoryJson {
         }
     }
 
-    /** Reads one .jsonl file, or every .jsonl file under a directory. */
+    /**
+     * Reads one .jsonl file, or every history file under a directory. In a directory, a
+     * {@code .jsonl} file counts as history when its first record has a {@code runId}; other
+     * JSON Lines files (healing records, for example) are skipped.
+     */
     public static List<TestResult> read(Path fileOrDir) {
         List<TestResult> out = new ArrayList<>();
         try (Stream<Path> files = Files.isDirectory(fileOrDir)
-                ? Files.walk(fileOrDir).filter(p -> p.toString().endsWith(".jsonl")).sorted()
+                ? Files.walk(fileOrDir).filter(HistoryJson::isHistoryFile).sorted()
                 : Stream.of(fileOrDir)) {
             for (Path f : files.toList()) {
                 for (String line : Files.readAllLines(f, StandardCharsets.UTF_8)) {
@@ -51,8 +55,26 @@ public final class HistoryJson {
                 }
             }
         } catch (IOException e) {
-            throw new UncheckedIOException("Cannot read history from " + fileOrDir, e);
+            throw new UncheckedIOException("Cannot read history from " + fileOrDir + ": " + e.getMessage(), e);
         }
         return out;
+    }
+
+    static boolean isHistoryFile(Path p) {
+        if (!p.getFileName().toString().endsWith(".jsonl") || !Files.isRegularFile(p)) {
+            return false;
+        }
+        try (Stream<String> lines = Files.lines(p, StandardCharsets.UTF_8)) {
+            return lines.filter(l -> !l.isBlank()).findFirst()
+                    .map(l -> {
+                        try {
+                            return MAPPER.readTree(l).has("runId");
+                        } catch (IOException e) {
+                            return false;
+                        }
+                    }).orElse(false);
+        } catch (IOException | UncheckedIOException e) {
+            return false;
+        }
     }
 }
