@@ -192,6 +192,19 @@ class SecuritySmokeTest extends ApiTest {
     }
 
     @Test
+    void content_hashed_assets_are_cached_and_pages_and_data_are_not() {
+        Response page = api.anonymous().accept("text/html").get("/login");
+        assertThat(page.header("Cache-Control")).contains("no-store");
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("/assets/[A-Za-z0-9._-]+\\.js").matcher(page.asString());
+        assertThat(m.find()).as("the page references a built script").isTrue();
+        Response asset = api.anonymous().accept("*/*").get(m.group());
+        assertThat(asset.statusCode()).isEqualTo(200);
+        assertThat(asset.header("Cache-Control")).contains("max-age=31536000", "public", "immutable")
+                .doesNotContain("no-store");
+        assertThat(api.as(fx.newDriver()).get("/api/auth/me").header("Cache-Control")).contains("no-store");
+    }
+
+    @Test
     void errors_do_not_leak_internals() {
         Response r = api.as(fx.newDriver()).body("{\"slotId\": \"not-a-number\"}").post("/api/bookings");
         assertThatResponse(r).hasStatus(400);
