@@ -1,3 +1,23 @@
-# OSV-Scanner configuration (security.yml). Every ignored vulnerability must say why it does
-# not apply and when it is reviewed again; an expired ignore fails the scan again.
+# OSV-Scanner configuration (security.yml). Every ignored vulnerability says why it does not
+# apply here and when it is reviewed again; after ignoreUntil it fails the scan again.
 # Format: https://google.github.io/osv-scanner/configuration/
+#
+# Spring Framework 6.2.x: these three advisories are fixed only in 7.0.9; 6.2.19 is the last
+# open-source 6.2 release (Maven Central, checked 2026-10-16), and the brief fixes Spring Boot
+# at 3.x (DESIGN.md D22). Each was checked against the code (grep of sut/, harness/, suites/,
+# adapters/ for the features named) and does not apply. Moving to Spring Boot 4 removes them.
+
+[[IgnoredVulns]]
+id = "GHSA-j9f9-w8pj-32f8"   # CVE-2026-47890, SSE stream corruption with view fragments
+ignoreUntil = 2027-01-31
+reason = "Needs Server-Sent Events rendered with view fragments (FragmentsRendering). The SUT serves JSON and a static single-page app; no SseEmitter or fragment rendering exists in this repository."
+
+[[IgnoredVulns]]
+id = "GHSA-pc63-qcmh-9cmg"   # CVE-2026-47884, XsltView path traversal
+ignoreUntil = 2027-01-31
+reason = "Needs XsltView with a '/**' mapping that renders a view whose name is not set explicitly. No XsltView is configured; the only view is SpaController's explicit forward:/index.html for six fixed routes."
+
+[[IgnoredVulns]]
+id = "GHSA-9qf2-26p9-2q2q"   # CVE-2026-47892, WebFlux functional endpoints header predicate bypass
+ignoreUntil = 2027-01-31
+reason = "Needs WebFlux functional endpoints (RouterFunction). The SUT is Spring MVC; spring-webflux is only on test classpaths (Pact provider support) and no RouterFunction exists in this repository."
