@@ -509,6 +509,10 @@ sandbox). Lifecycle plugins (clean, resources, install, …) are pinned because 
   race reproducible on any machine; without it the race is real but intermittent.
 - Coverage numbers in RESULTS.md are per-module unit/integration coverage; per-test coverage
   of the SUT is recorded only by the TIA experiment (D39).
+- While TIA recording is on (`-Dharness.tia.record=true`) the recorder resets the JaCoCo agent
+  per test, so that run's per-module JaCoCo reports are not meaningful (D39). The same reset
+  made `harness-insights` report 9 % line coverage until its test classes got one JVM each
+  (77.5 % after).
 - The PortSync suites run only in CI (PortSync needs Kafka; Docker Hub is blocked in the
   authoring sandbox), and their schemas are the adapter's expectations, not a published
   PortSync contract (D44).

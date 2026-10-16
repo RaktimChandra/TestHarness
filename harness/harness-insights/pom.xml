@@ -70,6 +70,10 @@
                     <excludes>
                         <exclude>**/fixtures/**</exclude>
                     </excludes>
+                    <!-- TiaTest drives the real JaCoCo agent, whose per-test reset also clears the
+                         coverage this module's own report is built from. One JVM per test class
+                         keeps the other classes' coverage (JaCoCo appends to one .exec file). -->
+                    <reuseForks>false</reuseForks>
                 </configuration>
             </plugin>
         </plugins>
