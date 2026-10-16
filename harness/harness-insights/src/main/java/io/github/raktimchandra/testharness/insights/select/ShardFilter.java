@@ -3,6 +3,7 @@ package io.github.raktimchandra.testharness.insights.select;
 import io.github.raktimchandra.testharness.core.config.HarnessConfig;
 import io.github.raktimchandra.testharness.insights.TestKeys;
 import java.nio.charset.StandardCharsets;
+import java.util.Map;
 import java.util.Optional;
 import java.util.zip.CRC32;
 import org.junit.platform.engine.FilterResult;
@@ -10,20 +11,30 @@ import org.junit.platform.engine.TestDescriptor;
 import org.junit.platform.launcher.PostDiscoveryFilter;
 
 /**
- * Splits a suite across CI machines: with {@code harness.shard=k/n} only tests whose key hashes
- * to bucket k (1-based) of n run. Shards are by test, not class — tests here own their data,
- * so any split is safe, and per-test buckets balance better than per-class ones.
+ * Splits a suite across CI machines: with {@code harness.shard=k/n} only the tests of shard k
+ * (1-based) of n run. Shards are by test, not class — tests here own their data, so any split
+ * is safe. With {@code harness.shard.durations} pointing at a durations file (written by
+ * {@code th history durations}), known tests are balanced by recorded duration
+ * ({@link ShardPlan}); otherwise, and for tests the file does not know, a stable hash of the
+ * test key decides.
  */
 public class ShardFilter implements PostDiscoveryFilter {
 
     private final Optional<int[]> shard;
+    private final Optional<ShardPlan> plan;
 
     public ShardFilter() {
-        this(HarnessConfig.get().find("shard").map(ShardFilter::parse));
+        this(HarnessConfig.get().find("shard").map(ShardFilter::parse),
+                HarnessConfig.get().find("shard.durations").flatMap(RepoFiles::locate).map(ShardPlan::read));
     }
 
     ShardFilter(Optional<int[]> shard) {
+        this(shard, Optional.empty());
+    }
+
+    ShardFilter(Optional<int[]> shard, Optional<Map<String, Long>> durations) {
         this.shard = shard;
+        this.plan = shard.flatMap(s -> durations.map(d -> ShardPlan.of(d, s[1])));
     }
 
     static int[] parse(String spec) {
@@ -54,7 +65,7 @@ public class ShardFilter implements PostDiscoveryFilter {
         int k = shard.get()[0];
         int n = shard.get()[1];
         String key = TestKeys.of(descriptor.getSource()).orElse(descriptor.getUniqueId().toString());
-        return FilterResult.includedIf(bucket(key, n) == k, () -> "shard " + k + "/" + n,
-                () -> "other shard");
+        int assigned = plan.map(p -> p.shardOf(key)).orElseGet(() -> bucket(key, n));
+        return FilterResult.includedIf(assigned == k, () -> "shard " + k + "/" + n, () -> "other shard");
     }
 }

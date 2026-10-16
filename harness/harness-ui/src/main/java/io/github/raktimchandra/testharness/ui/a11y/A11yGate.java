@@ -31,7 +31,10 @@ public record A11yGate(int maxCritical, int maxSerious, int maxModerate, int max
     private static void check(List<String> out, String impact, int count, int max, A11yReport report) {
         if (max >= 0 && count > max) {
             List<String> rules = report.violations().stream().filter(v -> impact.equals(v.impact()))
-                    .map(v -> v.rule() + " (" + v.nodes() + " element" + (v.nodes() == 1 ? "" : "s") + ")").toList();
+                    .map(v -> v.rule() + " (" + v.nodes() + " element" + (v.nodes() == 1 ? "" : "s")
+                            + (v.targets() == null || v.targets().isEmpty() ? ""
+                                    : ": " + String.join(" ", v.targets().subList(0, Math.min(3, v.targets().size()))))
+                            + ")").toList();
             out.add(count + " " + impact + " (max " + max + "): " + String.join(", ", rules));
         }
     }

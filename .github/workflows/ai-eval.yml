@@ -1,0 +1,79 @@
+# The AI drafter against real models: Ollama on the runner serves small open models through
+# its OpenAI-compatible API, tools/ai_eval.py drafts a feature for every story in
+# experiments/ai/stories (twice) and scores the drafts against the BDD suite's real step
+# definitions. One runner per model. Results are pushed to the branch ai-eval/<run id>.
+name: ai-eval
+
+on:
+  workflow_dispatch:
+    inputs:
+      repeats:
+        description: Drafts per story per model
+        default: '2'
+
+permissions:
+  contents: read
+
+env:
+  HARNESS_ENV: ci
+  GATE_SEED_PASSWORD: ai-${{ github.run_id }}
+
+jobs:
+  model:
+    name: ${{ matrix.model }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 150
+    strategy:
+      fail-fast: false
+      matrix:
+        model: ['qwen2.5:1.5b', 'llama3.2:3b', 'qwen2.5:7b']
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Ollama with ${{ matrix.model }}
+        run: |
+          curl -fsSL https://ollama.com/install.sh | sh
+          for i in $(seq 1 30); do curl -sf http://localhost:11434/api/version && break; sleep 2; done
+          ollama pull '${{ matrix.model }}'
+          ollama list
+      - name: Build
+        run: ./mvnw -B -ntp -q install -DskipTests
+      - name: Draft and score
+        run: |
+          python3 tools/ai_eval.py --model '${{ matrix.model }}' --repeats ${{ inputs.repeats || '2' }} \
+            --out out --explain | tee console.txt
+          echo "::notice title=ai-eval ${{ matrix.model }}::$(python3 -c "import json,glob;print(json.dumps(json.load(open(glob.glob('out/*/ai-eval.json')[0]))['summary']))")"
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ai-eval-${{ strategy.job-index }}
+          path: out
+
+  results:
+    name: Push results
+    needs: model
+    if: always()
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: ai-eval-*
+          path: experiments/ai/results
+          merge-multiple: true
+      - name: Summarise
+        run: python3 tools/ai_eval_report.py experiments/ai/results | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Push
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "ai-eval/${{ github.run_id }}"
+          git add -f experiments/ai/results
+          git commit -m "experiment: AI drafter evaluation from run ${{ github.run_id }}"
+          git push origin "ai-eval/${{ github.run_id }}"

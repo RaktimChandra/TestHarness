@@ -17,6 +17,7 @@ def main() -> int:
     label = sys.argv[1]
     patterns = sys.argv[2:] or ["**/target/surefire-reports/TEST-*.xml"]
     rows = {}
+    failures = []
     for pattern in patterns:
         for path in glob.glob(pattern, recursive=True):
             module = path.split("/target/")[0] or "."
@@ -25,6 +26,10 @@ def main() -> int:
             for case in root.iter("testcase"):
                 r["tests"] += 1
                 r["time"] += float(case.get("time") or 0)
+                bad = case.find("failure") if case.find("failure") is not None else case.find("error")
+                if bad is not None:
+                    msg = " ".join((bad.get("message") or bad.get("type") or "").split())[:400]
+                    failures.append(f"{case.get('classname')} > {case.get('name')}: {msg}")
                 if case.find("failure") is not None:
                     r["failed"] += 1
                 elif case.find("error") is not None:
@@ -48,6 +53,11 @@ def main() -> int:
     compact = "; ".join(f"{m}={r['tests']}/{r['failed']}/{r['errors']}/{r['skipped']}" for m, r in sorted(rows.items()))
     print(f"::notice title={label} (tests/failed/errors/skipped)::total={total['tests']}/{total['failed']}/"
           f"{total['errors']}/{total['skipped']} test-time={total['time']:.1f}s | {compact}")
+    # The failing tests themselves, one annotation each (GitHub shows at most ten per step).
+    for f in failures[:8]:
+        print(f"::error title={label} failed test::{f}")
+    if len(failures) > 8:
+        print(f"::error title={label}::{len(failures) - 8} more failing test(s), see the job summary")
     return 0
 
 

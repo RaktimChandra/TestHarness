@@ -65,6 +65,21 @@ class FiltersTest {
     }
 
     @Test
+    void durationBalancedShardsStillPartitionTheSuiteExactly() {
+        // Durations known for two methods only: the rest fall back to the hash, and the union is
+        // still every test exactly once.
+        java.util.Map<String, Long> durations = java.util.Map.of(K + "passes", 5000L, K + "parameterised", 4000L);
+        List<Set<String>> shards = IntStream.rangeClosed(1, 2).mapToObj(k ->
+                methods(new ShardFilter(Optional.of(new int[] {k, 2}), Optional.of(durations)))).toList();
+        assertThat(shards.get(0)).contains("passes").doesNotContain("parameterised");
+        assertThat(shards.get(1)).contains("parameterised").doesNotContain("passes");
+        assertThat(shards.get(0).size() + shards.get(1).size()).isEqualTo(6);
+        Set<String> union = new HashSet<>(shards.get(0));
+        union.addAll(shards.get(1));
+        assertThat(union).hasSize(6);
+    }
+
+    @Test
     void filtersReadTheirSettingsFromHarnessSystemProperties(@org.junit.jupiter.api.io.TempDir java.nio.file.Path dir)
             throws Exception {
         java.nio.file.Path select = dir.resolve("select.txt");

@@ -18,6 +18,7 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
  * @param seed          demo data created at start-up
  * @param jwt           token settings
  * @param testSupport   time-travel and bug-switch endpoints used by the test suites
+ * @param loginThrottle limits on failed sign-ins (brute force and credential stuffing)
  */
 @ConfigurationProperties("gate")
 public record GateProperties(
@@ -27,7 +28,8 @@ public record GateProperties(
         @DefaultValue("150ms") Duration raceWindow,
         @DefaultValue Seed seed,
         @DefaultValue Jwt jwt,
-        @DefaultValue TestSupport testSupport) {
+        @DefaultValue TestSupport testSupport,
+        @DefaultValue LoginThrottle loginThrottle) {
 
     /**
      * @param enabled   create demo users and slots at start-up
@@ -52,4 +54,18 @@ public record GateProperties(
      * @param key      shared secret required in the X-Test-Support-Key header
      */
     public record TestSupport(@DefaultValue("false") boolean enabled, @DefaultValue("") String key) {}
+
+    /**
+     * @param maxFailuresPerUser    failed sign-ins for one username within {@code window} before it locks
+     *                              (counted for unknown usernames too, so a lock reveals nothing)
+     * @param maxFailuresPerClient  failed sign-ins from one client address within {@code window}, across
+     *                              all usernames, before that address is locked out
+     * @param window                sliding window the failures are counted in
+     * @param lockout               how long a lock lasts
+     */
+    public record LoginThrottle(
+            @DefaultValue("5") int maxFailuresPerUser,
+            @DefaultValue("100") int maxFailuresPerClient,
+            @DefaultValue("15m") Duration window,
+            @DefaultValue("5m") Duration lockout) {}
 }
