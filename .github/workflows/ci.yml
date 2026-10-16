@@ -190,6 +190,26 @@ jobs:
         with:
           file: ${{ runner.temp }}/perf.log
 
+  dashboard:
+    name: Quality dashboard - tests, typecheck, committed build is current
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+      - run: npm ci --no-audit --no-fund
+      - run: npm test
+      - run: npm run build
+      - name: The page committed into harness-insights matches its source
+        run: git diff --exit-code -- ../harness/harness-insights/src/main/resources/io/github/raktimchandra/testharness/insights/dashboard/site/index.html
+
   mutation:
     name: Mutation testing (PIT) - domain rules
     needs: build
