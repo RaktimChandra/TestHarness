@@ -1,0 +1,275 @@
+{
+ "ciforge_commit": "2ef5457",
+ "run": {
+  "id": "20261016-053049-a47fe6",
+  "project": "testharness",
+  "commit_sha": "cff831ec09c5f308dc67a4d5a38a9edb77d9de4b",
+  "branch": "phase5",
+  "trigger": "cli",
+  "targets": "[\"build\", \"api\", \"bdd\", \"ui-1\", \"ui-2\", \"mutation\", \"perf\", \"quarantined\", \"quality-gate\"]",
+  "params": "{\"mvn\": \"mvn -o -B\", \"suite.args\": \"-Dui.node=system -Dharness.ui.binary.chrome=/opt/browsers/chrome/chrome -Dharness.ui.driver-path.chrome=/opt/browsers/drivers/chromedriver -Dharness.ui.no-sandbox=true\"}",
+  "status": "success",
+  "created_at": "2026-10-16T05:30:49+00:00",
+  "started_at": "2026-10-16T05:30:49+00:00",
+  "finished_at": "2026-10-16T05:39:00+00:00"
+ },
+ "builds": [
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "build",
+   "name": "Build + framework & SUT tests",
+   "position": 0,
+   "depends_on": "[]",
+   "status": "success",
+   "reason": null,
+   "started_at": "2026-10-16T05:30:49+00:00",
+   "finished_at": "2026-10-16T05:33:35+00:00"
+  },
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "api",
+   "name": "API + security suite",
+   "position": 1,
+   "depends_on": "[\"build\"]",
+   "status": "success",
+   "reason": null,
+   "started_at": "2026-10-16T05:33:37+00:00",
+   "finished_at": "2026-10-16T05:35:40+00:00"
+  },
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "bdd",
+   "name": "BDD suite",
+   "position": 2,
+   "depends_on": "[\"build\"]",
+   "status": "success",
+   "reason": null,
+   "started_at": "2026-10-16T05:33:37+00:00",
+   "finished_at": "2026-10-16T05:35:11+00:00"
+  },
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "ui-1",
+   "name": "UI suite, shard 1/2",
+   "position": 3,
+   "depends_on": "[\"build\"]",
+   "status": "success",
+   "reason": null,
+   "started_at": "2026-10-16T05:35:13+00:00",
+   "finished_at": "2026-10-16T05:36:57+00:00"
+  },
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "ui-2",
+   "name": "UI suite, shard 2/2",
+   "position": 4,
+   "depends_on": "[\"build\"]",
+   "status": "success",
+   "reason": null,
+   "started_at": "2026-10-16T05:35:41+00:00",
+   "finished_at": "2026-10-16T05:37:47+00:00"
+  },
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "mutation",
+   "name": "Mutation testing (PIT), 95 % gate",
+   "position": 5,
+   "depends_on": "[\"build\"]",
+   "status": "success",
+   "reason": null,
+   "started_at": "2026-10-16T05:36:58+00:00",
+   "finished_at": "2026-10-16T05:38:10+00:00"
+  },
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "perf",
+   "name": "Gatling performance smoke",
+   "position": 6,
+   "depends_on": "[\"build\"]",
+   "status": "success",
+   "reason": null,
+   "started_at": "2026-10-16T05:37:48+00:00",
+   "finished_at": "2026-10-16T05:38:59+00:00"
+  },
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "quarantined",
+   "name": "Quarantined tests (non-blocking)",
+   "position": 7,
+   "depends_on": "[\"build\"]",
+   "status": "success",
+   "reason": null,
+   "started_at": "2026-10-16T05:38:12+00:00",
+   "finished_at": "2026-10-16T05:38:57+00:00"
+  },
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "quality-gate",
+   "name": "Quality gate",
+   "position": 8,
+   "depends_on": "[\"api\", \"bdd\", \"ui-1\", \"ui-2\", \"mutation\", \"perf\"]",
+   "status": "success",
+   "reason": null,
+   "started_at": "2026-10-16T05:38:59+00:00",
+   "finished_at": "2026-10-16T05:39:00+00:00"
+  }
+ ],
+ "steps": [
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "api",
+   "idx": 0,
+   "name": "api suite",
+   "status": "success",
+   "exit_code": 0,
+   "started_at": "2026-10-16T05:33:37+00:00",
+   "finished_at": "2026-10-16T05:35:40+00:00"
+  },
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "bdd",
+   "idx": 0,
+   "name": "bdd suite",
+   "status": "success",
+   "exit_code": 0,
+   "started_at": "2026-10-16T05:33:37+00:00",
+   "finished_at": "2026-10-16T05:35:11+00:00"
+  },
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "build",
+   "idx": 0,
+   "name": "compile, unit, framework, SUT integration and Pact tests; install for the suites",
+   "status": "success",
+   "exit_code": 0,
+   "started_at": "2026-10-16T05:30:49+00:00",
+   "finished_at": "2026-10-16T05:33:35+00:00"
+  },
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "build",
+   "idx": 1,
+   "name": "the consumer contract is up to date",
+   "status": "success",
+   "exit_code": 0,
+   "started_at": "2026-10-16T05:33:35+00:00",
+   "finished_at": "2026-10-16T05:33:35+00:00"
+  },
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "mutation",
+   "idx": 0,
+   "name": "pit on the domain rules",
+   "status": "success",
+   "exit_code": 0,
+   "started_at": "2026-10-16T05:36:58+00:00",
+   "finished_at": "2026-10-16T05:38:10+00:00"
+  },
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "perf",
+   "idx": 0,
+   "name": "booking flow under load (p95/p99/error-rate gates)",
+   "status": "success",
+   "exit_code": 0,
+   "started_at": "2026-10-16T05:37:48+00:00",
+   "finished_at": "2026-10-16T05:38:59+00:00"
+  },
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "quality-gate",
+   "idx": 0,
+   "name": "count every suite result and fail on any failure",
+   "status": "success",
+   "exit_code": 0,
+   "started_at": "2026-10-16T05:38:59+00:00",
+   "finished_at": "2026-10-16T05:39:00+00:00"
+  },
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "quarantined",
+   "idx": 0,
+   "name": "only what quarantine.json lists; failures are reported, never blocking",
+   "status": "success",
+   "exit_code": 0,
+   "started_at": "2026-10-16T05:38:12+00:00",
+   "finished_at": "2026-10-16T05:38:57+00:00"
+  },
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "ui-1",
+   "idx": 0,
+   "name": "ui suite shard 1 of 2",
+   "status": "success",
+   "exit_code": 0,
+   "started_at": "2026-10-16T05:35:13+00:00",
+   "finished_at": "2026-10-16T05:36:57+00:00"
+  },
+  {
+   "run_id": "20261016-053049-a47fe6",
+   "build_id": "ui-2",
+   "idx": 0,
+   "name": "ui suite shard 2 of 2",
+   "status": "success",
+   "exit_code": 0,
+   "started_at": "2026-10-16T05:35:42+00:00",
+   "finished_at": "2026-10-16T05:37:47+00:00"
+  }
+ ],
+ "log_extracts": {
+  "build": [
+   "[INFO] Tests run: 69, Failures: 0, Errors: 0, Skipped: 0",
+   "[INFO] Tests run: 16, Failures: 0, Errors: 0, Skipped: 0",
+   "[INFO] Tests run: 43, Failures: 0, Errors: 0, Skipped: 0",
+   "[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0",
+   "[INFO] Tests run: 75, Failures: 0, Errors: 0, Skipped: 0",
+   "[INFO] Tests run: 13, Failures: 0, Errors: 0, Skipped: 0",
+   "[INFO] Tests run: 43, Failures: 0, Errors: 0, Skipped: 0",
+   "[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0",
+   "[INFO] Tests run: 39, Failures: 0, Errors: 0, Skipped: 0",
+   "[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0",
+   "[INFO] BUILD SUCCESS",
+   "[INFO] Total time:  02:43 min"
+  ],
+  "api": [
+   "[INFO] Tests run: 109, Failures: 0, Errors: 0, Skipped: 0",
+   "[INFO] BUILD SUCCESS",
+   "[INFO] Total time:  01:59 min"
+  ],
+  "bdd": [
+   "[INFO] Tests run: 20, Failures: 0, Errors: 0, Skipped: 0",
+   "[INFO] BUILD SUCCESS",
+   "[INFO] Total time:  01:30 min"
+  ],
+  "ui-1": [
+   "[WARNING] Tests run: 15, Failures: 0, Errors: 0, Skipped: 3",
+   "[INFO] BUILD SUCCESS",
+   "[INFO] Total time:  01:41 min"
+  ],
+  "ui-2": [
+   "[WARNING] Tests run: 14, Failures: 0, Errors: 0, Skipped: 2",
+   "[INFO] BUILD SUCCESS",
+   "[INFO] Total time:  02:02 min"
+  ],
+  "mutation": [
+   "[INFO] Tests run: 69, Failures: 0, Errors: 0, Skipped: 0",
+   ">> Generated 143 mutations Killed 143 (100%)",
+   "[INFO] BUILD SUCCESS",
+   "[INFO] Total time:  01:07 min"
+  ],
+  "perf": [
+   "Global: 95th percentile of response time is less than 800.0 : true (actual : 142.0)",
+   "Global: 99th percentile of response time is less than 1500.0 : true (actual : 298.0)",
+   "[INFO] BUILD SUCCESS",
+   "[INFO] Total time:  01:07 min"
+  ],
+  "quarantined": [
+   "[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0",
+   "[INFO] BUILD SUCCESS",
+   "[INFO] Total time:  42.975 s"
+  ],
+  "quality-gate": [
+   "suites: 158 tests, 0 failed, 5 skipped"
+  ]
+ }
+}
