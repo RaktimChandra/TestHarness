@@ -29,34 +29,6 @@ import jetbrains.buildServer.configs.kotlin.triggers.vcs
 
 version = "2025.07"
 
-project {
-    description = "Test automation framework with a seeded-defect SUT (github.com/RaktimChandra/TestHarness)"
-
-    params {
-        param("env.HARNESS_ENV", "ci")
-        param("mvn.args", "-B -ntp --fail-at-end")
-        password("env.GATE_SEED_PASSWORD", "credentialsJSON:gate-seed-password",
-            label = "Seed users' password", display = ParameterDisplay.HIDDEN)
-    }
-
-    buildType(Build)
-    buildType(ApiSuite)
-    buildType(BddSuite)
-    val uiBuilds = listOf("chrome", "firefox", "edge").flatMap { browser ->
-        listOf(1, 2).map { shard -> UiSuite(browser, shard, of = 2) }
-    }
-    uiBuilds.forEach { buildType(it) }
-    buildType(ComposeSmoke)
-    buildType(Grid)
-    buildType(Perf)
-    buildType(Mutation)
-    buildType(Quarantined)
-    buildType(AllureReport(listOf(ApiSuite, BddSuite) + uiBuilds))
-    buildType(QualityGate(listOf(Build, ApiSuite, BddSuite, ComposeSmoke, Grid, Perf, Mutation) + uiBuilds))
-
-    buildTypesOrder = listOf(Build, ApiSuite, BddSuite) + uiBuilds +
-        listOf(ComposeSmoke, Grid, Perf, Mutation, Quarantined)
-}
 
 /** Common to every Maven build: JDK 21, Docker on the agent, surefire results imported. */
 fun BuildType.mavenBasics() {
@@ -106,8 +78,8 @@ object Build : BuildType({
 })
 
 /** A suite build: snapshot-depends on Build so every suite tests the same commit. */
-open class SuiteBuild(id: String, title: String, module: String, extraArgs: String = "") : BuildType({
-    this.id(id)
+fun suiteBuild(buildId: String, title: String, module: String, extraArgs: String): BuildType = BuildType {
+    id(buildId)
     name = title
     mavenBasics()
     dependencies { snapshot(Build) { onDependencyFailure = FailureAction.FAIL_TO_START } }
@@ -130,15 +102,18 @@ open class SuiteBuild(id: String, title: String, module: String, extraArgs: Stri
             compareTo = build { buildRule = lastSuccessful() }
         }
     }
-})
+}
 
-object ApiSuite : SuiteBuild("ApiSuite", "2. API + security suite", "suites/api-suite")
-object BddSuite : SuiteBuild("BddSuite", "3. BDD suite", "suites/bdd-suite")
+val ApiSuite = suiteBuild("ApiSuite", "2. API + security suite", "suites/api-suite", "")
+val BddSuite = suiteBuild("BddSuite", "3. BDD suite", "suites/bdd-suite", "")
 
-class UiSuite(browser: String, shard: Int, of: Int) : SuiteBuild(
-    "UiSuite_${browser}_$shard", "4. UI suite — $browser, shard $shard/$of", "suites/ui-suite",
-    "-Dharness.ui.browser=$browser -Dharness.visual.platform=$browser-ci -Dharness.shard=$shard/$of"
-)
+/** The UI suite in three browsers, each split in two by a stable hash of the test keys. */
+val UiBuilds: List<BuildType> = listOf("chrome", "firefox", "edge").flatMap { browser ->
+    listOf(1, 2).map { shard ->
+        suiteBuild("UiSuite_${browser}_$shard", "4. UI suite - $browser, shard $shard/2", "suites/ui-suite",
+            "-Dharness.ui.browser=$browser -Dharness.visual.platform=$browser-ci -Dharness.shard=$shard/2")
+    }
+}
 
 object ComposeSmoke : BuildType({
     name = "5. Docker Compose SUT + API suite (external mode)"
@@ -212,7 +187,7 @@ object Quarantined : BuildType({
     }
 })
 
-class AllureReport(suites: List<BuildType>) : BuildType({
+fun allureReport(suites: List<BuildType>): BuildType = BuildType {
     id("AllureReport")
     name = "Allure report"
     mavenBasics()
@@ -229,10 +204,10 @@ class AllureReport(suites: List<BuildType>) : BuildType({
     }
     steps { mvn("Generate report", "verify", "-N -Preport") }
     artifactRules = "target/allure-report/** => allure-report.zip"
-})
+}
 
 /** The one check to require on pull requests: a composite build over every blocking build. */
-class QualityGate(blocking: List<BuildType>) : BuildType({
+fun qualityGate(blocking: List<BuildType>): BuildType = BuildType {
     id("QualityGate")
     name = "Quality gate"
     type = BuildTypeSettings.Type.COMPOSITE
@@ -246,4 +221,31 @@ class QualityGate(blocking: List<BuildType>) : BuildType({
             triggerBuild = always()
         }
     }
-})
+}
+
+// Declared last: the top-level vals above (suites, UI shards) must be initialised first.
+project {
+    description = "Test automation framework with a seeded-defect SUT (github.com/RaktimChandra/TestHarness)"
+
+    params {
+        param("env.HARNESS_ENV", "ci")
+        param("mvn.args", "-B -ntp --fail-at-end")
+        password("env.GATE_SEED_PASSWORD", "credentialsJSON:gate-seed-password",
+            label = "Seed users' password", display = ParameterDisplay.HIDDEN)
+    }
+
+    buildType(Build)
+    buildType(ApiSuite)
+    buildType(BddSuite)
+    UiBuilds.forEach { buildType(it) }
+    buildType(ComposeSmoke)
+    buildType(Grid)
+    buildType(Perf)
+    buildType(Mutation)
+    buildType(Quarantined)
+    buildType(allureReport(listOf(ApiSuite, BddSuite) + UiBuilds))
+    buildType(qualityGate(listOf(Build, ApiSuite, BddSuite, ComposeSmoke, Grid, Perf, Mutation) + UiBuilds))
+
+    buildTypesOrder = listOf(Build, ApiSuite, BddSuite) + UiBuilds +
+        listOf(ComposeSmoke, Grid, Perf, Mutation, Quarantined)
+}
