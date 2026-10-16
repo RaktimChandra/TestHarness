@@ -3,6 +3,34 @@
 All notable changes, one section per phase. Each phase ends with the whole project
 compiling, every test passing, and `./mvnw verify` running end to end.
 
+## [1.0.0] — 2026-10-16 — Phase 5: the pipeline in three CI systems
+
+### Added
+- **GitHub Actions:** the UI suite sharded 3 browsers × 2 shards (`harness.shard`); blocking
+  jobs exclude quarantined tests (`quarantine.json`, committed from the flaky-demo results); a
+  non-blocking `quarantined` job runs only them; one `quality-gate` job — the check to require —
+  passes only when every blocking job succeeded (skipped or cancelled count as failures);
+  `teamcity-dsl` job.
+- **TeamCity Kotlin DSL** (`.teamcity/settings.kts`, `.teamcity/pom.xml`): the same chain with
+  snapshot and artifact dependencies, a composite quality gate, a non-blocking quarantine build
+  and a "test count dropped by 20 %" failure condition. Compiled and generated in CI against a
+  throwaway TeamCity server; **not run on a TeamCity agent**.
+- **CIForge pipeline** (`.ciforge.yml`), executed: 9 builds, 8 min 11 s, green
+  (`experiments/ciforge`).
+- **INTERVIEW.md**: a two-minute pitch and 25 questions with honest answers.
+
+### Fixed — found while building Phase 5
+- **TeamCity DSL** (`e7ab21a`, `dfd0181`, `9151cdc`): wrong version of the core DSL artifact; a
+  Kotlin compiler crash on `BuildType` subclasses with default constructor arguments; objects
+  capturing the script instance.
+
+### Measured
+GitHub Actions run 38863031687: 18 jobs green in 14 min 40 s, UI shards 15 + 14 = 29 in each
+browser. CIForge: 158 suite tests, 0 failed, 8 min 11 s.
+
+### Could not be run
+- A TeamCity agent (no server with agents available).
+
 ## [1.0.0-phase4] — 2026-10-16 — Quality dashboard, CLI, new-test guide, PortSync adapter
 
 ### Added
