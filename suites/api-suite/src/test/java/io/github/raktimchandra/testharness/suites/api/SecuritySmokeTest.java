@@ -124,7 +124,43 @@ class SecuritySmokeTest extends ApiTest {
     @ParameterizedTest(name = "username {0}")
     @ValueSource(strings = {"' OR 1=1 --", "admin'--", "\" OR \"\"=\""})
     void sql_injection_in_login_fails_closed(String username) {
-        assertThatResponse(api.login(username, "x' OR '1'='1")).hasStatus(401).hasProblemCode("UNAUTHENTICATED");
+        // A unique suffix per run: each failure counts towards that username's lock.
+        assertThatResponse(api.login(username + System.nanoTime(), "x' OR '1'='1")).hasStatus(401)
+                .hasProblemCode("UNAUTHENTICATED");
+    }
+
+    // ---- brute force ----------------------------------------------------------------
+
+    @Test
+    void five_failed_sign_ins_lock_the_account_even_against_the_right_password() {
+        GateUser user = fx.newDriver();
+        for (int i = 1; i <= 5; i++) {
+            assertThatResponse(api.login(user.username(), "guess-" + i)).hasStatus(401).hasProblemCode("UNAUTHENTICATED");
+        }
+        Response locked = api.login(user.username(), user.credentials().password().reveal());
+        assertThatResponse(locked).hasStatus(429).hasProblemCode("TOO_MANY_ATTEMPTS");
+        assertThat(Integer.parseInt(locked.header("Retry-After"))).isBetween(1, 300);
+        assertThat(locked.jsonPath().getString("detail")).doesNotContain(user.username());
+        // The lock is per account: another account still signs in.
+        GateUser other = fx.newDriver();
+        assertThatResponse(api.login(other.username(), other.credentials().password().reveal())).hasStatus(200);
+    }
+
+    @Test
+    void a_lock_looks_the_same_for_an_account_that_does_not_exist() {
+        String ghost = "ghost-" + System.nanoTime();
+        for (int i = 1; i <= 5; i++) {
+            assertThatResponse(api.login(ghost, "guess-" + i)).hasStatus(401);
+        }
+        GateUser real = fx.newDriver();
+        for (int i = 1; i <= 5; i++) {
+            assertThatResponse(api.login(real.username(), "guess-" + i)).hasStatus(401);
+        }
+        Response forGhost = api.login(ghost, "guess-6");
+        Response forReal = api.login(real.username(), "guess-6");
+        assertThatResponse(forGhost).hasStatus(429).hasProblemCode("TOO_MANY_ATTEMPTS");
+        assertThatResponse(forReal).hasStatus(429).hasProblemCode("TOO_MANY_ATTEMPTS");
+        assertThat(forGhost.jsonPath().getString("detail")).isEqualTo(forReal.jsonPath().getString("detail"));
     }
 
     @Test

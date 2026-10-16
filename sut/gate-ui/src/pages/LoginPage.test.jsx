@@ -22,4 +22,15 @@ describe('LoginPage', () => {
     await userEvent.click(screen.getByTestId('login-submit'));
     expect(await screen.findByTestId('login-error')).toHaveTextContent('Invalid username or password');
   });
+
+  it('shows the server\'s explanation when sign-in is locked (429)', async () => {
+    vi.spyOn(api, 'login').mockRejectedValue(Object.assign(
+      new Error('Too many failed sign-in attempts. Try again in 5 minutes.'), { status: 429 }));
+    render(<LoginPage onLogin={() => {}} />);
+    await userEvent.type(screen.getByTestId('login-username'), 'driver1');
+    await userEvent.type(screen.getByTestId('login-password'), 'bad');
+    await userEvent.click(screen.getByTestId('login-submit'));
+    expect(await screen.findByTestId('login-error'))
+      .toHaveTextContent('Too many failed sign-in attempts. Try again in 5 minutes.');
+  });
 });
