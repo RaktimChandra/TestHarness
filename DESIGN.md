@@ -319,8 +319,9 @@ framework unchanged.
   (path traversal, encoded slashes, SQL); SQL injection in login; script payloads never
   reflected; security headers; errors without stack traces; test-support API unreachable
   without its key.
-- **Not covered (honestly):** no DAST scanner (e.g. ZAP), no fuzzing, no dependency CVE
-  scan yet (Phase 5 CI), no rate-limit / brute-force tests.
+- **Not covered (honestly):** no DAST scanner (e.g. ZAP), no fuzzing, full dependency CVE
+  scan (CI runs GitHub's dependency review on pull requests, which only checks dependencies a
+  PR adds or changes), no rate-limit / brute-force tests.
 - **Found:** firewall and Tomcat rejections were not RFC 9457 problems (D33).
 
 ### D31 — Strict schema mode can register a deliberately non-JSON response as `none` — Built
