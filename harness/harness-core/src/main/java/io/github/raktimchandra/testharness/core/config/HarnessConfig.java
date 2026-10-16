@@ -80,7 +80,10 @@ public final class HarnessConfig {
         readAll(loader, environment.fileName(), values, origins);
         for (Map.Entry<String, String> e : envVars.entrySet()) {
             if (e.getKey().startsWith("HARNESS_") && !e.getKey().equals("HARNESS_ENV")) {
-                String key = e.getKey().substring("HARNESS_".length()).toLowerCase(Locale.ROOT).replace('_', '.');
+                // '_' stands for '.' or '-' (env names cannot hold '-'): HARNESS_UI_NO_SANDBOX sets
+                // ui.no-sandbox when that key exists in the files, else ui.no.sandbox.
+                String dotted = e.getKey().substring("HARNESS_".length()).toLowerCase(Locale.ROOT).replace('_', '.');
+                String key = values.keySet().stream().filter(k -> relaxed(k).equals(dotted)).findFirst().orElse(dotted);
                 values.put(key, e.getValue());
                 origins.put(key, "env " + e.getKey());
             }
@@ -101,6 +104,10 @@ public final class HarnessConfig {
 
     public Optional<String> find(String key) {
         String v = values.get(key);
+        if (v == null && key.indexOf('-') >= 0) {
+            // set from an environment variable for a key no file declares (see load)
+            v = values.get(relaxed(key));
+        }
         return v == null || v.isBlank() ? Optional.empty() : Optional.of(v);
     }
 
@@ -149,7 +156,8 @@ public final class HarnessConfig {
 
     /** Where a key's value came from, for diagnostics and the report's environment page. */
     public String origin(String key) {
-        return origins.getOrDefault(key, "unset");
+        String o = origins.get(key);
+        return o != null ? o : origins.getOrDefault(relaxed(key), "unset");
     }
 
     /** All values (secrets are never stored here), sorted by key. */
@@ -187,7 +195,11 @@ public final class HarnessConfig {
     }
 
     private static String envName(String key) {
-        return "HARNESS_" + key.toUpperCase(Locale.ROOT).replace('.', '_');
+        return "HARNESS_" + key.toUpperCase(Locale.ROOT).replace('.', '_').replace('-', '_');
+    }
+
+    private static String relaxed(String key) {
+        return key.replace('-', '.');
     }
 
     private static void readAll(ClassLoader loader, String resource, Map<String, String> into,
