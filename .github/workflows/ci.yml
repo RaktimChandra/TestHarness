@@ -56,7 +56,7 @@ jobs:
           if-no-files-found: ignore
 
   suite:
-    name: ${{ matrix.suite }} suite (${{ matrix.browser }})
+    name: ${{ matrix.suite }} suite (${{ matrix.browser }}, shard ${{ matrix.shard }})
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -64,11 +64,16 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {suite: api, browser: none}
-          - {suite: bdd, browser: chrome}
-          - {suite: ui, browser: chrome}
-          - {suite: ui, browser: firefox}
-          - {suite: ui, browser: edge}
+          # The UI suite is split in two per browser by a stable hash of each test's key
+          # (harness.shard, ShardFilter): six UI jobs, each running about half the tests.
+          - {suite: api, browser: none, shard: '1/1', tag: 1of1}
+          - {suite: bdd, browser: chrome, shard: '1/1', tag: 1of1}
+          - {suite: ui, browser: chrome, shard: '1/2', tag: 1of2}
+          - {suite: ui, browser: chrome, shard: '2/2', tag: 2of2}
+          - {suite: ui, browser: firefox, shard: '1/2', tag: 1of2}
+          - {suite: ui, browser: firefox, shard: '2/2', tag: 2of2}
+          - {suite: ui, browser: edge, shard: '1/2', tag: 1of2}
+          - {suite: ui, browser: edge, shard: '2/2', tag: 2of2}
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-java@v5
@@ -87,17 +92,19 @@ jobs:
             -Dharness.visual.platform=${BROWSER/none/chrome}-ci \
             -Djunit.jupiter.execution.parallel.config.fixed.parallelism=4 \
             -Djunit.jupiter.execution.parallel.config.fixed.max-pool-size=4 \
+            -Dharness.shard=${{ matrix.shard }} \
+            -Dharness.quarantine.mode=exclude \
             2>&1 | tee "$RUNNER_TEMP/suite.log"
       - name: Test summary
         if: always()
-        run: python3 .github/scripts/test_summary.py "${{ matrix.suite }}-${{ matrix.browser }}" "suites/${{ matrix.suite }}-suite/**/TEST-*.xml"
+        run: python3 .github/scripts/test_summary.py "${{ matrix.suite }}-${{ matrix.browser }}-${{ matrix.tag }}" "suites/${{ matrix.suite }}-suite/**/TEST-*.xml"
       - name: Accessibility summary
         if: always() && matrix.suite == 'ui'
         run: python3 .github/scripts/a11y_summary.py "${{ matrix.browser }}" "suites/ui-suite/target/a11y/*.json"
       - uses: actions/upload-artifact@v4
         if: failure() && matrix.suite == 'ui'
         with:
-          name: visual-${{ matrix.browser }}
+          name: visual-${{ matrix.browser }}-${{ matrix.tag }}
           path: suites/ui-suite/target/visual
           if-no-files-found: ignore
       - uses: ./.github/actions/log-tail
@@ -107,13 +114,13 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: allure-results-${{ matrix.suite }}-${{ matrix.browser }}
+          name: allure-results-${{ matrix.suite }}-${{ matrix.browser }}-${{ matrix.tag }}
           path: target/allure-results
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: evidence-${{ matrix.suite }}-${{ matrix.browser }}
+          name: evidence-${{ matrix.suite }}-${{ matrix.browser }}-${{ matrix.tag }}
           path: suites/*/target/evidence
           if-no-files-found: ignore
 
@@ -210,6 +217,65 @@ jobs:
       - name: The page committed into harness-insights matches its source
         run: git diff --exit-code -- ../harness/harness-insights/src/main/resources/io/github/raktimchandra/testharness/insights/dashboard/site/index.html
 
+  teamcity-dsl:
+    name: TeamCity Kotlin DSL compiles and generates
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+      # The Kotlin DSL library is served by a TeamCity server (it includes classes generated
+      # from the server's plugins), so start a throwaway server just to resolve it.
+      - name: Start a throwaway TeamCity server (DSL library repository only)
+        run: |
+          docker run -d --name teamcity -p 8111:8111 \
+            -e TEAMCITY_SERVER_OPTS="-Dteamcity.startup.maintenance=false -Dteamcity.licenseAgreement.accepted=true" \
+            jetbrains/teamcity-server:2025.07
+          # Ready once the web app answers (401 = up, authentication required).
+          for i in $(seq 1 60); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8111/ || true)
+            if [ "$code" = 401 ] || [ "$code" = 200 ]; then echo "server up after $((i*5)) s"; break; fi
+            sleep 5
+          done
+          for a in configs-dsl-kotlin-latest configs-dsl-kotlin-plugins-latest; do
+            curl -s -o /dev/null -w "$a pom: %{http_code}\n" \
+              "http://localhost:8111/app/dsl-plugins-repository/org/jetbrains/teamcity/$a/1.0-SNAPSHOT/$a-1.0-SNAPSHOT.pom" \
+              | tee -a "$RUNNER_TEMP/teamcity.log"
+          done
+      - name: Compile .teamcity/settings.kts and generate the project configuration
+        run: |
+          set -o pipefail
+          ./mvnw -B -ntp -f .teamcity/pom.xml teamcity-configs:generate 2>&1 | tee -a "$RUNNER_TEMP/teamcity.log"
+          echo "### TeamCity DSL" >> "$GITHUB_STEP_SUMMARY"
+          echo "Generated $(find .teamcity/target/generated-configs -type f | wc -l) files; build types:" >> "$GITHUB_STEP_SUMMARY"
+          find .teamcity/target/generated-configs -name '*.kts' -o -name '*.xml' | sed 's/^/- /' | head -40 >> "$GITHUB_STEP_SUMMARY"
+      - uses: ./.github/actions/log-tail
+        if: failure()
+        with:
+          file: ${{ runner.temp }}/teamcity.log
+      - uses: actions/upload-artifact@v4
+        with:
+          name: teamcity-generated-configs
+          path: .teamcity/target/generated-configs
+          if-no-files-found: error
+
+  dependency-review:
+    name: Dependency review (new vulnerable dependencies)
+    # Needs the repository's dependency graph (Settings -> Code security). Switched on by the
+    # repository variable DEPENDENCY_REVIEW=true once that is enabled.
+    if: github.event_name == 'pull_request' && vars.DEPENDENCY_REVIEW == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
   mutation:
     name: Mutation testing (PIT) - domain rules
     needs: build
@@ -304,9 +370,50 @@ jobs:
         if: always()
         run: docker compose -f docker-compose.yml -f docker-compose.grid.yml down -v
 
+  quarantined:
+    name: Quarantined tests (non-blocking)
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    # Runs only what quarantine.json lists. Its failures are reported in the summary and the
+    # Allure report, and never fail the pipeline: that is what quarantine means here.
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Build upstream modules
+        run: $MVN install -DskipTests -pl suites/flaky-demo -am
+      - name: Run the quarantined tests
+        run: $MVN verify -pl suites/flaky-demo -DskipFlakyDemo=false -Dharness.quarantine.mode=only
+      - name: Test summary
+        if: always()
+        run: python3 .github/scripts/test_summary.py "quarantined" "suites/flaky-demo/**/TEST-*.xml"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: allure-results-quarantined
+          path: target/allure-results
+          if-no-files-found: ignore
+
+  quality-gate:
+    name: Quality gate
+    needs: [build, dashboard, suite, compose-smoke, perf, mutation, grid, teamcity-dsl, quarantined]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Every blocking job passed; quarantined results are reported only
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: python3 .github/scripts/quality_gate.py
+
   report:
     name: Allure report
-    needs: [build, suite]
+    needs: [build, suite, quarantined]
     if: always()
     runs-on: ubuntu-latest
     steps:

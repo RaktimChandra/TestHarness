@@ -289,6 +289,30 @@ alert, UI, accessibility and BDD suites. When finished, in **Terminal B**:
 docker compose down -v
 ```
 
+## 14. Run the whole pipeline locally with CIForge — WSL terminal
+
+CIForge runs on Linux and macOS, so on Windows use **WSL (Ubuntu)**. It needs Python 3.12+,
+git, JDK 21 and Docker Desktop with WSL integration on (Maven comes from the wrapper).
+
+In the **WSL terminal**, install CIForge:
+
+```bash
+git clone https://github.com/RaktimChandra/CIForge.git ~/CIForge
+```
+
+```bash
+cd ~/CIForge && python3 -m venv .venv && .venv/bin/pip install -e .
+```
+
+Run TestHarness's pipeline (nine builds, about 8–15 minutes):
+
+```bash
+~/CIForge/.venv/bin/ciforge run /mnt/c/path/to/TestHarness/.ciforge.yml --source /mnt/c/path/to/TestHarness
+```
+
+The last lines list every build with its result; logs and artifacts are under
+`.ciforge-data` in the folder you ran it from (change with `--data-dir`).
+
 ## Troubleshooting
 
 | Symptom | Fix |

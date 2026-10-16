@@ -28,6 +28,7 @@ From real runs on 2026-10-14 to 2026-10-16 — method, machine and raw numbers f
 | Test impact analysis, per-test JaCoCo | **6/6 seeded bugs still caught** by the selected subset; wall-clock saved **3.8–21.6 %** (and why so little) |
 | Flaky-test detection (20 runs, one commit, CI) | deliberately flaky test scored **0.368** and was auto-quarantined; its stable control scored 0 |
 | A second, unrelated system (PortSync: Kafka + Spring + React) | **42 tests, 0 failures, 0 axe violations** in CI with the framework unchanged; three ISO 6346 implementations agree on every number tried |
+| CI pipeline | **18 jobs green in 14 min 40 s**: UI sharded 3 browsers × 2 (15 + 14 tests each), quarantine non-blocking, one quality gate; the same chain on CIForge in 8 min 11 s |
 | Self-healing locators | **1 heal in 26 UI tests** — the demo that renames a `data-testid` — reported with the exact fix, never silent |
 | Cross-browser | UI suite passes in **Chrome 154, Firefox 157 and Edge 154** in CI, both directly and on **Selenium Grid** |
 | Accessibility (axe-core, WCAG 2.0/2.1 A+AA) | **0 violations** on 9 page states × 3 browsers |
@@ -225,6 +226,33 @@ Switch them on for a run with `-Dharness.sut.seeded-bugs=OFF_BY_ONE_CAPACITY,RAC
   `docs/images/`.
 - The screenshots above were taken from the running app with headless Chrome.
 
+## CI/CD
+
+```mermaid
+flowchart LR
+  B["build<br/>SUT + framework + Pact"] --> API["API suite"] & BDD["BDD suite"]
+  B --> UI["UI suite<br/>Chrome · Firefox · Edge<br/>× 2 shards"]
+  B --> CS["Compose smoke"] & G["Selenium Grid"] & P["Gatling"] & M["PIT ≥ 95 %"]
+  B --> D["dashboard build check"] & TC["TeamCity DSL compiles"]
+  B -.-> Q["quarantined tests<br/>(non-blocking)"]
+  API & BDD & UI & CS & G & P & M & D & TC --> QG{{"quality gate<br/>the one required check"}}
+  Q -. reported only .-> QG
+  API & BDD & UI & Q --> R["Allure report"]
+```
+
+The same pipeline exists three times, each labelled with how far it was proven:
+
+| | File | Status |
+|---|---|---|
+| GitHub Actions | `.github/workflows/ci.yml` | runs on every push and PR — 18 jobs, 14 min 40 s, green (RESULTS §27) |
+| CIForge (my TeamCity-style orchestrator) | `.ciforge.yml` | **executed**: 9 builds, 8 min 11 s, green (RESULTS §28) |
+| TeamCity Kotlin DSL | `.teamcity/settings.kts` | compiled and generated in CI against a real TeamCity server's DSL; **not run on an agent** (RESULTS §29) |
+
+Further workflows: `fault-seeding.yml` (the experiment), `flaky-demo.yml`, `portsync.yml`
+(the adapter against PortSync), `visual-baselines.yml`.
+
+Interview preparation for this project: [INTERVIEW.md](INTERVIEW.md).
+
 ## Roadmap
 
 | Phase | Status |
@@ -232,8 +260,8 @@ Switch them on for a run with `-Dharness.sut.seeded-bugs=OFF_BY_ONE_CAPACITY,RAC
 | 1 — SUT, framework core, API/UI/BDD suites, CI, docs | **done** |
 | 2 — Selenium Grid in Compose, visual regression, axe-core a11y, Pact, Gatling, security smoke | **done** |
 | 3 — fault-seeding experiment, flaky-test intelligence, honest self-healing locators, test impact analysis, PIT, AI-assisted test design | **done** |
-| 4 — React quality dashboard, CLI, "new test in 5 minutes" guide, PortSync adapter | **done** (this release) |
-| 5 — full CI/CD with quality gates, TeamCity Kotlin DSL, CIForge pipeline | planned |
+| 4 — React quality dashboard, CLI, "new test in 5 minutes" guide, PortSync adapter | **done** |
+| 5 — full CI/CD with quality gates, TeamCity Kotlin DSL, CIForge pipeline | **done** (this release) |
 
 Changes per phase: [CHANGELOG.md](CHANGELOG.md).
 

@@ -319,8 +319,11 @@ framework unchanged.
   (path traversal, encoded slashes, SQL); SQL injection in login; script payloads never
   reflected; security headers; errors without stack traces; test-support API unreachable
   without its key.
-- **Not covered (honestly):** no DAST scanner (e.g. ZAP), no fuzzing, no dependency CVE
-  scan yet (Phase 5 CI), no rate-limit / brute-force tests.
+- **Not covered (honestly):** no DAST scanner (e.g. ZAP), no fuzzing, dependency CVE scan
+  yet: a `dependency-review` job is in CI, but it needs the repository's dependency graph
+  switched on (it failed with "not supported on this repository" in run 38864791578), so it
+  runs only once the repository variable `DEPENDENCY_REVIEW=true` is set; no rate-limit /
+  brute-force tests.
 - **Found:** firewall and Tomcat rejections were not RFC 9457 problems (D33).
 
 ### D31 — Strict schema mode can register a deliberately non-JSON response as `none` — Built
@@ -474,6 +477,48 @@ which no test covered, plus a direction-echo test) that is committed and passing
 cannot drift from the code without a test noticing. Writing it exposed that the ArchUnit
 rules only covered `harness/`; they now run in every suite and the adapter.
 
+## Phase 5 — the pipeline
+
+### D46 — Shard by a stable hash of the test key — Built
+The UI suite runs as 3 browsers × 2 shards. `ShardFilter` keeps a test when
+`CRC32(key) mod n = k-1`, so a test always lands in the same shard and its history stays
+comparable across runs, and no coordinator is needed. **Measured:** the CIForge run's shards
+ran 15 and 14 of the 29 UI tests — nothing lost or duplicated. **Trade-off:** shard durations
+are uneven (a hash knows nothing about duration); a split balanced on recorded durations is the
+next step once enough history exists per test.
+
+### D47 — One quality gate; quarantine is visible and never blocking — Built
+- Blocking jobs run with `quarantine.mode=exclude` against the committed `quarantine.json`; a
+  separate job runs `quarantine.mode=only` with `continue-on-error`, so quarantined tests keep
+  producing history (and can leave quarantine) without ever failing a build.
+- `quality-gate` is the one check to require on `main`. It reads the `needs` context and
+  passes only if every blocking job **succeeded** — a skipped or cancelled job counts as not
+  passed, because "did not run" is not evidence. The quarantine job is listed in its summary
+  but cannot fail it.
+- **Alternatives:** branch protection listing every job (brittle: renaming a matrix entry
+  silently drops it from protection), `if: failure()` aggregators (pass when a needed job is
+  skipped).
+
+### D48 — The same pipeline in three CI systems, each honest about how far it ran — Built
+- **GitHub Actions** (`.github/workflows/ci.yml`) is the pipeline of record.
+- **CIForge** (`.ciforge.yml`) — my own TeamCity-style orchestrator — ran the full chain on the
+  authoring machine: 9 builds, snapshot and artifact dependencies, 8 min 11 s, green
+  (`experiments/ciforge`). Its quality gate counts suite results from artifacts, not from a
+  shared disk.
+- **TeamCity** (`.teamcity/settings.kts`) models the same chain: snapshot dependencies, a
+  composite quality-gate build, a non-blocking quarantine build, a "test count dropped by 20 %"
+  failure condition. See D49 for how far it was verified.
+
+### D49 — The TeamCity DSL is compiled for real, against a throwaway server — Built
+The Kotlin DSL library is not on any public Maven repository in a usable form: a TeamCity
+server serves it, including classes generated from that server's plugins (`script`,
+`xmlReport`, …). So the CI job starts `jetbrains/teamcity-server:2025.07`, waits for it, and
+runs `teamcity-configs:generate` against its DSL repository. This turned up three real problems
+a reader would never have seen: a dependency-version mismatch, a Kotlin 2.0 compiler crash on
+`BuildType` subclasses with default constructor arguments, and objects that capture the script
+instance (rejected by the DSL compiler). **Limit:** generating the configuration is not running
+it — no TeamCity agent has executed these builds.
+
 ---
 
 ## Build and tooling
@@ -513,6 +558,8 @@ sandbox). Lifecycle plugins (clean, resources, install, …) are pinned because 
   per test, so that run's per-module JaCoCo reports are not meaningful (D39). The same reset
   made `harness-insights` report 9 % line coverage until its test classes got one JVM each
   (77.5 % after).
+- The TeamCity configuration is compiled and generated in CI, never run on a TeamCity agent
+  (D49); the CIForge pipeline ran on the authoring machine only (D48).
 - The PortSync suites run only in CI (PortSync needs Kafka; Docker Hub is blocked in the
   authoring sandbox), and their schemas are the adapter's expectations, not a published
   PortSync contract (D44).

@@ -548,3 +548,60 @@ Writing the guide also showed the no-sleep / no-stdout ArchUnit rules covered on
   PortSync) are blocked in the sandbox. Its suites ran in CI only (§24).
 - Visual "awaiting approval" items on the local dashboard are the sandbox's own candidates
   (the committed baselines belong to the CI platforms), as in §7.
+
+## Phase 5
+
+### 27. The pipeline on GitHub Actions — run 38863031687, commit `9151cdc`, 2026-10-16
+
+**Method:** `.github/workflows/ci.yml` on the `phase5` pull request; counts from each job's
+test-summary annotation (surefire XML).
+
+| Job | Tests | Failed | Notes |
+|---|---:|---:|---|
+| Build + framework & SUT tests | — | 0 | as §23 |
+| API suite | 109 | 0 | quarantine excluded |
+| BDD suite | 20 | 0 | |
+| UI — Chrome, shard 1/2 · 2/2 | 15 · 14 | 0 | Σ test time 136.4 s · 128.8 s |
+| UI — Firefox, shard 1/2 · 2/2 | 15 · 14 | 0 | 235.4 s · 249.6 s |
+| UI — Edge, shard 1/2 · 2/2 | 15 · 14 | 0 | 162.6 s · 214.2 s |
+| Docker Compose SUT + API suite | 109 | 0 | |
+| Selenium Grid (1/4/8 workers + cross-browser) | 24 per pass | 0 | |
+| Gatling, PIT, dashboard, TeamCity DSL | — | 0 | all succeeded |
+| Quarantined tests (non-blocking) | 1 | 0 | the flaky demo passed this time; it could not have failed the gate |
+| **Quality gate** | | | **success** — every blocking job succeeded |
+
+- **Sharding is exact:** in each browser the two shards ran 15 + 14 = 29 tests, the whole UI
+  suite (visual checks included in CI), with the same split in every browser because the shard
+  is a function of the test key only.
+- **Whole run: 14 min 40 s** from trigger to the gate (06:45:36 → 07:00:16 UTC), 18 jobs.
+- The UI shards are uneven in time (e.g. Edge 162.6 s vs 214.2 s): the hash balances test
+  *count*, not duration (DESIGN D46).
+
+### 28. The same pipeline on CIForge — run `20261016-053049-a47fe6`, commit `cff831e`
+
+**Method and full table:** [experiments/ciforge](experiments/ciforge/README.md). The 9-build
+chain ran on the 2-vCPU sandbox with CIForge's local runner, two builds at a time.
+
+| | |
+|---|---|
+| Result | **success**, 9 of 9 builds |
+| Wall-clock | **8 min 11 s** |
+| Quality gate | collected the suites' reports as artifacts: **158 tests, 0 failed, 5 skipped** (the local visual candidates) |
+| UI shards | 15 + 14 = 29 |
+| PIT | 143/143 mutants killed |
+| Gatling | p95 142 ms, p99 298 ms — higher than a solo run (§23: 96 / 106 ms) because two builds shared two vCPUs |
+
+### 29. TeamCity Kotlin DSL — compiled and generated, not run
+
+The `teamcity-dsl` CI job (run 38863031687) compiled `.teamcity/settings.kts` and generated
+the project configuration — 16 build configurations: build, API, BDD, six UI shards, Compose
+smoke, Grid, Gatling, PIT, quarantined tests, Allure report, and the composite quality gate —
+against the DSL library served by a throwaway TeamCity 2025.07 server started in the job.
+Getting there took six CI iterations and fixed three real defects in the DSL (DESIGN D49).
+**No TeamCity agent ran these builds.**
+
+### What could not run in Phase 5, and why
+- **A TeamCity agent** — there is no TeamCity server with agents available; the DSL is compiled
+  and generated only (§29).
+- **CIForge with the Docker runner for this pipeline** — Docker Hub is blocked in the sandbox,
+  so the run used CIForge's local runner (the Docker runner is covered by CIForge's own tests).
