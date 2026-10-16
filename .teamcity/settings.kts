@@ -54,7 +54,8 @@ fun BuildSteps.mvn(stepName: String, goals: String, args: String = "") {
     }
 }
 
-object Build : BuildType({
+val Build: BuildType = BuildType {
+    id("Build")
     name = "1. Build + framework & SUT tests"
     description = "Compiles everything; unit, framework (real Chrome), SUT integration and Pact tests"
     mavenBasics()
@@ -75,7 +76,7 @@ object Build : BuildType({
         sut/**/target/surefire-reports/** => reports/build.zip
         harness/**/target/surefire-reports/** => reports/build.zip
     """.trimIndent()
-})
+}
 
 /** A suite build: snapshot-depends on Build so every suite tests the same commit. */
 fun suiteBuild(buildId: String, title: String, module: String, extraArgs: String): BuildType = BuildType {
@@ -115,7 +116,8 @@ val UiBuilds: List<BuildType> = listOf("chrome", "firefox", "edge").flatMap { br
     }
 }
 
-object ComposeSmoke : BuildType({
+val ComposeSmoke: BuildType = BuildType {
+    id("ComposeSmoke")
     name = "5. Docker Compose SUT + API suite (external mode)"
     mavenBasics()
     dependencies { snapshot(Build) {} }
@@ -129,9 +131,10 @@ object ComposeSmoke : BuildType({
             scriptContent = "docker compose down -v"
         }
     }
-})
+}
 
-object Grid : BuildType({
+val Grid: BuildType = BuildType {
+    id("Grid")
     name = "6. Selenium Grid — UI suite on Chrome, Firefox, Edge nodes"
     mavenBasics()
     dependencies { snapshot(Build) {} }
@@ -150,9 +153,10 @@ object Grid : BuildType({
             scriptContent = "docker compose -f docker-compose.yml -f docker-compose.grid.yml down -v"
         }
     }
-})
+}
 
-object Perf : BuildType({
+val Perf: BuildType = BuildType {
+    id("Perf")
     name = "7. Gatling performance smoke (p95/p99/error gates)"
     mavenBasics()
     dependencies { snapshot(Build) {} }
@@ -161,17 +165,19 @@ object Perf : BuildType({
         mvn("Booking flow under load", "verify", "-pl suites/perf-suite")
     }
     artifactRules = "suites/perf-suite/target/gatling/** => gatling.zip"
-})
+}
 
-object Mutation : BuildType({
+val Mutation: BuildType = BuildType {
+    id("Mutation")
     name = "8. Mutation testing (PIT) — domain rules, 95 % gate"
     mavenBasics()
     dependencies { snapshot(Build) {} }
     steps { mvn("PIT", "verify", "-Pmutation -pl sut/gate-domain") }
     artifactRules = "sut/gate-domain/target/pit-reports/** => pit-report.zip"
-})
+}
 
-object Quarantined : BuildType({
+val Quarantined: BuildType = BuildType {
+    id("Quarantined")
     name = "Quarantined tests (non-blocking)"
     description = "Runs only what quarantine.json lists; not a dependency of the quality gate"
     mavenBasics()
@@ -185,7 +191,7 @@ object Quarantined : BuildType({
         testFailure = false
         nonZeroExitCode = false
     }
-})
+}
 
 fun allureReport(suites: List<BuildType>): BuildType = BuildType {
     id("AllureReport")
