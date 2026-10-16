@@ -264,7 +264,9 @@ jobs:
 
   dependency-review:
     name: Dependency review (new vulnerable dependencies)
-    if: github.event_name == 'pull_request'
+    # Needs the repository's dependency graph (Settings -> Code security). Switched on by the
+    # repository variable DEPENDENCY_REVIEW=true once that is enabled.
+    if: github.event_name == 'pull_request' && vars.DEPENDENCY_REVIEW == 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: read
