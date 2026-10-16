@@ -12,6 +12,7 @@ COPY sut/gate-ui/pom.xml sut/gate-ui/
 COPY sut/gate-api/pom.xml sut/gate-api/
 COPY harness harness
 COPY suites suites
+COPY adapters adapters
 COPY sut sut
 RUN --mount=type=cache,target=/root/.m2 \
     mvn -B -ntp -pl sut/gate-api -am -DskipTests package && \
