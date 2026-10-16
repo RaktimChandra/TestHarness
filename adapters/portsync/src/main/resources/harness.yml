@@ -1,0 +1,11 @@
+# PortSync adapter defaults: the URLs of PortSync's own `docker compose up` on this machine.
+# Override with -Dharness.portsync.api-url=... or HARNESS_PORTSYNC_API_URL=...
+portsync:
+  api-url: http://localhost:8080        # portsync-core
+  simulator-url: http://localhost:8081  # simulator (fault injection)
+  ui-url: http://localhost:3000         # dashboard (nginx, proxies /api to the core)
+  ready-timeout: 4m                     # first start builds images and replays the opening inventory
+  min-events-processed: 1500            # the opening inventory is ~1,700 events
+  alert-timeout: 90s                    # a crane fault alerts after 15 simulated minutes (~15 s at 60x)
+ui:
+  headless: true

@@ -1,0 +1,35 @@
+# Every PortSync response the adapter's tests can observe (core on :8080, simulator on :8081).
+# Strict mode: a response not covered here fails the test that received it.
+rules:
+  # portsync-core: terminal state
+  - {method: GET,  path: "/api/overview",                      status: "200", schema: overview.json}
+  - {method: GET,  path: "/api/berths",                        status: "200", schema: berth-list.json}
+  - {method: GET,  path: "/api/cranes",                        status: "200", schema: crane-list.json}
+  - {method: GET,  path: "/api/vessels",                       status: "200", schema: vessel-list.json}
+  - {method: GET,  path: "/api/yard/blocks",                   status: "200", schema: block-list.json}
+  - {method: GET,  path: "/api/yard/blocks/{block}",           status: "200", schema: yard-block.json}
+  - {method: GET,  path: "/api/gate/visits",                   status: "200", schema: truck-visit-list.json}
+  # portsync-core: containers
+  - {method: GET,  path: "/api/containers/{number}",           status: "200", schema: container.json}
+  - {method: GET,  path: "/api/containers/{number}/validation", status: "200", schema: container-validation.json}
+  # portsync-core: alerts, events, operations
+  - {method: GET,  path: "/api/alerts",                        status: "200", schema: alert-list.json}
+  - {method: POST, path: "/api/alerts/{id}/ack",               status: "200", schema: alert.json}
+  - {method: POST, path: "/api/alerts/{id}/resolve",           status: "200", schema: alert.json}
+  - {method: GET,  path: "/api/events",                        status: "200", schema: event-list.json}
+  - {method: GET,  path: "/api/dlq",                           status: "200", schema: dlq-list.json}
+  - {method: GET,  path: "/api/ops/invariants",                status: "200", schema: invariants.json}
+  - {method: GET,  path: "/api/ops/runtime",                   status: "200", schema: runtime.json}
+  # simulator: fault injection and status (errors are plain ProblemDetail, no code)
+  - {method: POST, path: "/api/faults/invalid-container",      status: "200", schema: injection.json}
+  - {method: POST, path: "/api/faults/out-of-order",           status: "200", schema: injection.json}
+  - {method: POST, path: "/api/faults/duplicates",             status: "200", schema: injection.json}
+  - {method: POST, path: "/api/faults/impossible",             status: "200", schema: injection.json}
+  - {method: POST, path: "/api/faults/cranes/{crane}/fault",   status: "200", schema: injection.json}
+  - {method: POST, path: "/api/faults/cranes/{crane}/recover", status: "200", schema: injection.json}
+  - {method: POST, path: "/api/faults/impossible",             status: 4xx,   schema: simulator-problem.json}
+  - {method: POST, path: "/api/faults/duplicates",             status: 4xx,   schema: simulator-problem.json}
+  - {method: GET,  path: "/api/simulation/status",             status: "200", schema: simulation-status.json}
+  # Every core error, on any endpoint, has the ApiError shape with a machine-readable code.
+  - {method: "*",  path: "**",                                 status: 4xx,   schema: api-error.json}
+  - {method: "*",  path: "**",                                 status: 5xx,   schema: api-error.json}
