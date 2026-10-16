@@ -22,8 +22,9 @@ import java.util.stream.Collectors;
  * to the currently lightest shard (LPT scheduling, ties by key then by lowest shard); tests not
  * in the file (new ones) fall back to the stable hash of {@link ShardFilter#bucket}.
  *
- * <p>Durations are the mean, over recorded runs, of a test key's total time in that run
- * (a parameterised method's invocations add up, because the filter shards by method).
+ * <p>Durations are the mean, over recorded runs (a run id in one environment), of a test key's
+ * total time in that run (a parameterised method's invocations add up, because the filter
+ * shards by method).
  */
 public final class ShardPlan {
 
@@ -84,7 +85,9 @@ public final class ShardPlan {
             if (r.status() == TestResult.Status.SKIPPED) {
                 continue;
             }
-            perKeyPerRun.computeIfAbsent(r.key(), k -> new HashMap<>()).merge(r.runId(), r.durationMs(), Long::sum);
+            // A run is a run id in one environment: CI jobs for different browsers can share a run id.
+            perKeyPerRun.computeIfAbsent(r.key(), k -> new HashMap<>())
+                    .merge(r.runId() + "|" + r.environment(), r.durationMs(), Long::sum);
         }
         Map<String, Long> out = new TreeMap<>();
         perKeyPerRun.forEach((key, runs) -> out.put(key,

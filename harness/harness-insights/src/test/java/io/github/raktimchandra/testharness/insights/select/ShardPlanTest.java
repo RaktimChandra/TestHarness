@@ -18,7 +18,11 @@ import org.junit.jupiter.api.io.TempDir;
 class ShardPlanTest {
 
     private static TestResult result(String run, String key, Status status, long ms) {
-        return new TestResult(run, "abc", "main", "ui", key, key, status, ms, null, null, null, "ci", Instant.EPOCH);
+        return result(run, "ci/chrome", key, status, ms);
+    }
+
+    private static TestResult result(String run, String env, String key, Status status, long ms) {
+        return new TestResult(run, "abc", "main", "ui", key, key, status, ms, null, null, null, env, Instant.EPOCH);
     }
 
     @Test
@@ -86,8 +90,10 @@ class ShardPlanTest {
                 result("r1", "C#p", Status.PASSED, 100), result("r1", "C#p", Status.PASSED, 200),
                 // run 2: 500 ms; mean of 300 and 500 is 400
                 result("r2", "C#p", Status.FAILED, 500),
-                result("r1", "C#s", Status.SKIPPED, 0), result("r2", "C#s", Status.PASSED, 80));
-        assertThat(ShardPlan.durationsFrom(history)).containsExactly(Map.entry("C#p", 400L), Map.entry("C#s", 80L));
+                result("r1", "C#s", Status.SKIPPED, 0), result("r2", "C#s", Status.PASSED, 80),
+                // the same run id in another browser is another run, not more time in r2
+                result("r2", "ci/firefox", "C#s", Status.PASSED, 120));
+        assertThat(ShardPlan.durationsFrom(history)).containsExactly(Map.entry("C#p", 400L), Map.entry("C#s", 100L));
     }
 
     @Test

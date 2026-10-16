@@ -122,10 +122,14 @@ class HistoryCommand {
         @Option(names = "--shards", description = "also print the plan for this many shards")
         Integer shards;
 
+        @Option(names = "--suite", description = "only this suite's results, e.g. ui-suite (for the printed plan)")
+        String suite;
+
         @Override
         public Integer call() {
             PrintWriter out = spec.commandLine().getOut();
-            Map<String, Long> durations = ShardPlan.durationsFrom(source.load());
+            Map<String, Long> durations = ShardPlan.durationsFrom(source.load().stream()
+                    .filter(r -> suite == null || suite.equals(r.suite())).toList());
             if (durations.isEmpty()) {
                 spec.commandLine().getErr().println("No timed results in the history; nothing written.");
                 return 1;
