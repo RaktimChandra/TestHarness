@@ -38,6 +38,7 @@
         <module>suites/bdd-suite</module>
         <module>suites/perf-suite</module>
         <module>suites/flaky-demo</module>
+        <module>adapters/portsync</module>
     </modules>
 
     <properties>
@@ -79,6 +80,12 @@
         <exec-plugin.version>3.6.2</exec-plugin.version>
         <jacoco.version>0.8.15</jacoco.version>
         <node.version>v22.23.3</node.version>
+
+        <!-- One run id for every module of one Maven build, so run history groups a whole
+             `mvnw verify` as one run (each module's tests run in their own JVM).
+             Override with -Dharness.run.id=... -->
+        <maven.build.timestamp.format>yyyyMMdd-HHmmss</maven.build.timestamp.format>
+        <harness.run.id>${maven.build.timestamp}</harness.run.id>
 
         <!-- Populated by jacoco:prepare-agent where enabled; empty otherwise. -->
         <argLine/>
@@ -320,6 +327,7 @@
                             <!-- One results folder for the whole build, so one report covers every suite. -->
                             <allure.results.directory>${maven.multiModuleProjectDirectory}/target/allure-results</allure.results.directory>
                             <harness.report.history-dir>${maven.multiModuleProjectDirectory}/.allure/history</harness.report.history-dir>
+                            <harness.run.id>${harness.run.id}</harness.run.id>
                         </systemPropertyVariables>
                     </configuration>
                 </plugin>

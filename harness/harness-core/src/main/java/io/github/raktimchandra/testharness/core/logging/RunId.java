@@ -6,7 +6,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Identifies one test run. Taken from {@code HARNESS_RUN_ID} (CI sets it to the build id)
+ * Identifies one test run. Taken from the {@code harness.run.id} system property (the root POM
+ * sets it to the Maven build timestamp, so all modules of one build share it), else from
+ * {@code HARNESS_RUN_ID},
  * or generated as {@code yyyyMMdd-HHmmss-xxxx} once per JVM.
  */
 public final class RunId {
