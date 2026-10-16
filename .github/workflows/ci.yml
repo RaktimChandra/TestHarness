@@ -227,6 +227,12 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+      - name: Find the DSL libraries inside the TeamCity server image
+        run: |
+          docker pull -q jetbrains/teamcity-server:2025.07
+          cid=$(docker create jetbrains/teamcity-server:2025.07)
+          docker export "$cid" | tar -t | grep -iE 'configs-dsl|dsl-plugin|kotlin-dsl' | head -60 | tee "$RUNNER_TEMP/dsl-files.txt"
+          echo "::error title=dsl files::$(sed -e 's/%/%25/g' "$RUNNER_TEMP/dsl-files.txt" | awk 'BEGIN{ORS="%0A"} {print}')"
       - name: Compile .teamcity/settings.kts and generate the project configuration
         run: |
           set -o pipefail
