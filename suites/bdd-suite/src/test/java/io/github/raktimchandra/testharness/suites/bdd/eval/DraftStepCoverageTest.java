@@ -8,6 +8,7 @@ import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.junit.jupiter.api.io.TempDir;
+import org.slf4j.LoggerFactory;
 
 class DraftStepCoverageTest {
 
@@ -65,6 +66,7 @@ class DraftStepCoverageTest {
     void reportOnDrafts() throws Exception {
         Path out = Path.of(System.getProperty("ai.coverage.out", "target/ai-eval/coverage.json"));
         Map<String, Object> doc = coverage.report(Path.of(System.getProperty("ai.drafts")), out);
-        System.out.println("draft step coverage: " + doc.get("matched") + " of " + doc.get("steps") + " -> " + out);
+        LoggerFactory.getLogger(DraftStepCoverageTest.class)
+                .info("draft step coverage: {} of {} -> {}", doc.get("matched"), doc.get("steps"), out);
     }
 }
