@@ -1,17 +1,17 @@
 {
-  "generated" : "2026-10-15T11:58:17.058273256Z",
+  "generated" : "2026-10-16T08:00:44.652328149Z",
   "policy" : {
     "minRuns" : 5,
     "minScore" : 0.2
   },
   "tests" : [ {
     "key" : "io.github.raktimchandra.testharness.suites.flaky.LastPlaceRaceTest#the_driver_who_asks_first_gets_the_last_place",
-    "score" : 0.368,
+    "score" : 0.421,
     "runs" : 20,
-    "flips" : 7,
+    "flips" : 8,
     "failureCauses" : {
-      "ASSERTION" : 8
+      "ASSERTION" : 5
     },
-    "reason" : "7 flips in 19 same-commit transitions; failures: {ASSERTION=8}"
+    "reason" : "8 flips in 19 same-commit transitions; failures: {ASSERTION=5}"
   } ]
 }
