@@ -3,6 +3,46 @@
 All notable changes, one section per phase. Each phase ends with the whole project
 compiling, every test passing, and `./mvnw verify` running end to end.
 
+## [1.0.0-phase4] — 2026-10-16 — Quality dashboard, CLI, new-test guide, PortSync adapter
+
+### Added
+- **Quality dashboard** (`dashboard/`, Vite + React 19 + TypeScript): pass rate over time,
+  failure causes, flakiness leaderboard, quarantine, slowest tests, coverage by module,
+  mutation score and survivors, axe results, visual changes awaiting approval, defect
+  detection matrix, test-impact results, healed locators and a list of missing data sources.
+  Hand-written SVG charts on a validated palette, light and dark, table view for every
+  chart, status always icon + word. Built into one `index.html` committed into
+  `harness-insights`, so it needs no Node to use and opens from disk.
+- **`th dashboard`** (`--open`, `--serve`, `--jdbc-url`, `--jsonl`) and `DashboardData`, which
+  reads only the files runs leave behind and lists what is missing.
+- **PortSync adapter** (`adapters/portsync`): API, contract (strict schemas for every core and
+  simulator response), differential ISO 6346, event-handling, alert-lifecycle, UI, axe and
+  BDD suites against github.com/RaktimChandra/PortSync, run in CI against PortSync's own
+  Compose stack (`.github/workflows/portsync.yml`); offline contract checks in every build.
+- **`docs/NEW_TEST_IN_5_MINUTES.md`** with a committed, passing worked example: valid J and Z
+  container categories (API data rows + BDD examples) and a direction-echo API test.
+- One run id per Maven build (`harness.run.id` from the root POM).
+- CI: `dashboard` job (tests, typecheck, committed page = rebuilt page).
+- Windows guide steps 10–13: `th`, flakiness, dashboard, PortSync.
+
+### Fixed — found while building Phase 4
+- `f3fd133` **Framework tests**: `harness-insights` coverage read 9 % because `TiaTest`'s JaCoCo
+  resets erased other test classes' data; one JVM per test class → 77.5 %. Found by the
+  dashboard.
+- `ecbc3f5` **Build rules**: the no-sleep / no-parking / no-stdout ArchUnit rules covered only
+  `harness/`; now every suite and the adapter.
+- `b4acecf` **Coverage gap**: no test used a J or Z category container number.
+- `c57ab74` **Docker**: the SUT image build did not copy `adapters/`.
+- `26c798a` **Adapter**: the Cucumber runner was not included by surefire, so no PortSync
+  scenario ran in the first CI run.
+
+### Measured
+485 JVM tests + 31 + 9 Vitest + 1 Gatling simulation, 0 failures, 5 min 54 s (RESULTS §23).
+PortSync: 42 tests, 0 failures, 0 axe violations, in CI (§24).
+
+### Could not be run in the authoring sandbox
+- PortSync (needs Kafka; Docker Hub and Maven Central blocked) — CI only.
+
 ## [1.0.0-phase3] — 2026-10-15 — Measuring the suites: fault seeding, flakiness, healing, TIA, mutation, AI drafts
 
 ### Added

@@ -1,0 +1,1080 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "description": "PortSync response shapes, written from portsync-core's Views records and the simulator's records (PortSync commit f34ac31). additionalProperties is false so a renamed or added field is noticed.",
+  "$defs": {
+    "instant": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "instantOrNull": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "uuidOrNull": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "uuid"
+    },
+    "stringOrNull": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "containerNumber": {
+      "type": "string",
+      "pattern": "^[A-Z]{3}[UJZ][0-9]{7}$"
+    },
+    "blockSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "block",
+        "used",
+        "capacity",
+        "utilisation"
+      ],
+      "properties": {
+        "block": {
+          "type": "string",
+          "pattern": "^[A-Z]$"
+        },
+        "used": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "capacity": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "utilisation": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    },
+    "overview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "simulatedTime",
+        "clockSynchronised",
+        "vesselsAtBerth",
+        "vesselsWaiting",
+        "craneMovesLastHour",
+        "yardUtilisation",
+        "blocks",
+        "openAlerts",
+        "acknowledgedAlerts",
+        "avgTruckTurnMinutes",
+        "trucksInTerminal",
+        "cranesFaulted",
+        "eventsProcessed",
+        "dlqEvents"
+      ],
+      "properties": {
+        "simulatedTime": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "clockSynchronised": {
+          "type": "boolean"
+        },
+        "vesselsAtBerth": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "vesselsWaiting": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "craneMovesLastHour": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "yardUtilisation": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/blockSummary"
+          }
+        },
+        "openAlerts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "acknowledgedAlerts": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "avgTruckTurnMinutes": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "trucksInTerminal": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "cranesFaulted": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "eventsProcessed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "dlqEvents": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "crane": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "status",
+        "berthId",
+        "assignedAt",
+        "faultCode",
+        "faultedSince",
+        "lastHeartbeatAt",
+        "movesLastHour"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^QC[0-9]{2}$"
+        },
+        "status": {
+          "type": "string"
+        },
+        "berthId": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "assignedAt": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "faultCode": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "faultedSince": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "lastHeartbeatAt": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "movesLastHour": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "vessel": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "voyage",
+        "status",
+        "berthId",
+        "arrivedAt",
+        "berthedAt",
+        "departedAt",
+        "dischargePlanned",
+        "discharged",
+        "loadPlanned",
+        "loaded"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "voyage": {
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "WAITING",
+            "AT_BERTH",
+            "DEPARTED"
+          ]
+        },
+        "berthId": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "arrivedAt": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "berthedAt": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "departedAt": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "dischargePlanned": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "discharged": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "loadPlanned": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "loaded": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "berth": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "vessel",
+        "cranes"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "vessel": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/vessel"
+            }
+          ]
+        },
+        "cranes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/crane"
+          }
+        }
+      }
+    },
+    "slot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "tier",
+        "containerNumber"
+      ],
+      "properties": {
+        "tier": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "containerNumber": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/containerNumber"
+            }
+          ]
+        }
+      }
+    },
+    "stack": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "row",
+        "bay",
+        "height",
+        "slots"
+      ],
+      "properties": {
+        "row": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bay": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "height": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "slots": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/slot"
+          }
+        }
+      }
+    },
+    "yardBlock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "block",
+        "rows",
+        "bays",
+        "tiers",
+        "capacity",
+        "used",
+        "utilisation",
+        "stacks"
+      ],
+      "properties": {
+        "block": {
+          "type": "string",
+          "pattern": "^[A-Z]$"
+        },
+        "rows": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "bays": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "tiers": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "capacity": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "used": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "utilisation": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "stacks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/stack"
+          }
+        }
+      }
+    },
+    "location": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "block",
+        "row",
+        "bay",
+        "tier",
+        "label"
+      ],
+      "properties": {
+        "block": {
+          "type": "string"
+        },
+        "row": {
+          "type": "integer"
+        },
+        "bay": {
+          "type": "integer"
+        },
+        "tier": {
+          "type": "integer"
+        },
+        "label": {
+          "type": "string"
+        }
+      }
+    },
+    "historyItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eventId",
+        "type",
+        "occurredAt",
+        "description"
+      ],
+      "properties": {
+        "eventId": {
+          "$ref": "#/$defs/uuidOrNull"
+        },
+        "type": {
+          "type": "string"
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "description": {
+          "$ref": "#/$defs/stringOrNull"
+        }
+      }
+    },
+    "rejection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eventId",
+        "type",
+        "reason",
+        "detail",
+        "deadLetteredAt"
+      ],
+      "properties": {
+        "eventId": {
+          "$ref": "#/$defs/uuidOrNull"
+        },
+        "type": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "detail": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "deadLetteredAt": {
+          "$ref": "#/$defs/instant"
+        }
+      }
+    },
+    "container": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "number",
+        "valid",
+        "status",
+        "vesselId",
+        "location",
+        "lastEventAt",
+        "history",
+        "rejections"
+      ],
+      "properties": {
+        "number": {
+          "$ref": "#/$defs/containerNumber"
+        },
+        "valid": {
+          "const": true
+        },
+        "status": {
+          "type": "string"
+        },
+        "vesselId": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "location": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "$ref": "#/$defs/location"
+            }
+          ]
+        },
+        "lastEventAt": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "history": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/historyItem"
+          }
+        },
+        "rejections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/rejection"
+          }
+        }
+      }
+    },
+    "containerValidation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "input",
+        "valid",
+        "reason",
+        "expectedCheckDigit"
+      ],
+      "properties": {
+        "input": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "valid": {
+          "type": "boolean"
+        },
+        "reason": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "expectedCheckDigit": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 9
+        }
+      }
+    },
+    "dlqItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "eventId",
+        "type",
+        "entityId",
+        "reason",
+        "detail",
+        "sourceTopic",
+        "sourcePartition",
+        "sourceOffset",
+        "deadLetteredAt",
+        "rawValue"
+      ],
+      "properties": {
+        "id": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "eventId": {
+          "$ref": "#/$defs/uuidOrNull"
+        },
+        "type": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "entityId": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "reason": {
+          "type": "string"
+        },
+        "detail": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "sourceTopic": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "sourcePartition": {
+          "type": "integer"
+        },
+        "sourceOffset": {
+          "type": "integer"
+        },
+        "deadLetteredAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "rawValue": {
+          "$ref": "#/$defs/stringOrNull"
+        }
+      }
+    },
+    "eventItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eventId",
+        "type",
+        "entityId",
+        "occurredAt",
+        "outcome",
+        "reason",
+        "detail",
+        "topic",
+        "partition",
+        "offset",
+        "processedAt"
+      ],
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string"
+        },
+        "entityId": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "outcome": {
+          "enum": [
+            "APPLIED",
+            "IGNORED_STALE",
+            "REJECTED",
+            "DUPLICATE"
+          ]
+        },
+        "reason": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "detail": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "topic": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "partition": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "offset": {
+          "type": [
+            "integer",
+            "null"
+          ]
+        },
+        "processedAt": {
+          "$ref": "#/$defs/instantOrNull"
+        }
+      }
+    },
+    "alert": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "rule",
+        "entityId",
+        "severity",
+        "state",
+        "message",
+        "observedValue",
+        "threshold",
+        "openedAt",
+        "lastSeenAt",
+        "acknowledgedAt",
+        "resolvedAt",
+        "resolution"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "rule": {
+          "type": "string",
+          "pattern": "^[A-Z_]+$"
+        },
+        "entityId": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string"
+        },
+        "state": {
+          "enum": [
+            "OPEN",
+            "ACKNOWLEDGED",
+            "RESOLVED"
+          ]
+        },
+        "message": {
+          "type": "string"
+        },
+        "observedValue": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "threshold": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "openedAt": {
+          "$ref": "#/$defs/instant"
+        },
+        "lastSeenAt": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "acknowledgedAt": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "resolvedAt": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "resolution": {
+          "$ref": "#/$defs/stringOrNull"
+        }
+      }
+    },
+    "truckVisit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "containerNumber",
+        "direction",
+        "lane",
+        "truckPlate",
+        "gateInAt",
+        "minutesInside"
+      ],
+      "properties": {
+        "id": {
+          "type": "string"
+        },
+        "containerNumber": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "direction": {
+          "type": "string"
+        },
+        "lane": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "truckPlate": {
+          "$ref": "#/$defs/stringOrNull"
+        },
+        "gateInAt": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "minutesInside": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "published": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "eventId",
+        "type",
+        "entityId",
+        "occurredAt"
+      ],
+      "properties": {
+        "eventId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "type": {
+          "type": "string"
+        },
+        "entityId": {
+          "type": "string"
+        },
+        "occurredAt": {
+          "$ref": "#/$defs/instant"
+        }
+      }
+    },
+    "apiError": {
+      "description": "portsync-core's single error body (ApiError, @JsonInclude NON_EMPTY: empty details are omitted).",
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "timestamp",
+        "status",
+        "error",
+        "code",
+        "message",
+        "path"
+      ],
+      "properties": {
+        "timestamp": {
+          "$ref": "#/$defs/instant"
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 599
+        },
+        "error": {
+          "type": "string"
+        },
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z_]+$"
+        },
+        "message": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "details": {
+          "type": "object"
+        }
+      }
+    },
+    "simulatorProblem": {
+      "description": "The simulator's errors: Spring ProblemDetail (RFC 9457) without a code.",
+      "type": "object",
+      "required": [
+        "status",
+        "title"
+      ],
+      "properties": {
+        "type": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 599
+        },
+        "detail": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "instance": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "injection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "description",
+        "expectedOutcome",
+        "events"
+      ],
+      "properties": {
+        "description": {
+          "type": "string"
+        },
+        "expectedOutcome": {
+          "type": "string"
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/published"
+          }
+        }
+      }
+    },
+    "simulationStatus": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "simulatedNow",
+        "speedFactor",
+        "paused",
+        "running",
+        "terminal"
+      ],
+      "properties": {
+        "simulatedNow": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "speedFactor": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "paused": {
+          "type": "boolean"
+        },
+        "running": {
+          "type": "boolean"
+        },
+        "terminal": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "simulatedTime",
+            "started",
+            "pendingActions",
+            "eventsPublished",
+            "waitingVessels",
+            "berths",
+            "cranes",
+            "yardOccupancy",
+            "importsAwaitingPickup",
+            "exportsAwaitingLoad"
+          ],
+          "properties": {
+            "simulatedTime": {
+              "$ref": "#/$defs/instantOrNull"
+            },
+            "started": {
+              "type": "boolean"
+            },
+            "pendingActions": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "eventsPublished": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "waitingVessels": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "berths": {
+              "type": "object",
+              "additionalProperties": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "cranes": {
+              "type": "object",
+              "additionalProperties": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "yardOccupancy": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "importsAwaitingPickup": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "exportsAwaitingLoad": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        }
+      }
+    },
+    "invariantReport": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "consistent",
+        "violations"
+      ],
+      "properties": {
+        "consistent": {
+          "type": "boolean"
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        }
+      }
+    },
+    "runtimeInfo": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "simulatedNow",
+        "watermark",
+        "speedFactor",
+        "synchronised",
+        "slaLastEvaluatedAt",
+        "slaRules",
+        "consumerLag",
+        "sseClients",
+        "sseDroppedMessages"
+      ],
+      "properties": {
+        "simulatedNow": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "watermark": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "speedFactor": {
+          "type": "number"
+        },
+        "synchronised": {
+          "type": "boolean"
+        },
+        "slaLastEvaluatedAt": {
+          "$ref": "#/$defs/instantOrNull"
+        },
+        "slaRules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "description"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "consumerLag": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          }
+        },
+        "sseClients": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "sseDroppedMessages": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    }
+  }
+}

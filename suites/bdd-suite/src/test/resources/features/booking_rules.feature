@@ -29,6 +29,8 @@ Feature: Gate appointment booking rules
       | container   | outcome                            |
       | CSQU3054383 | confirmed                          |
       | MSCU1000110 | confirmed                          |
+      | HLXJ4820152 | confirmed                          |
+      | OOLZ7302641 | confirmed                          |
       | CSQU3054384 | refused because "INVALID_CONTAINER_NUMBER" |
       | CSQX3054383 | refused because "INVALID_CONTAINER_NUMBER" |
 

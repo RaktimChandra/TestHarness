@@ -34,10 +34,12 @@ compiles against, code in this repository.
 | `harness/harness-api` | `ApiSpecs`, `SchemaRegistry` + validation filter, `TokenCache`, `ResponseAssert` | no |
 | `harness/harness-ui` | `Drivers`, `DriverFactory`, `Waits`, `BasePage`, `Component`, `Locators`, `Inputs`, `BrowserExtension`, `UiEvidence` | no |
 | `harness/harness-bdd` | `ScenarioContext`, `ScenarioHooks` | no |
-| `harness/harness-insights` | history, flakiness, quarantine/selection/shard filters, failure classes, test impact analysis, AI drafts | no |
+| `harness/harness-insights` | history, flakiness, quarantine/selection/shard filters, failure classes, test impact analysis, AI drafts, dashboard data + prebuilt page | no |
 | `harness/harness-cli` | the `th` command | no |
 | `suites/suite-support` | `GateSut` launcher, `GateApi`, `GateFixtures`, models, schemas, page objects | **yes** |
 | `suites/*-suite` | the tests (`flaky-demo` only runs with `-DskipFlakyDemo=false`) | yes |
+| `adapters/portsync` | the PortSync adapter: config, clients, schemas, page objects, live suites (`-Dportsync.live`) | PortSync |
+| `dashboard/` | source of the quality dashboard (Vite + React + TypeScript) | no |
 | `tools/` | experiment scripts (`tia_experiment.py`) | — |
 | `experiments/` | committed results of the experiments | — |
 
@@ -307,6 +309,7 @@ camera icon; the nodes run noVNC without a password).
 ./th history flaky --jsonl suites/api-suite/target/test-history
 ./th tia select --base origin/main
 ./th ai explain                                          # summary of the last failures
+./th dashboard --open                                    # quality dashboard from the last runs
 ./th <command> --help
 ```
 
@@ -433,11 +436,36 @@ mvnw -N -Preport verify
 jwebserver -d <absolute path>/target/allure-report -p 8000
 ```
 
+## Quality dashboard
+
+```bash
+./th dashboard                    # writes target/dashboard/index.html (opens from disk)
+./th dashboard --open             # …and opens it
+./th dashboard --serve            # serves it on http://localhost:8001
+./th dashboard --jdbc-url jdbc:postgresql://localhost:5433/history   # include PostgreSQL history
+```
+
+It reads only what runs left on disk (see DESIGN D42) and lists every missing source under
+"Data sources". To change the page: edit `dashboard/src`, then `cd dashboard && npm ci && npm
+test && npm run build` — the build writes the single-file page into
+`harness/harness-insights/src/main/resources/.../dashboard/site/index.html`; commit both (CI
+fails if they differ).
+
+## Another system under test: the PortSync adapter
+
+`adapters/portsync` is the template for pointing the framework at a different application;
+see its [README](adapters/portsync/README.md). In short: a config record for URLs, API clients
+built with `ApiSpecs.base(url, SchemaRegistry.load("<your>-schemas"), config)`, a schema
+registry in strict mode, page objects extending `BasePage` with `Target`s, and live tests kept
+behind a property so the default build does not need the other system running.
+
+Adding a single test to the existing suites: [docs/NEW_TEST_IN_5_MINUTES.md](docs/NEW_TEST_IN_5_MINUTES.md).
+
 ## Rules the build enforces
 
 | Rule | Where | Why |
 |---|---|---|
-| No `Thread.sleep` / `TimeUnit.sleep` | `HarnessArchRules.NO_THREAD_SLEEP` | wait on conditions, not time |
+| No `Thread.sleep` / `TimeUnit.sleep` (framework, suites and adapter) | `HarnessArchRules.NO_THREAD_SLEEP` | wait on conditions, not time |
 | `LockSupport.park*` only in `core.retry.Pause` | `PARKING_ONLY_IN_PAUSE` | one audited place that blocks |
 | No `System.out` / `System.err` | `NO_STANDARD_STREAMS` | logs are structured |
 | Implicit waits = 0 | `DriverFactory` | explicit waits only |
@@ -449,3 +477,4 @@ jwebserver -d <absolute path>/target/allure-report -p 8000
 | Retry needs a cap and a predicate | `Retry.Builder.build()` | no unbounded or blanket retries |
 | A locator matches exactly one element | `Healer` | ambiguity is a test bug; heals are always reported |
 | Domain mutation score ≥ 95 % | PIT `mutation` profile | untested behaviour in the rules fails the build |
+| Committed dashboard page = rebuilt page | CI `dashboard` job | the page shipped in the jar is the reviewed source |

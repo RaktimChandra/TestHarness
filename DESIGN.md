@@ -432,6 +432,48 @@ framework unchanged.
 - **Not done:** no run against a real provider in this repository (no key in the authoring
   environment); request/response formats are tested against stub servers.
 
+## Phase 4 — the dashboard, the CLI and a second system under test
+
+### D42 — The dashboard is one static page fed by files the build already writes — Built
+- `th dashboard` (`DashboardData`) reads what the build and experiments leave on disk —
+  history JSONL, JaCoCo CSV, PIT XML, axe JSON, visual candidates and diffs, healing records,
+  experiment JSON — plus PostgreSQL history if asked, and writes `data.json` and `data.js`
+  beside a prebuilt page. A missing source empties its panel and is listed under "Data
+  sources"; nothing is estimated or back-filled.
+- The React app is built (Vite) into **one** `index.html` with script and styles inlined, and
+  that file is committed into `harness-insights` resources, so the framework needs no Node and
+  the page opens from disk (`file://`) — `data.js` is a classic script for the same reason. CI
+  rebuilds it and fails if the committed page differs from its source.
+- **Alternatives:** Grafana (needs a server and a datasource for every artefact type), Allure
+  trends (only pass/fail history; no flakiness, mutation, TIA or detection matrix), a served
+  SPA (one more process to run for a read-only page).
+- Charts are hand-written SVG (no chart library) on the reference dataviz palette, validated
+  for light and dark; status is always icon + word; every chart has a table view.
+
+### D43 — One run id per Maven build — Built
+Each module's tests run in their own JVM, so a per-JVM run id split one `mvnw verify` into a
+dozen "runs". The root POM passes `harness.run.id=${maven.build.timestamp}` to every surefire
+fork; the CLI and CI can still set their own.
+
+### D44 — A second SUT through an adapter, without touching the framework — Built
+- `adapters/portsync` drives PortSync (Kafka, PostgreSQL, Spring Boot, React; no logins, no
+  test ids) with the unchanged `harness/` modules: its own config keys, clients on
+  `ApiSpecs`, a strict schema registry and page objects with `Target`s.
+- The adapter **never starts PortSync** — it needs Kafka, and PortSync's own Compose file is
+  the supported way to run it. The adapter waits for readiness the way PortSync's smoke test
+  does (core ready, simulator running, opening inventory processed) and remembers a failure so
+  later tests fail fast.
+- **Differential testing** is the strongest check available on a system I did not design the
+  rules of: PortSync's ISO 6346 validator, its dashboard's validator and TestHarness's oracle
+  are three independent implementations asked about the same numbers.
+- Live tests are excluded unless `-Dportsync.live`, so `./mvnw verify` stays self-contained.
+
+### D45 — The new-test guide is executable — Built
+`docs/NEW_TEST_IN_5_MINUTES.md` walks through a real change (J and Z container categories,
+which no test covered, plus a direction-echo test) that is committed and passing, so the guide
+cannot drift from the code without a test noticing. Writing it exposed that the ArchUnit
+rules only covered `harness/`; they now run in every suite and the adapter.
+
 ---
 
 ## Build and tooling
@@ -465,5 +507,12 @@ sandbox). Lifecycle plugins (clean, resources, install, …) are pinned because 
 - The AI features have not been exercised against a real model provider (D41).
 - The race-condition bug uses a configurable pause (`gate.race-window`, 150 ms) to make the
   race reproducible on any machine; without it the race is real but intermittent.
-- Coverage numbers in RESULTS.md are per-module unit/integration coverage; per-test
-  coverage of the SUT during suite runs arrives with Phase 3 test-impact analysis.
+- Coverage numbers in RESULTS.md are per-module unit/integration coverage; per-test coverage
+  of the SUT is recorded only by the TIA experiment (D39).
+- While TIA recording is on (`-Dharness.tia.record=true`) the recorder resets the JaCoCo agent
+  per test, so that run's per-module JaCoCo reports are not meaningful (D39). The same reset
+  made `harness-insights` report 9 % line coverage until its test classes got one JVM each
+  (77.5 % after).
+- The PortSync suites run only in CI (PortSync needs Kafka; Docker Hub is blocked in the
+  authoring sandbox), and their schemas are the adapter's expectations, not a published
+  PortSync contract (D44).

@@ -458,3 +458,93 @@ test (which failed in that run) without failing the build.
 - **GitHub artifact downloads** are blocked, so experiment workflows push their results to a
   branch (`fault-seeding/<run>`, `flaky-demo/<run>`), copied into `experiments/` unchanged.
 - The TIA experiment ran once per mode per bug on 2 vCPUs (§19 explains the noise).
+
+## Phase 4
+
+### 23. One-command build — sandbox, 2026-10-16
+
+**Method:** as §16, `mvn -o clean install` on commit `848acb3` (the Phase 4 code before the
+coverage fix in §25, which changes only how `harness-insights` forks its test JVMs).
+
+| Module | Tests | Failed | Errors | Skipped | Σ test time (s) |
+|---|---:|---:|---:|---:|---:|
+| sut/gate-domain | 69 | 0 | 0 | 0 | 0.5 |
+| sut/gate-api | 16 | 0 | 0 | 0 | 7.8 |
+| harness/harness-core | 43 | 0 | 0 | 0 | 3.4 |
+| harness/harness-reporting | 8 | 0 | 0 | 0 | 0.3 |
+| harness/harness-data | 75 | 0 | 0 | 0 | 4.1 |
+| harness/harness-api | 13 | 0 | 0 | 0 | 1.2 |
+| harness/harness-ui | 43 | 0 | 0 | 0 | 21.8 |
+| harness/harness-bdd | 3 | 0 | 0 | 0 | 0.1 |
+| harness/harness-insights (+ dashboard data, run context, history files) | 39 | 0 | 0 | 0 | 1.8 |
+| harness/harness-cli (+ `th dashboard`) | 11 | 0 | 0 | 0 | 1.1 |
+| suites/api-suite (+ 3 architecture rules, + 4 worked-example cases) | 109 | 0 | 0 | 0 | 100.3 |
+| suites/ui-suite (+ 3 architecture rules) | 29 | 0 | 0 | 5 | 85.5 |
+| suites/bdd-suite (+ 2 examples, + 3 architecture rules) | 20 | 0 | 0 | 0 | 61.4 |
+| **adapters/portsync** (offline: schema registry 4, architecture 3) | 7 | 0 | 0 | 0 | 3.4 |
+| **Total (JVM)** | **485** | **0** | **0** | **5** | **292.5** |
+| sut/gate-ui (Vitest) | 31 | 0 | 0 | 0 | — |
+| dashboard (Vitest: model + server-rendered App) | 9 | 0 | 0 | 0 | — |
+| suites/perf-suite (Gatling) | 1 simulation, 300 requests | 0 KO | — | — | p95 96 ms · p99 106 ms |
+
+**Wall-clock: 5 min 54 s** (finished 2026-10-16T09:51:28+05:30). Framework self-tests: **235**.
+
+### 24. PortSync adapter against the real PortSync stack — CI run 38848816383, 2026-10-16
+
+**Method:** `.github/workflows/portsync.yml` on commit `26c798a`: check out PortSync
+(`main` = `f34ac31`), `docker compose up -d --build` (Kafka, PostgreSQL, core, simulator,
+dashboard), then `mvn verify -pl adapters/portsync -Dportsync.live` on `ubuntu-latest`.
+Counts from the surefire XML via the job summary.
+
+| Suite | Tests | Failed |
+|---|---:|---:|
+| Offline contract + architecture | 7 | 0 |
+| ISO 6346 differential (300 numbers vs the independent oracle, lookups) | 4 | 0 |
+| Terminal state consistency | 5 | 0 |
+| Event handling through Kafka (DLQ, stale, malformed, duplicates) | 5 | 0 |
+| Alert lifecycle (fault → open → ack → 409 → recover → auto-resolve) | 1 | 0 |
+| Dashboard UI incl. axe-core | 5 | 0 |
+| BDD scenarios (`features/portsync`) | 15 | 0 |
+| **Total** | **42** | **0** |
+
+- Test time Σ 98.6 s; the whole job (PortSync image builds included) took **3 min 49 s**.
+- **axe-core: 0 violations** of any impact on PortSync's overview, container lookup (with an
+  invalid-number verdict showing) and alerts pages.
+- **All three ISO 6346 implementations agreed** on every number tried: PortSync's API (300
+  generated numbers + 10 BDD examples), its dashboard's live validator (20 numbers) and
+  TestHarness's oracle.
+- **Found while building it (in TestHarness, not PortSync):** the first CI run reported 24
+  tests — surefire's default includes skip the Cucumber runner class, so no scenario ran
+  (`26c798a`); and the Gate SUT's Docker build broke because the image did not copy the new
+  `adapters/` directory (`c57ab74`).
+- **No defect was found in PortSync.** That is a result, not a claim of completeness: these
+  42 tests are what was checked.
+
+### 25. Quality dashboard
+
+- `th dashboard` on this machine after §23 and a PIT run: 294 history results in 22 runs (one
+  full build + 20 flaky-demo runs + one adapter run), every source present. Page: one
+  220 KB `index.html`; two consecutive `npm run build`s produced byte-identical files, which is
+  what the CI check relies on. Screenshot: [docs/images/dashboard.png](docs/images/dashboard.png).
+- **It found a measurement bug on its first real data:** `harness-insights` showed **9 %**
+  line coverage despite 39 passing tests. `TiaTest` resets the real JaCoCo agent per test,
+  which also erased every other test class's coverage in that JVM. With one JVM per test
+  class (`f3fd133`) the module measures **77.5 % lines / 65.9 % branches** (813/1049,
+  331/502).
+- Palette checked with the dataviz validator: categorical slots 1–2 pass every check in light
+  (worst CVD ΔE 24.7) and dark (26.8) against their surfaces.
+
+### 26. "Add a new test in 5 minutes" — the worked example
+
+The guide's example (J and Z container categories — untested before — plus a direction-echo
+test) is committed. Running the guide's own commands in the sandbox:
+`verify -pl suites/api-suite -Dtest=BookingApiTest` **54 s** (26 tests, PostgreSQL and app
+start included); `verify -pl suites/bdd-suite` **39 s** (17 scenarios). All passed.
+Writing the guide also showed the no-sleep / no-stdout ArchUnit rules covered only
+`harness/`; they now run in every suite and the adapter (§23).
+
+### What could not run in Phase 4, and why
+- **PortSync locally:** it needs Kafka, and Docker Hub (and Maven Central, for building
+  PortSync) are blocked in the sandbox. Its suites ran in CI only (§24).
+- Visual "awaiting approval" items on the local dashboard are the sandbox's own candidates
+  (the committed baselines belong to the CI platforms), as in §7.

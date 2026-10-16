@@ -10,7 +10,7 @@ import picocli.CommandLine.Command;
 @Command(name = "harness", mixinStandardHelpOptions = true, version = "TestHarness 1.0.0",
         description = "Run the TestHarness suites and analyse their results.",
         subcommands = {RunCommand.class, RerunFailedCommand.class, ReportCommand.class, HistoryCommand.class,
-                TiaCommand.class, AiCommand.class, CommandLine.HelpCommand.class})
+                TiaCommand.class, AiCommand.class, DashboardCommand.class, CommandLine.HelpCommand.class})
 public final class HarnessCli {
 
     public static void main(String[] args) {

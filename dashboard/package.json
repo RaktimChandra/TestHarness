@@ -1,0 +1,25 @@
+{
+  "name": "testharness-dashboard",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "TestHarness quality dashboard: one static page built from data.json",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc -b && vite build",
+    "typecheck": "tsc -b",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "react": "19.1.1",
+    "react-dom": "19.1.1"
+  },
+  "devDependencies": {
+    "@types/react": "19.1.16",
+    "@types/react-dom": "19.1.11",
+    "@vitejs/plugin-react": "6.1.2",
+    "typescript": "5.9.3",
+    "vite": "8.3.4",
+    "vitest": "5.0.4"
+  }
+}

@@ -21,6 +21,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @DisplayName("Booking API")
 class BookingApiTest extends ApiTest {
@@ -74,6 +75,15 @@ class BookingApiTest extends ApiTest {
             // persistent database (Docker mode) is not blocked by "one open booking per container".
             assertThatResponse(api.rawCancel(driver, b.reference())).hasStatus(200);
         }
+    }
+
+    // Worked example from docs/NEW_TEST_IN_5_MINUTES.md, step 3.
+    @ParameterizedTest(name = "{0}")
+    @ValueSource(strings = {"PICK_UP", "DROP_OFF"})
+    void the_direction_asked_for_is_the_direction_booked(String direction) {
+        Models.Slot slot = fx.slotTomorrowAt(LocalTime.of(15, 0), 1);
+        Response r = api.rawBook(fx.newDriver(), slot.id(), GateFixtures.container(), direction);
+        assertThatResponse(r).hasStatus(201).hasJsonValue("direction", direction);
     }
 
     @Test

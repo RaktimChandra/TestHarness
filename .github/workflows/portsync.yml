@@ -1,0 +1,84 @@
+name: portsync
+
+# Runs the PortSync adapter (adapters/portsync) against a real PortSync stack:
+# github.com/RaktimChandra/PortSync, brought up with its own Docker Compose file.
+on:
+  pull_request:
+    paths:
+      - 'adapters/portsync/**'
+      - 'harness/**'
+      - '.github/workflows/portsync.yml'
+  workflow_dispatch:
+    inputs:
+      portsync_ref:
+        description: PortSync branch, tag or commit to test
+        default: main
+  schedule:
+    - cron: '17 3 * * 1'   # weekly, to notice PortSync changes that break the contract
+
+permissions:
+  contents: read
+
+concurrency:
+  group: portsync-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  HARNESS_ENV: ci
+  MVN: ./mvnw -B -ntp --fail-at-end
+
+jobs:
+  portsync:
+    name: API, contract, UI and BDD suites against PortSync
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v5
+      - name: Check out PortSync
+        uses: actions/checkout@v5
+        with:
+          repository: RaktimChandra/PortSync
+          ref: ${{ inputs.portsync_ref || 'main' }}
+          path: portsync
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Start PortSync (Kafka, PostgreSQL, core, simulator, dashboard)
+        working-directory: portsync
+        run: |
+          echo "PortSync commit: $(git rev-parse --short HEAD)" >> "$GITHUB_STEP_SUMMARY"
+          docker compose up -d --build kafka postgres portsync-core simulator frontend
+      - name: Build the adapter and its framework modules
+        run: $MVN install -DskipTests -pl adapters/portsync -am
+      - name: Run the PortSync suites (the adapter waits for readiness itself)
+        run: $MVN verify -pl adapters/portsync -Dportsync.live
+      - name: Test summary
+        if: always()
+        run: python3 .github/scripts/test_summary.py "portsync" "adapters/portsync/**/TEST-*.xml"
+      - name: Accessibility summary
+        if: always()
+        run: python3 .github/scripts/a11y_summary.py "chrome" "adapters/portsync/target/a11y/*.json"
+      - name: PortSync logs on failure
+        if: failure()
+        working-directory: portsync
+        run: docker compose logs --no-color --tail=200 portsync-core simulator > "$RUNNER_TEMP/portsync.log" 2>&1 || true
+      - uses: ./.github/actions/log-tail
+        if: failure()
+        with:
+          file: ${{ runner.temp }}/portsync.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: portsync-results
+          path: |
+            adapters/portsync/target/surefire-reports
+            adapters/portsync/target/cucumber
+            adapters/portsync/target/a11y
+            adapters/portsync/target/evidence
+          if-no-files-found: ignore
+      - name: Stop PortSync
+        if: always()
+        working-directory: portsync
+        run: docker compose down -v
