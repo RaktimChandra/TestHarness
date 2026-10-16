@@ -16,7 +16,7 @@ SHORT=${GITHUB_SHA::7}
 summary() { echo "$*" >> "$GITHUB_STEP_SUMMARY"; }
 
 git config --global user.name "github-actions[bot]"
-git config --global user.email "41898283+github-actions[bot]@users.noreply.github.com"
+git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
 # --- 1. the ci-history branch ------------------------------------------------------------
 if git ls-remote --exit-code --heads origin ci-history >/dev/null 2>&1; then
