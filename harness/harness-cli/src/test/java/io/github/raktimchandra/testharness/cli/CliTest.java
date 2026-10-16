@@ -36,7 +36,17 @@ class CliTest {
     void helpListsEveryCommand() {
         Out o = run("--help");
         assertThat(o.code()).isZero();
-        assertThat(o.out()).contains("run", "rerun-failed", "report", "history", "tia", "ai");
+        assertThat(o.out()).contains("run", "rerun-failed", "report", "history", "tia", "ai", "dashboard");
+    }
+
+    @Test
+    void dashboardIsWrittenFromTheRepositoryResults() {
+        Path out = tmp.resolve("dash");
+        Out o = run("dashboard", "--out", out.toString());
+        assertThat(o.code()).as(o.err()).isZero();
+        assertThat(o.out()).contains("Dashboard: ");
+        assertThat(out.resolve("index.html")).exists();
+        assertThat(out.resolve("data.js")).content().startsWith("window.__TESTHARNESS__ = ");
     }
 
     @Test
