@@ -24,6 +24,7 @@ env:
   HARNESS_ENV: ci
   GATE_SEED_PASSWORD: win-${{ github.run_id }}
   HARNESS_DB_PASSWORD: gate
+  HARNESS_HISTORY_DB_PASSWORD: gate
 
 jobs:
   windows:

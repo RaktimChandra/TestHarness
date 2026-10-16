@@ -15,7 +15,9 @@
     <description>Gatling (Java DSL) performance smoke test of the booking flow with p95/p99 and error-rate gates.</description>
 
     <properties>
-        <skipPerf>false</skipPerf>
+        <!-- -DskipTests skips the load test too (install -DskipTests must not run Gatling);
+             -DskipPerf skips only it. Unset, ${skipTests} stays literal and reads as false. -->
+        <skipPerf>${skipTests}</skipPerf>
         <!-- -Dperf.simulation=...CapacitySimulation for one level of tools/capacity.py -->
         <perf.simulation>io.github.raktimchandra.testharness.perf.BookingFlowSimulation</perf.simulation>
     </properties>

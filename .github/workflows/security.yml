@@ -66,6 +66,9 @@ jobs:
         if: always()
         run: |
           { echo "### OSV-Scanner $OSV_VERSION"; cat "$RUNNER_TEMP/osv.md" 2>/dev/null || echo "no output"; } >> "$GITHUB_STEP_SUMMARY"
+          # One annotation per affected package: version in use, the version fixing every
+          # advisory against it, and the advisories.
+          python3 .github/scripts/osv_annotations.py "$RUNNER_TEMP/osv.md"
       - uses: ./.github/actions/log-tail
         if: failure()
         with:
