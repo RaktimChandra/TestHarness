@@ -34,7 +34,10 @@ class SchemasTest {
                 new String[] {"POST", "/api/alerts/7/resolve"}, new String[] {"GET", "/api/dlq"},
                 new String[] {"GET", "/api/events"}, new String[] {"GET", "/api/ops/invariants"},
                 new String[] {"POST", "/api/faults/invalid-container"}, new String[] {"POST", "/api/faults/out-of-order"},
-                new String[] {"POST", "/api/faults/cranes/QC01/fault"}, new String[] {"GET", "/api/simulation/status"});
+                new String[] {"POST", "/api/faults/cranes/QC01/fault"}, new String[] {"GET", "/api/simulation/status"},
+                new String[] {"POST", "/api/faults/cranes/QC01/slow"}, new String[] {"POST", "/api/faults/gate-surge"},
+                new String[] {"POST", "/api/faults/vessel-surge"}, new String[] {"POST", "/api/simulation/pause"},
+                new String[] {"POST", "/api/simulation/resume"});
         calls.forEach(c -> assertThat(schemaFor(c[0], c[1], 200)).as(c[0] + " " + c[1]).isNotBlank());
         assertThat(schemaFor("GET", "/api/containers/X", 400)).isEqualTo("api-error.json");
         assertThat(schemaFor("POST", "/api/faults/impossible", 400)).isEqualTo("simulator-problem.json");
