@@ -1,5 +1,6 @@
 package io.github.raktimchandra.gate.api.web;
 
+import io.github.raktimchandra.gate.api.service.LoginThrottledException;
 import io.github.raktimchandra.gate.domain.DomainException;
 import io.github.raktimchandra.gate.domain.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,7 +9,9 @@ import java.util.Comparator;
 import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -23,6 +26,14 @@ import org.springframework.web.servlet.resource.NoResourceFoundException;
 public class ApiExceptionHandler {
 
     private static final Logger log = LoggerFactory.getLogger(ApiExceptionHandler.class);
+
+    @ExceptionHandler(LoginThrottledException.class)
+    ResponseEntity<ProblemDetail> throttled(LoginThrottledException e, HttpServletRequest req) {
+        log.warn("Sign-in refused: {}", e.getMessage());
+        return ResponseEntity.status(e.code().httpStatus())
+                .header(HttpHeaders.RETRY_AFTER, Long.toString(e.retryAfterSeconds()))
+                .body(ProblemWriter.problem(e.code(), e.getMessage(), req.getRequestURI()));
+    }
 
     @ExceptionHandler(DomainException.class)
     ProblemDetail domain(DomainException e, HttpServletRequest req) {

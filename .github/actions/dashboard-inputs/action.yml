@@ -1,0 +1,31 @@
+name: dashboard-inputs
+description: >-
+  Packs this job's results that the quality dashboard reads (test history, JaCoCo CSV, PIT
+  mutations, axe reports, healing log, visual diffs) into one archive with repository-relative
+  paths, and uploads it for the publish job.
+inputs:
+  name:
+    description: Unique artifact suffix for this job
+    required: true
+  coverage:
+    description: Include JaCoCo CSVs (only the build job's coverage is meaningful)
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        find . \( -name node_modules -o -name .git \) -prune -o -type f \( \
+              -path '*/target/test-history/*.jsonl' \
+           -o -path '*/target/site/jacoco/jacoco.csv' -a -path "${{ inputs.coverage == 'true' && '*' || '/nowhere/*' }}" \
+           -o -path '*/pit-reports/*mutations.xml' \
+           -o -path '*/target/a11y/*.json' \
+           -o -path '*/target/healing/healing.jsonl' \
+           -o -path '*/target/visual/*' -name '*.png' \) -print > "$RUNNER_TEMP/dashboard-inputs.txt"
+        echo "$(wc -l < "$RUNNER_TEMP/dashboard-inputs.txt") dashboard input file(s)"
+        tar -czf "$RUNNER_TEMP/dashboard-inputs-${{ inputs.name }}.tgz" -T "$RUNNER_TEMP/dashboard-inputs.txt"
+    - uses: actions/upload-artifact@v7
+      with:
+        name: dashboard-inputs-${{ inputs.name }}
+        path: ${{ runner.temp }}/dashboard-inputs-${{ inputs.name }}.tgz
+        retention-days: 7

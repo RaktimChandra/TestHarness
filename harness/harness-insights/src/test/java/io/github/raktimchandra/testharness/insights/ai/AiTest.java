@@ -191,4 +191,53 @@ class AiTest {
         assertThat(Files.readString(ai.file())).contains("DRAFT by fake/model (unverified")
                 .contains("capacity failure is a product bug");
     }
+
+    @Test
+    void failureSummaryAttachesEvidenceAndSurvivesAModelError() throws IOException {
+        FailureExplainer.Result none = new FailureExplainer(Optional.empty(), false).explain(dir, dir.resolve("o0"));
+        assertThat(none.failures()).isZero();
+        assertThat(Files.readString(none.file())).contains("No failed tests found.");
+
+        Path reports = dir.resolve("suites/ui-suite/target/surefire-reports");
+        Files.createDirectories(reports);
+        String longMessage = "x".repeat(500);
+        Files.writeString(reports.resolve("TEST-x.LoginTest.xml"), """
+                <testsuite name="x.LoginTest" tests="2">
+                  <testcase classname="x.LoginTest" name="signs_in(WebDriver)" time="1">
+                    <failure type="org.openqa.selenium.TimeoutException" message="%s">at x.LoginTest.signs_in(LoginTest.java:9)</failure>
+                  </testcase>
+                  <testcase classname="x.LoginTest" name="no_message" time="1">
+                    <failure type="java.lang.AssertionError"/>
+                  </testcase>
+                </testsuite>
+                """.formatted(longMessage));
+        Path evidence = dir.resolve("suites/ui-suite/target/evidence/LoginTest_signs_in-chrome");
+        Files.createDirectories(evidence);
+        Files.writeString(evidence.resolve("console.log"), "line1\nSEVERE boom\n");
+        Files.write(evidence.resolve("screenshot.png"), new byte[] {(byte) 0x89, 'P', 'N', 'G'});
+
+        List<List<LlmClient.Image>> seen = new java.util.ArrayList<>();
+        LlmClient failing = new LlmClient() {
+            public String complete(String s, String u, List<Image> images) {
+                seen.add(images);
+                throw new LlmException("rate limited (429)");
+            }
+
+            public String describe() {
+                return "fake/model";
+            }
+        };
+        FailureExplainer.Result r = new FailureExplainer(Optional.of(failing), true).explain(dir, dir.resolve("o3"));
+        String md = Files.readString(r.file());
+        assertThat(r.failures()).isEqualTo(2);
+        assertThat(r.usedModel()).isFalse();
+        assertThat(md).contains("AI summary unavailable: rate limited (429)")
+                .contains("evidence: `suites/ui-suite/target/evidence/LoginTest_signs_in-chrome`".replace('/',
+                        java.io.File.separatorChar))
+                .contains("SEVERE boom")
+                .contains("x".repeat(400) + "…")
+                .contains("message: (none)");
+        assertThat(seen).singleElement().satisfies(images -> assertThat(images).singleElement()
+                .satisfies(i -> assertThat(i.mediaType()).isEqualTo("image/png")));
+    }
 }

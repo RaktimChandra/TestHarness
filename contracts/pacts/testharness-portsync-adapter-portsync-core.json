@@ -1,0 +1,556 @@
+{
+  "consumer": {
+    "name": "testharness-portsync-adapter"
+  },
+  "interactions": [
+    {
+      "description": "a lookup of a number with a wrong check digit",
+      "request": {
+        "method": "GET",
+        "path": "/api/containers/CSQU3054384"
+      },
+      "response": {
+        "body": {
+          "code": "INVALID_CONTAINER_NUMBER",
+          "details": {
+            "expectedCheckDigit": 3
+          },
+          "error": "Bad Request",
+          "message": "explanation",
+          "path": "/api/containers/CSQU3054384",
+          "status": 400,
+          "timestamp": "2026-10-16T09:00:00.123Z"
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.timestamp": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,9})?Z$"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ]
+            }
+          }
+        },
+        "status": 400
+      }
+    },
+    {
+      "description": "a lookup of a valid number the terminal has never seen",
+      "request": {
+        "method": "GET",
+        "path": "/api/containers/ZZZU0000026"
+      },
+      "response": {
+        "body": {
+          "code": "CONTAINER_NOT_FOUND",
+          "error": "Not Found",
+          "message": "explanation",
+          "path": "/api/containers/ZZZU0000026",
+          "status": 404,
+          "timestamp": "2026-10-16T09:00:00.123Z"
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.timestamp": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,9})?Z$"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ]
+            }
+          }
+        },
+        "status": 404
+      }
+    },
+    {
+      "description": "a yard block that does not exist",
+      "request": {
+        "method": "GET",
+        "path": "/api/yard/blocks/Q"
+      },
+      "response": {
+        "body": {
+          "code": "BLOCK_NOT_FOUND",
+          "error": "Not Found",
+          "message": "explanation",
+          "path": "/api/yard/blocks/Q",
+          "status": 404,
+          "timestamp": "2026-10-16T09:00:00.123Z"
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.timestamp": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,9})?Z$"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ]
+            }
+          }
+        },
+        "status": 404
+      }
+    },
+    {
+      "description": "acknowledging an alert that does not exist",
+      "request": {
+        "method": "POST",
+        "path": "/api/alerts/999999999/ack"
+      },
+      "response": {
+        "body": {
+          "code": "ALERT_NOT_FOUND",
+          "error": "Not Found",
+          "message": "explanation",
+          "path": "/api/alerts/999999999/ack",
+          "status": 404,
+          "timestamp": "2026-10-16T09:00:00.123Z"
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.error": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.message": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.timestamp": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,9})?Z$"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ]
+            }
+          }
+        },
+        "status": 404
+      }
+    },
+    {
+      "description": "the terminal overview",
+      "request": {
+        "method": "GET",
+        "path": "/api/overview"
+      },
+      "response": {
+        "body": {
+          "acknowledgedAlerts": 1,
+          "avgTruckTurnMinutes": 34.5,
+          "blocks": [
+            {
+              "block": "A",
+              "capacity": 400,
+              "used": 120,
+              "utilisation": 0.3
+            }
+          ],
+          "clockSynchronised": true,
+          "craneMovesLastHour": 120,
+          "cranesFaulted": 0,
+          "dlqEvents": 4,
+          "eventsProcessed": 2500,
+          "openAlerts": 3,
+          "simulatedTime": "2026-10-16T08:30:00Z",
+          "trucksInTerminal": 6,
+          "vesselsAtBerth": 2,
+          "vesselsWaiting": 1,
+          "yardUtilisation": 0.42
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.acknowledgedAlerts": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.avgTruckTurnMinutes": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.blocks": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.blocks[*].block": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^[A-Z]$"
+                }
+              ]
+            },
+            "$.blocks[*].capacity": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.blocks[*].used": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.blocks[*].utilisation": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            },
+            "$.clockSynchronised": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.craneMovesLastHour": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.cranesFaulted": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.dlqEvents": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.eventsProcessed": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.openAlerts": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.simulatedTime": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,9})?Z$"
+                }
+              ]
+            },
+            "$.trucksInTerminal": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.vesselsAtBerth": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.vesselsWaiting": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.yardUtilisation": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "decimal"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "validation of a number with a wrong check digit",
+      "request": {
+        "method": "GET",
+        "path": "/api/containers/CSQU3054384/validation"
+      },
+      "response": {
+        "body": {
+          "expectedCheckDigit": 3,
+          "input": "CSQU3054384",
+          "reason": "Check digit mismatch: expected 3 but was 4",
+          "valid": false
+        },
+        "headers": {
+          "Content-Type": "application/json; charset=UTF-8"
+        },
+        "matchingRules": {
+          "body": {
+            "$.reason": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json(;\\s?charset=[\\w\\-]+)?"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "validation of a valid container number",
+      "request": {
+        "method": "GET",
+        "path": "/api/containers/CSQU3054383/validation"
+      },
+      "response": {
+        "body": {
+          "expectedCheckDigit": null,
+          "input": "CSQU3054383",
+          "reason": null,
+          "valid": true
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.21"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "portsync-core"
+  }
+}

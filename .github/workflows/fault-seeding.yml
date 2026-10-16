@@ -17,7 +17,7 @@ env:
 jobs:
   seed:
     name: ${{ matrix.bug }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -25,8 +25,8 @@ jobs:
         bug: [NONE, OFF_BY_ONE_CAPACITY, CHECK_DIGIT_EDGE_CASE, TIMEZONE_SLOT_TIMES, RACE_ON_LAST_SLOT,
               MISSING_AUTHORISATION_CHECK, API_SKIPS_CONTAINER_VALIDATION]
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-java@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'
@@ -61,7 +61,7 @@ jobs:
           suite perf     suites/perf-suite
           grep -h -A12 "Global Information" "$RUNNER_TEMP/perf.log" | tail -12 > "$R/perf/note" || true
           python3 .github/scripts/fault_results.py "${{ matrix.bug }}" "$R" "$RUNNER_TEMP/${{ matrix.bug }}.json"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: fault-${{ matrix.bug }}
           path: ${{ runner.temp }}/${{ matrix.bug }}.json
@@ -69,10 +69,10 @@ jobs:
   matrix:
     needs: seed
     if: always()
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/download-artifact@v4
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
         with:
           pattern: fault-*
           merge-multiple: true

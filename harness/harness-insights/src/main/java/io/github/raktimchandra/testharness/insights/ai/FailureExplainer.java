@@ -153,7 +153,7 @@ public final class FailureExplainer {
     }
 
     private static String oneLine(String s) {
-        if (s == null) {
+        if (s == null || s.isBlank()) {
             return "(none)";
         }
         String one = s.replaceAll("\\s+", " ").strip();

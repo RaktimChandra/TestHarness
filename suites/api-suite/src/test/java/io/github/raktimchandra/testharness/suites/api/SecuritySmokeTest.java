@@ -124,7 +124,43 @@ class SecuritySmokeTest extends ApiTest {
     @ParameterizedTest(name = "username {0}")
     @ValueSource(strings = {"' OR 1=1 --", "admin'--", "\" OR \"\"=\""})
     void sql_injection_in_login_fails_closed(String username) {
-        assertThatResponse(api.login(username, "x' OR '1'='1")).hasStatus(401).hasProblemCode("UNAUTHENTICATED");
+        // A unique suffix per run: each failure counts towards that username's lock.
+        assertThatResponse(api.login(username + System.nanoTime(), "x' OR '1'='1")).hasStatus(401)
+                .hasProblemCode("UNAUTHENTICATED");
+    }
+
+    // ---- brute force ----------------------------------------------------------------
+
+    @Test
+    void five_failed_sign_ins_lock_the_account_even_against_the_right_password() {
+        GateUser user = fx.newDriver();
+        for (int i = 1; i <= 5; i++) {
+            assertThatResponse(api.login(user.username(), "guess-" + i)).hasStatus(401).hasProblemCode("UNAUTHENTICATED");
+        }
+        Response locked = api.login(user.username(), user.credentials().password().reveal());
+        assertThatResponse(locked).hasStatus(429).hasProblemCode("TOO_MANY_ATTEMPTS");
+        assertThat(Integer.parseInt(locked.header("Retry-After"))).isBetween(1, 300);
+        assertThat(locked.jsonPath().getString("detail")).doesNotContain(user.username());
+        // The lock is per account: another account still signs in.
+        GateUser other = fx.newDriver();
+        assertThatResponse(api.login(other.username(), other.credentials().password().reveal())).hasStatus(200);
+    }
+
+    @Test
+    void a_lock_looks_the_same_for_an_account_that_does_not_exist() {
+        String ghost = "ghost-" + System.nanoTime();
+        for (int i = 1; i <= 5; i++) {
+            assertThatResponse(api.login(ghost, "guess-" + i)).hasStatus(401);
+        }
+        GateUser real = fx.newDriver();
+        for (int i = 1; i <= 5; i++) {
+            assertThatResponse(api.login(real.username(), "guess-" + i)).hasStatus(401);
+        }
+        Response forGhost = api.login(ghost, "guess-6");
+        Response forReal = api.login(real.username(), "guess-6");
+        assertThatResponse(forGhost).hasStatus(429).hasProblemCode("TOO_MANY_ATTEMPTS");
+        assertThatResponse(forReal).hasStatus(429).hasProblemCode("TOO_MANY_ATTEMPTS");
+        assertThat(forGhost.jsonPath().getString("detail")).isEqualTo(forReal.jsonPath().getString("detail"));
     }
 
     @Test
@@ -147,7 +183,25 @@ class SecuritySmokeTest extends ApiTest {
         assertThat(api1.header("X-Frame-Options")).isEqualTo("DENY");
         assertThat(api1.header("Cache-Control")).contains("no-store");
         Response page = api.anonymous().accept("text/html").get("/login");
-        assertThat(page.header("Content-Security-Policy")).contains("default-src 'self'").contains("frame-ancestors 'none'");
+        assertThat(page.header("Content-Security-Policy")).contains("default-src 'self'").contains("frame-ancestors 'none'")
+                .contains("object-src 'none'", "base-uri 'self'", "form-action 'self'").doesNotContain("unsafe-inline");
+        assertThat(page.header("Permissions-Policy")).contains("camera=()", "geolocation=()");
+        assertThat(page.header("Cross-Origin-Opener-Policy")).isEqualTo("same-origin");
+        assertThat(page.header("Cross-Origin-Embedder-Policy")).isEqualTo("require-corp");
+        assertThat(page.header("Cross-Origin-Resource-Policy")).isEqualTo("same-origin");
+    }
+
+    @Test
+    void content_hashed_assets_are_cached_and_pages_and_data_are_not() {
+        Response page = api.anonymous().accept("text/html").get("/login");
+        assertThat(page.header("Cache-Control")).contains("no-store");
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("/assets/[A-Za-z0-9._-]+\\.js").matcher(page.asString());
+        assertThat(m.find()).as("the page references a built script").isTrue();
+        Response asset = api.anonymous().accept("*/*").get(m.group());
+        assertThat(asset.statusCode()).isEqualTo(200);
+        assertThat(asset.header("Cache-Control")).contains("max-age=31536000", "public", "immutable")
+                .doesNotContain("no-store");
+        assertThat(api.as(fx.newDriver()).get("/api/auth/me").header("Cache-Control")).contains("no-store");
     }
 
     @Test
