@@ -183,7 +183,12 @@ class SecuritySmokeTest extends ApiTest {
         assertThat(api1.header("X-Frame-Options")).isEqualTo("DENY");
         assertThat(api1.header("Cache-Control")).contains("no-store");
         Response page = api.anonymous().accept("text/html").get("/login");
-        assertThat(page.header("Content-Security-Policy")).contains("default-src 'self'").contains("frame-ancestors 'none'");
+        assertThat(page.header("Content-Security-Policy")).contains("default-src 'self'").contains("frame-ancestors 'none'")
+                .contains("object-src 'none'", "base-uri 'self'", "form-action 'self'").doesNotContain("unsafe-inline");
+        assertThat(page.header("Permissions-Policy")).contains("camera=()", "geolocation=()");
+        assertThat(page.header("Cross-Origin-Opener-Policy")).isEqualTo("same-origin");
+        assertThat(page.header("Cross-Origin-Embedder-Policy")).isEqualTo("require-corp");
+        assertThat(page.header("Cross-Origin-Resource-Policy")).isEqualTo("same-origin");
     }
 
     @Test
