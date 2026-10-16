@@ -111,6 +111,11 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <argLine>@{argLine} ${aspectj.agent} -XX:+EnableDynamicAgentLoading -Dfile.encoding=UTF-8</argLine>
+                    <!-- The Cucumber runner is a JUnit Platform suite class, not a *Test class. -->
+                    <includes>
+                        <include>**/*Test.java</include>
+                        <include>**/RunPortSyncFeatures.java</include>
+                    </includes>
                     <excludes>
                         <exclude>${portsync.live.excludes}</exclude>
                     </excludes>
