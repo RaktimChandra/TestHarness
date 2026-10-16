@@ -1,0 +1,143 @@
+# TestHarness pipeline for CIForge (github.com/RaktimChandra/CIForge) — the same stages as
+# .github/workflows/ci.yml and .teamcity/settings.kts. Run it without a server:
+#
+#   ciforge run .ciforge.yml --source .
+#
+# On a machine without network access to Maven Central, point `mvn` at an offline Maven:
+#   ciforge run .ciforge.yml --source . -p mvn="mvn -o -B"
+version: 1
+project: testharness
+description: >
+  Build once, then every suite against the same commit; mutation testing, the Gatling smoke
+  and the dashboard alongside; quarantined tests reported but never blocking; one quality
+  gate at the end.
+vcs:
+  url: https://github.com/RaktimChandra/TestHarness.git
+  branch: main
+params:
+  mvn: ./mvnw -B -ntp
+  # Extra -D settings for every suite run (e.g. a local browser binary on a CI agent).
+  suite.args: ""
+max_parallel: 2
+triggers:
+  - type: vcs
+    branches: [main, "phase*"]
+    builds: [quality-gate]
+  - type: schedule
+    cron: "30 21 * * *"       # 03:00 IST
+    branch: main
+    builds: [quality-gate, quarantined]
+builds:
+  build:
+    name: Build + framework & SUT tests
+    timeout_minutes: 30
+    steps:
+      - name: compile, unit, framework, SUT integration and Pact tests; install for the suites
+        run: >
+          %mvn% install
+          -pl sut/gate-domain,sut/gate-ui,sut/gate-api,harness/harness-core,harness/harness-reporting,harness/harness-data,harness/harness-api,harness/harness-ui,harness/harness-bdd,harness/harness-insights,harness/harness-cli,suites/suite-support
+          -am %suite.args%
+      - name: the consumer contract is up to date
+        run: git diff --exit-code -- contracts/
+    artifacts:
+      - "**/target/surefire-reports/TEST-*.xml => reports"
+
+  api:
+    name: API + security suite
+    depends_on: [build]
+    timeout_minutes: 20
+    steps:
+      - name: api suite
+        run: "%mvn% verify -pl suites/api-suite -Dharness.quarantine.mode=exclude %suite.args%"
+    artifacts:
+      - "suites/api-suite/target/surefire-reports/** => reports"
+      - "suites/api-suite/target/test-history/** => history"
+
+  bdd:
+    name: BDD suite
+    depends_on: [build]
+    timeout_minutes: 20
+    steps:
+      - name: bdd suite
+        run: "%mvn% verify -pl suites/bdd-suite -Dharness.quarantine.mode=exclude %suite.args%"
+    artifacts:
+      - "suites/bdd-suite/target/surefire-reports/** => reports"
+      - "suites/bdd-suite/target/test-history/** => history"
+
+  ui-1:
+    name: UI suite, shard 1/2
+    depends_on: [build]
+    timeout_minutes: 25
+    steps:
+      - name: ui suite shard 1 of 2
+        run: "%mvn% verify -pl suites/ui-suite -Dharness.shard=1/2 -Dharness.quarantine.mode=exclude %suite.args%"
+    artifacts:
+      - "suites/ui-suite/target/surefire-reports/** => reports"
+      - "suites/ui-suite/target/test-history/** => history"
+      - "suites/ui-suite/target/a11y/** => a11y"
+
+  ui-2:
+    name: UI suite, shard 2/2
+    depends_on: [build]
+    timeout_minutes: 25
+    steps:
+      - name: ui suite shard 2 of 2
+        run: "%mvn% verify -pl suites/ui-suite -Dharness.shard=2/2 -Dharness.quarantine.mode=exclude %suite.args%"
+    artifacts:
+      - "suites/ui-suite/target/surefire-reports/** => reports"
+      - "suites/ui-suite/target/test-history/** => history"
+      - "suites/ui-suite/target/a11y/** => a11y"
+
+  mutation:
+    name: Mutation testing (PIT), 95 % gate
+    depends_on: [build]
+    timeout_minutes: 15
+    steps:
+      - name: pit on the domain rules
+        run: "%mvn% verify -Pmutation -pl sut/gate-domain %suite.args%"
+    artifacts:
+      - "sut/gate-domain/target/pit-reports/** => pit"
+
+  perf:
+    name: Gatling performance smoke
+    depends_on: [build]
+    timeout_minutes: 15
+    steps:
+      - name: booking flow under load (p95/p99/error-rate gates)
+        run: "%mvn% verify -pl suites/perf-suite %suite.args%"
+
+  quarantined:
+    name: Quarantined tests (non-blocking)
+    depends_on: [build]
+    timeout_minutes: 15
+    steps:
+      - name: only what quarantine.json lists; failures are reported, never blocking
+        run: "%mvn% verify -pl suites/flaky-demo -DskipFlakyDemo=false -Dharness.quarantine.mode=only %suite.args%"
+        continue_on_error: true
+    artifacts:
+      - "suites/flaky-demo/target/surefire-reports/** => reports"
+
+  quality-gate:
+    name: Quality gate
+    depends_on: [api, bdd, ui-1, ui-2, mutation, perf]
+    artifacts_from:
+      - {build: api, paths: ["reports/**", "history/**"], into: "in/api"}
+      - {build: bdd, paths: ["reports/**", "history/**"], into: "in/bdd"}
+      - {build: ui-1, paths: ["reports/**", "history/**"], into: "in/ui-1"}
+      - {build: ui-2, paths: ["reports/**", "history/**"], into: "in/ui-2"}
+    steps:
+      - name: count every suite result and fail on any failure
+        run: |
+          python3 - <<'PY'
+          import glob, sys, xml.etree.ElementTree as ET
+          total = failed = skipped = 0
+          for f in glob.glob("in/**/TEST-*.xml", recursive=True):
+              for tc in ET.parse(f).getroot().iter("testcase"):
+                  total += 1
+                  failed += tc.find("failure") is not None or tc.find("error") is not None
+                  skipped += tc.find("skipped") is not None
+          print(f"suites: {total} tests, {failed} failed, {skipped} skipped")
+          sys.exit(1 if failed or total == 0 else 0)
+          PY
+    artifacts:
+      - "in/** => suite-results"
