@@ -72,6 +72,7 @@ jobs:
           python3 tools/teamcity_run.py --token-file "$RUNNER_TEMP/tc/token" \
             --repo "https://github.com/${{ github.repository }}.git" --branch "$BRANCH" \
             --builds '${{ inputs.builds || 'ApiSuite,BddSuite,UiSuite_chrome_1,UiSuite_chrome_2,Perf,Mutation' }}' \
+            -p visual.platform.suffix=teamcity-agent -p visual.require-baseline=false \
             --out out | tee "$RUNNER_TEMP/teamcity-run.log"
       - name: Summary
         if: always()

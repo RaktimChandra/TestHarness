@@ -113,7 +113,8 @@ val BddSuite = suiteBuild("BddSuite", "3. BDD suite", "suites/bdd-suite", "")
 val UiBuilds: List<BuildType> = listOf("chrome", "firefox", "edge").flatMap { browser ->
     listOf(1, 2).map { shard ->
         suiteBuild("UiSuite_${browser}_$shard", "4. UI suite - $browser, shard $shard/2", "suites/ui-suite",
-            "-Dharness.ui.browser=$browser -Dharness.visual.platform=$browser-ci -Dharness.shard=$shard/2")
+            "-Dharness.ui.browser=$browser -Dharness.visual.platform=$browser-%visual.platform.suffix% " +
+                "-Dharness.visual.require-baseline=%visual.require-baseline% -Dharness.shard=$shard/2")
     }
 }
 
@@ -239,6 +240,10 @@ project {
     params {
         param("env.HARNESS_ENV", "ci")
         param("mvn.args", "-B -ntp --fail-at-end")
+        // Visual baselines are per platform; agents whose browser renders differently from the
+        // GitHub runner ("ci") use their own suffix and, until baselines exist, do not require them.
+        param("visual.platform.suffix", "ci")
+        param("visual.require-baseline", "true")
     }
 
     buildType(Build)

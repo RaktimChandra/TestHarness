@@ -72,10 +72,11 @@ def main():
     ap.add_argument("--builds", required=True)
     ap.add_argument("--out", default="experiments/teamcity")
     ap.add_argument("--timeout-min", type=int, default=150)
+    ap.add_argument("-p", "--param", action="append", default=[], help="NAME=VALUE build parameter for the queued builds")
     a = ap.parse_args()
     os.makedirs(a.out, exist_ok=True)
     tc = TC(a.url, open(a.token_file).read().strip())
-    report = {"server": a.url, "repo": a.repo, "branch": a.branch, "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
+    report = {"server": a.url, "repo": a.repo, "branch": a.branch, "params": a.param, "started": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
 
     server = wait("the REST API", lambda: tc.get("/app/rest/server"), 600)
     report["teamcity_version"] = server.get("version")
@@ -119,8 +120,10 @@ def main():
     queued = []
     for short in a.builds.split(","):
         bt = resolve(short.strip())
+        props = [{"name": k, "value": v} for k, _, v in (p.partition("=") for p in a.param)]
         q = tc.call("POST", "/app/rest/buildQueue", {"buildType": {"id": bt}, "branchName": a.branch,
-                                                      "comment": {"text": "teamcity.yml"}})
+                                                      "comment": {"text": "teamcity.yml"},
+                                                      "properties": {"property": props}})
         queued.append(q["id"])
         log(f"queued {bt} as build {q['id']}")
 
