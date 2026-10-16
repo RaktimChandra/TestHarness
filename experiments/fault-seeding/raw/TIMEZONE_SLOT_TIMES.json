@@ -6,17 +6,17 @@
       "failed": 0,
       "skipped": 0,
       "exit_code": 0,
-      "seconds": 34.0,
+      "seconds": 35.0,
       "detected": false,
       "failures": [],
       "note": ""
     },
     "api": {
-      "tests": 85,
+      "tests": 92,
       "failed": 6,
       "skipped": 0,
       "exit_code": 1,
-      "seconds": 34.0,
+      "seconds": 38.0,
       "detected": true,
       "failures": [
         {
@@ -42,7 +42,7 @@
         {
           "test": "Slots API > a_slot_requested_in_utc_is_reported_in_terminal_time",
           "type": "AssertionFailedError",
-          "message": "expected: 2026-10-16T08:30:00Z"
+          "message": "expected: 2026-10-17T08:30:00Z"
         },
         {
           "test": "Slots API > slot_times_are_the_terminal_wall_clock_with_its_offset",
@@ -53,11 +53,11 @@
       "note": ""
     },
     "bdd": {
-      "tests": 15,
+      "tests": 20,
       "failed": 1,
       "skipped": 0,
       "exit_code": 1,
-      "seconds": 33.0,
+      "seconds": 36.0,
       "detected": true,
       "failures": [
         {
@@ -73,7 +73,7 @@
       "failed": 0,
       "skipped": 0,
       "exit_code": 0,
-      "seconds": 25.0,
+      "seconds": 26.0,
       "detected": false,
       "failures": [],
       "note": ""
@@ -86,24 +86,24 @@
       "seconds": 48.0,
       "detected": false,
       "failures": [],
-      "note": "> request count                                                                      |       300 |       300 |         -\n> min response time (ms)                                                             |         2 |         2 |         -\n> max response time (ms)                                                             |        95 |        95 |         -\n> mean response time (ms)                                                            |        19 |        19 |         -\n> response time std deviation (ms)                                                   |        30 |        30 |         -\n> response time 50th percentile (ms)                                                 |         5 |         5 |         -\n> response time 75th percentile (ms)                                                 |         8 |         8 |         -\n> response time 95th percentile (ms)                                                 |        78 |        78 |         -\n> response time 99th percentile (ms)                                                 |        84 |        84 |         -\n> mean throughput (rps)                                                              |        10 |        10 |         -\n---- Response Time Distribution ----------------------------------------------------------------------------------------\n> OK: t < 800 ms                                                                                            300   (100%)"
+      "note": "> request count                                                                      |       300 |       300 |         -\n> min response time (ms)                                                             |         2 |         2 |         -\n> max response time (ms)                                                             |        95 |        95 |         -\n> mean response time (ms)                                                            |        20 |        20 |         -\n> response time std deviation (ms)                                                   |        29 |        29 |         -\n> response time 50th percentile (ms)                                                 |         5 |         5 |         -\n> response time 75th percentile (ms)                                                 |         8 |         8 |         -\n> response time 95th percentile (ms)                                                 |        78 |        78 |         -\n> response time 99th percentile (ms)                                                 |        82 |        82 |         -\n> mean throughput (rps)                                                              |        10 |        10 |         -\n---- Response Time Distribution ----------------------------------------------------------------------------------------\n> OK: t < 800 ms                                                                                            300   (100%)"
     },
     "security": {
       "tests": 17,
       "failed": 0,
       "skipped": 0,
       "exit_code": 0,
-      "seconds": 26.0,
+      "seconds": 28.0,
       "detected": false,
       "failures": [],
       "note": ""
     },
     "ui": {
-      "tests": 17,
+      "tests": 20,
       "failed": 3,
       "skipped": 0,
       "exit_code": 1,
-      "seconds": 54.0,
+      "seconds": 59.0,
       "detected": true,
       "failures": [
         {
@@ -129,7 +129,7 @@
       "failed": 0,
       "skipped": 0,
       "exit_code": 0,
-      "seconds": 29.0,
+      "seconds": 33.0,
       "detected": false,
       "failures": [],
       "note": ""
