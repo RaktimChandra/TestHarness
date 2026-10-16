@@ -196,6 +196,99 @@ git status contracts
 If `git status` shows `contracts\pacts\gate-ui-gate-api.json` as modified, you changed what
 the UI sends or expects — commit the file with your change (CI fails if they differ).
 
+## 10. The `th` command — Terminal A
+
+Install the framework once, so single suites can run on their own (`th.cmd` also builds
+itself on first use):
+
+```powershell
+.\mvnw.cmd install -DskipTests
+```
+
+Then use `th.cmd` from the repository root. Show every command:
+
+```powershell
+.	h.cmd --help
+```
+
+Run the UI suite in Firefox, smoke tests only:
+
+```powershell
+.	h.cmd run --suite ui --browser firefox --tags smoke
+```
+
+Re-run only what failed last time:
+
+```powershell
+.	h.cmd rerun-failed
+```
+
+Generate and open the Allure report (stop with Ctrl+C):
+
+```powershell
+.	h.cmd report
+```
+
+## 11. Flakiness leaderboard and quarantine — Terminal A
+
+Every test run records results under each module's `target	est-history`. Show the tests
+that flip between pass and fail on the same commit:
+
+```powershell
+.	h.cmd history flaky --jsonl suites
+```
+
+The committed results of the 20-run CI demo show a real flaky test:
+
+```powershell
+.	h.cmd history flaky --jsonl experimentslaky-demo\history.jsonl
+```
+
+## 12. The quality dashboard — Terminal A
+
+Run something first (step 2 or step 4), then build the dashboard from those results and open
+it in your default browser:
+
+```powershell
+.	h.cmd dashboard --open
+```
+
+It is written to `target\dashboard\index.html` and opens straight from disk. Panels with no
+data say what to run to fill them.
+
+## 13. Test PortSync with the adapter — Terminals B and A
+
+Needs about 6 GB free for Docker (Kafka, PostgreSQL and three PortSync containers).
+
+**Terminal B** — get PortSync (in any folder outside TestHarness):
+
+```powershell
+git clone https://github.com/RaktimChandra/PortSync.git
+```
+
+```powershell
+cd PortSync
+```
+
+```powershell
+docker compose up -d --build
+```
+
+The first build takes several minutes. Leave Terminal B open.
+
+**Terminal A** — in TestHarness (after step 10's install):
+
+```powershell
+.\mvnw.cmd verify -pl adapters/portsync "-Dportsync.live"
+```
+
+The tests wait until PortSync is ready (up to 4 minutes), then run the API, contract, event,
+alert, UI, accessibility and BDD suites. When finished, in **Terminal B**:
+
+```powershell
+docker compose down -v
+```
+
 ## Troubleshooting
 
 | Symptom | Fix |
@@ -204,6 +297,7 @@ the UI sends or expects — commit the file with your change (CI fails if they d
 | `client version ... is too old` from Docker | Update Docker Desktop. (Testcontainers 1.21.4, used here, was verified against Docker Engine 29.8.) |
 | UI tests fail to start a browser | Install/update Chrome; Selenium Manager downloads the matching driver automatically. |
 | Port 8080 or 5432 busy (Compose) | Stop the other program, or change the left-hand port in `docker-compose.yml`. |
+| PortSync tests: "PortSync is not running or not ready" | Check Terminal B: `docker compose ps` should list `portsync-core`, `simulator`, `frontend`, `kafka`, `postgres` as running/healthy. |
 | Need to reproduce a run's random data | Use the seed printed in the log: `"-Dharness.data.seed=<seed>"`. |
 | Grid run: `ERR_CONNECTION_REFUSED` in the browser | `-Dharness.sut.browser-base-url=http://gate:8080` is missing — browsers in Docker cannot use `localhost:8080`. |
 | Grid run: "Browser console capture unavailable" | The nodes must advertise `http://localhost:4444` (`SE_NODE_GRID_URL`, set in `docker-compose.grid.yml`); if your Grid is elsewhere set `GRID_PUBLIC_URL` before `docker compose up`. |
