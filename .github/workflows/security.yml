@@ -89,32 +89,33 @@ jobs:
         run: |
           set -o pipefail
           docker compose up -d --build --wait --wait-timeout 300 2>&1 | tee "$RUNNER_TEMP/compose.log"
-      - name: ZAP baseline (passive scan of everything the spider reaches)
-        uses: zaproxy/action-baseline@v0.15.0
-        with:
-          target: http://localhost:8080
-          rules_file_name: .zap/rules.tsv
-          cmd_options: -j
-          allow_issue_writing: false
-          fail_action: true
-          artifact_name: zap-baseline
-      - name: Alerts as annotations
-        if: always()
+      - name: ZAP baseline (passive scan of everything the spiders reach)
         run: |
-          python3 - <<'PY'
-          import pathlib, re
-          p = pathlib.Path("report_md.md")
-          if not p.exists():
-              raise SystemExit("no ZAP report")
-          text = p.read_text()
-          for line in text.splitlines():
-              cells = [c.strip() for c in line.strip().strip("|").split("|")]
-              if len(cells) == 3 and cells[2].isdigit() and cells[1] in ("High", "Medium", "Low", "Informational"):
-                  print(f"::warning title=ZAP {cells[1]}::{cells[0]} - {cells[2]} instance(s)")
-          ids = sorted(set(re.findall(r"pluginId=(\d+)|Plugin Id \| \[?(\d+)", text) and
-                           [a or b for a, b in re.findall(r"pluginId=(\d+)|Plugin Id \| \[?(\d+)", text)]))
-          print(f"::notice title=ZAP plugin ids::{', '.join(ids)}")
-          PY
+          # The ZAP image runs as uid 1000: give it a writable working directory with the rules.
+          mkdir -p zap && cp .zap/rules.tsv zap/ && chmod 777 zap
+          set +e
+          docker run --rm --network=host -v "$PWD/zap:/zap/wrk:rw" ghcr.io/zaproxy/zaproxy:stable \
+            zap-baseline.py -t http://localhost:8080 -c rules.tsv -j \
+            -r zap-report.html -w zap-report.md -J zap-report.json 2>&1 | tee "$RUNNER_TEMP/zap.log"
+          rc=${PIPESTATUS[0]}
+          set -e
+          grep -E "^(FAIL|WARN|PASS|IGNORE)" "$RUNNER_TEMP/zap.log" | grep -vE "^PASS" | while read -r line; do
+            echo "::warning title=ZAP::$line"
+          done
+          echo "ZAP exit code $rc (0 pass, 1 fail, 2 warnings)"
+          { echo "### OWASP ZAP baseline"; echo '```'; grep -E "^(FAIL|WARN|IGNORE|PASS:)" "$RUNNER_TEMP/zap.log" | grep -vE "^PASS" ; tail -1 "$RUNNER_TEMP/zap.log"; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+          exit $rc
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: zap-baseline
+          path: zap
+          if-no-files-found: ignore
+      - uses: ./.github/actions/log-tail
+        if: failure()
+        with:
+          file: ${{ runner.temp }}/zap.log
+          lines: '60'
       - name: Container logs on failure
         if: failure()
         run: |
