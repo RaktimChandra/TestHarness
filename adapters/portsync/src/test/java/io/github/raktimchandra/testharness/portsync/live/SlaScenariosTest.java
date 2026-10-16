@@ -71,14 +71,18 @@ class SlaScenariosTest extends LiveTest {
     @DisplayName("the SSE stream delivers processed events and a 'dlq' event for an invalid container")
     void eventStreamDeliversEventsAndDeadLetters() throws Exception {
         List<String> eventNames = new CopyOnWriteArrayList<>();
-        HttpClient http = HttpClient.newHttpClient();
+        List<String> firstLines = new CopyOnWriteArrayList<>();
+        HttpClient http = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
         HttpRequest req = HttpRequest.newBuilder(URI.create(PortSync.get().apiUrl() + "/api/events/stream"))
                 .header("Accept", "text/event-stream").build();
         CompletableFuture<Void> reader = http.sendAsync(req, HttpResponse.BodyHandlers.ofInputStream())
                 .thenAccept(res -> {
-                    assertThat(res.statusCode()).isEqualTo(200);
+                    firstLines.add("HTTP " + res.statusCode() + " " + res.headers().firstValue("content-type").orElse(""));
                     try (BufferedReader in = new BufferedReader(new InputStreamReader(res.body(), StandardCharsets.UTF_8))) {
                         for (String line; (line = in.readLine()) != null; ) {
+                            if (firstLines.size() < 12) {
+                                firstLines.add(line.length() > 120 ? line.substring(0, 120) : line);
+                            }
                             if (line.startsWith("event:")) {
                                 eventNames.add(line.substring(6).strip());
                             }
@@ -88,14 +92,17 @@ class SlaScenariosTest extends LiveTest {
                     }
                 });
         try {
+            await(EVENT_TIMEOUT).until("the stream's 'hello'", () -> eventNames.contains("hello"), b -> b);
             await(EVENT_TIMEOUT).until("a processed event on the stream", () -> eventNames.contains("event"), b -> b);
             simulator.invalidContainer();
             await(EVENT_TIMEOUT).until("a 'dlq' event on the stream", () -> eventNames.contains("dlq"), b -> b);
+        } catch (io.github.raktimchandra.testharness.core.retry.Await.AwaitTimeoutException e) {
+            throw new AssertionError(e.getMessage() + "; event names seen " + eventNames + "; first lines " + firstLines, e);
         } finally {
             reader.cancel(true);
             http.shutdownNow();
         }
-        assertThat(eventNames).contains("event", "dlq");
+        assertThat(eventNames).contains("hello", "event", "dlq");
     }
 
     @Test
