@@ -151,6 +151,15 @@ def main():
                      "status_text": b.get("statusText"), "started": b.get("startDate"), "finished": b.get("finishDate"),
                      "tests": t.get("count", 0), "passed": t.get("passed", 0), "failed": t.get("failed", 0),
                      "ignored": t.get("ignored", 0)})
+    for r in rows:
+        if r["failed"]:
+            occ = tc.get(f"/app/rest/testOccurrences?locator=build:(id:{r['id']}),status:FAILURE,count:30"
+                         "&fields=testOccurrence(name,details)")
+            r["failed_tests"] = [{"name": o.get("name"), "details": (o.get("details") or "")[:600]}
+                                 for o in occ.get("testOccurrence", [])]
+        elif r["status"] == "FAILURE" and not r["tests"]:
+            problems = tc.get(f"/app/rest/problemOccurrences?locator=build:(id:{r['id']})&fields=problemOccurrence(type,details)")
+            r["problems"] = [(p.get("type"), (p.get("details") or "")[:400]) for p in problems.get("problemOccurrence", [])]
     report["builds"] = rows
     report["finished"] = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
     report["success"] = bool(rows) and all(r["status"] == "SUCCESS" for r in rows) and not report.get("timed_out")
@@ -160,6 +169,10 @@ def main():
           "| build | status | tests | failed | ignored | started | finished | status text |", "|---|---|---:|---:|---:|---|---|---|"]
     md += [f"| {r['build_type']} | {r['status']} | {r['tests']} | {r['failed']} | {r['ignored']} | {r['started']} | "
            f"{r['finished']} | {(r['status_text'] or '').replace('|', '/')} |" for r in rows]
+    for r in rows:
+        if r.get("failed_tests"):
+            md += ["", f"Failed tests in {r['build_type']}:"]
+            md += [f"- `{t['name']}`: {' '.join(t['details'].split())[:300]}" for t in r["failed_tests"]]
     open(os.path.join(a.out, "teamcity-run.md"), "w").write("\n".join(md) + "\n")
     print("\n".join(md))
     return 0 if report["success"] else 1

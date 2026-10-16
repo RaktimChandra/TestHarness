@@ -59,13 +59,16 @@ jobs:
           echo "$token" > "$RUNNER_TEMP/tc/token"
       - name: Start the agent
         run: |
-          docker run -d --name tc-agent --network host \
+          # Chrome in a container: no user-namespace sandbox for the non-root agent user, and a
+          # larger /dev/shm than Docker's 64 MB default.
+          docker run -d --name tc-agent --network host --shm-size=2g \
             --group-add "$(stat -c %g /var/run/docker.sock)" -v /var/run/docker.sock:/var/run/docker.sock \
             -e SERVER_URL=http://localhost:8111 -e AGENT_NAME=gh-runner-agent \
-            -e GATE_SEED_PASSWORD="tc-${{ github.run_id }}" \
+            -e GATE_SEED_PASSWORD="tc-${{ github.run_id }}" -e HARNESS_UI_NO_SANDBOX=true \
             th-teamcity-agent
       - name: Import the settings and run the builds
         run: |
+          set -o pipefail
           python3 tools/teamcity_run.py --token-file "$RUNNER_TEMP/tc/token" \
             --repo "https://github.com/${{ github.repository }}.git" --branch "$BRANCH" \
             --builds '${{ inputs.builds || 'ApiSuite,BddSuite,UiSuite_chrome_1,UiSuite_chrome_2,Perf,Mutation' }}' \
@@ -79,6 +82,9 @@ jobs:
           r = json.load(open("out/teamcity-run.json"))
           for b in r["builds"]:
               print(f"::notice title=TeamCity {b['build_type']}::{b['status']} - {b['tests']} tests, {b['failed']} failed - {b['status_text']}")
+          for b in r["builds"]:
+              for t in b.get("failed_tests", [])[:6]:
+                  print(f"::error title=TeamCity {b['build_type']} failed test::{t['name']}: {' '.join(t['details'].split())[:500]}")
           PY
       - name: Server and agent logs on failure
         if: failure()
