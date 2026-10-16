@@ -30,6 +30,23 @@ jobs:
       OSV_VERSION: v2.7.0
     steps:
       - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Software bill of materials (every Maven module, transitive dependencies resolved by Maven)
+        run: |
+          # OSV-Scanner cannot resolve this reactor's own modules from Maven Central, so Maven
+          # resolves the graph and OSV-Scanner reads the CycloneDX SBOM.
+          ./mvnw -B -ntp -q install -DskipTests -DskipPerf
+          ./mvnw -B -ntp -q org.cyclonedx:cyclonedx-maven-plugin:2.9.1:makeAggregateBom \
+            -DoutputFormat=json -DoutputName=bom.cdx -DincludeTestScope=true
+          python3 -c "import json;b=json.load(open('target/bom.cdx.json'));print(len(b['components']),'components in the SBOM')"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: sbom
+          path: target/bom.cdx.json
       - name: Install OSV-Scanner (checksum verified)
         run: |
           base="https://github.com/google/osv-scanner/releases/download/$OSV_VERSION"
@@ -42,7 +59,9 @@ jobs:
       - name: Scan
         run: |
           set -o pipefail
-          osv-scanner scan source --recursive --config osv-scanner.toml --format markdown . 2>&1 | tee "$RUNNER_TEMP/osv.md"
+          osv-scanner scan source --config osv-scanner.toml --format markdown \
+            -L target/bom.cdx.json -L dashboard/package-lock.json -L sut/gate-ui/package-lock.json \
+            2>&1 | tee "$RUNNER_TEMP/osv.md"
       - name: Summary
         if: always()
         run: |
@@ -76,6 +95,23 @@ jobs:
           allow_issue_writing: false
           fail_action: true
           artifact_name: zap-baseline
+      - name: Alerts as annotations
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import pathlib, re
+          p = pathlib.Path("report_md.md")
+          if not p.exists():
+              raise SystemExit("no ZAP report")
+          text = p.read_text()
+          for line in text.splitlines():
+              cells = [c.strip() for c in line.strip().strip("|").split("|")]
+              if len(cells) == 3 and cells[2].isdigit() and cells[1] in ("High", "Medium", "Low", "Informational"):
+                  print(f"::warning title=ZAP {cells[1]}::{cells[0]} - {cells[2]} instance(s)")
+          ids = sorted(set(re.findall(r"pluginId=(\d+)|Plugin Id \| \[?(\d+)", text) and
+                           [a or b for a, b in re.findall(r"pluginId=(\d+)|Plugin Id \| \[?(\d+)", text)]))
+          print(f"::notice title=ZAP plugin ids::{', '.join(ids)}")
+          PY
       - name: Container logs on failure
         if: failure()
         run: |
