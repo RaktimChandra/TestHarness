@@ -34,10 +34,12 @@ compiles against, code in this repository.
 | `harness/harness-api` | `ApiSpecs`, `SchemaRegistry` + validation filter, `TokenCache`, `ResponseAssert` | no |
 | `harness/harness-ui` | `Drivers`, `DriverFactory`, `Waits`, `BasePage`, `Component`, `Locators`, `Inputs`, `BrowserExtension`, `UiEvidence` | no |
 | `harness/harness-bdd` | `ScenarioContext`, `ScenarioHooks` | no |
-| `harness/harness-insights` | history, flakiness, quarantine/selection/shard filters, failure classes, test impact analysis, AI drafts | no |
+| `harness/harness-insights` | history, flakiness, quarantine/selection/shard filters, failure classes, test impact analysis, AI drafts, dashboard data + prebuilt page | no |
 | `harness/harness-cli` | the `th` command | no |
 | `suites/suite-support` | `GateSut` launcher, `GateApi`, `GateFixtures`, models, schemas, page objects | **yes** |
 | `suites/*-suite` | the tests (`flaky-demo` only runs with `-DskipFlakyDemo=false`) | yes |
+| `adapters/portsync` | the PortSync adapter: config, clients, schemas, page objects, live suites (`-Dportsync.live`) | PortSync |
+| `dashboard/` | source of the quality dashboard (Vite + React + TypeScript) | no |
 | `tools/` | experiment scripts (`tia_experiment.py`) | — |
 | `experiments/` | committed results of the experiments | — |
 
@@ -307,6 +309,7 @@ camera icon; the nodes run noVNC without a password).
 ./th history flaky --jsonl suites/api-suite/target/test-history
 ./th tia select --base origin/main
 ./th ai explain                                          # summary of the last failures
+./th dashboard --open                                    # quality dashboard from the last runs
 ./th <command> --help
 ```
 
