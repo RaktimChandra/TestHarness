@@ -1,0 +1,145 @@
+{
+  "server": "http://localhost:8111",
+  "repo": "https://github.com/RaktimChandra/TestHarness.git",
+  "branch": "phase6",
+  "started": "2026-10-16T10:47:08Z",
+  "teamcity_version": "2025.07 (build 197242)",
+  "build_types": [
+    "TestHarness_Build",
+    "TestHarness_ApiSuite",
+    "TestHarness_BddSuite",
+    "TestHarness_UiSuite_chrome_1",
+    "TestHarness_UiSuite_chrome_2",
+    "TestHarness_UiSuite_edge_1",
+    "TestHarness_UiSuite_edge_2",
+    "TestHarness_UiSuite_firefox_1",
+    "TestHarness_UiSuite_firefox_2",
+    "TestHarness_ComposeSmoke",
+    "TestHarness_Grid",
+    "TestHarness_Perf",
+    "TestHarness_Mutation",
+    "TestHarness_AllureReport",
+    "TestHarness_QualityGate",
+    "TestHarness_Quarantined"
+  ],
+  "agent": "gh-runner-agent",
+  "builds": [
+    {
+      "id": 1,
+      "build_type": "TestHarness_Build",
+      "state": "finished",
+      "status": "SUCCESS",
+      "status_text": "Tests passed: 349",
+      "started": "20261016T104802+0000",
+      "finished": "20261016T105116+0000",
+      "tests": 349,
+      "passed": 349,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "id": 2,
+      "build_type": "TestHarness_ApiSuite",
+      "state": "finished",
+      "status": "SUCCESS",
+      "status_text": "Tests passed: 112",
+      "started": "20261016T105233+0000",
+      "finished": "20261016T105327+0000",
+      "tests": 112,
+      "passed": 112,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "id": 4,
+      "build_type": "TestHarness_BddSuite",
+      "state": "finished",
+      "status": "SUCCESS",
+      "status_text": "Tests passed: 23, ignored: 1",
+      "started": "20261016T105327+0000",
+      "finished": "20261016T105420+0000",
+      "tests": 24,
+      "passed": 23,
+      "failed": 0,
+      "ignored": 1
+    },
+    {
+      "id": 6,
+      "build_type": "TestHarness_UiSuite_chrome_1",
+      "state": "finished",
+      "status": "FAILURE",
+      "status_text": "Tests failed: 3 (3 new), passed: 12",
+      "started": "20261016T105420+0000",
+      "finished": "20261016T105525+0000",
+      "tests": 15,
+      "passed": 12,
+      "failed": 3,
+      "ignored": 0,
+      "failed_tests": [
+        {
+          "name": "io.github.raktimchandra.testharness.suites.ui.VisualRegressionTest: Visual regression.login_error(WebDriver, Waits)",
+          "details": "java.lang.AssertionError: Visual mismatch 'login-form-error': 1.569% of pixels differ (allowed 0.200%); diff at target/visual/diff/chrome-ci/login-form-error-diff.png\n\tat io.github.raktimchandra.testharness.ui.visual.VisualCheck.matches(VisualCheck.java:94)\n\tat io.github.raktimchandra.testharness.suites.ui.VisualRegressionTest.login_error(VisualRegressionTest.java:56)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat java.base/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:387)\n\tat java.base/java.util.concurrent.ForkJoinPool$WorkQueue.tryRemoveAndExec(ForkJoinPool."
+        },
+        {
+          "name": "io.github.raktimchandra.testharness.suites.ui.VisualRegressionTest: Visual regression.cancel_confirmation_dialog(WebDriver, Waits)",
+          "details": "java.lang.AssertionError: Visual mismatch 'cancel-dialog': 1.414% of pixels differ (allowed 0.200%); diff at target/visual/diff/chrome-ci/cancel-dialog-diff.png\n\tat io.github.raktimchandra.testharness.ui.visual.VisualCheck.matches(VisualCheck.java:94)\n\tat io.github.raktimchandra.testharness.suites.ui.VisualRegressionTest.cancel_confirmation_dialog(VisualRegressionTest.java:81)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat java.base/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:387)\n\tat java.base/java.util.concurrent.ForkJoinPool$WorkQueue.tryRemoveAndExec(Fork"
+        },
+        {
+          "name": "io.github.raktimchandra.testharness.suites.ui.VisualRegressionTest: Visual regression.login_form(WebDriver, Waits)",
+          "details": "java.lang.AssertionError: Visual mismatch 'login-form': 0.669% of pixels differ (allowed 0.200%); diff at target/visual/diff/chrome-ci/login-form-diff.png\n\tat io.github.raktimchandra.testharness.ui.visual.VisualCheck.matches(VisualCheck.java:94)\n\tat io.github.raktimchandra.testharness.suites.ui.VisualRegressionTest.login_form(VisualRegressionTest.java:47)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat java.base/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:387)\n\tat java.base/java.util.concurrent.ForkJoinPool$WorkQueue.tryRemoveAndExec(ForkJoinPool.java:1351)\n\ta"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "build_type": "TestHarness_UiSuite_chrome_2",
+      "state": "finished",
+      "status": "FAILURE",
+      "status_text": "Tests failed: 2 (2 new), passed: 12",
+      "started": "20261016T105525+0000",
+      "finished": "20261016T105629+0000",
+      "tests": 14,
+      "passed": 12,
+      "failed": 2,
+      "ignored": 0,
+      "failed_tests": [
+        {
+          "name": "io.github.raktimchandra.testharness.suites.ui.VisualRegressionTest: Visual regression.booking_form_with_a_check_digit_error(WebDriver, Waits)",
+          "details": "java.lang.AssertionError: Visual mismatch 'booking-form-invalid': 0.904% of pixels differ (allowed 0.200%); diff at target/visual/diff/chrome-ci/booking-form-invalid-diff.png\n\tat io.github.raktimchandra.testharness.ui.visual.VisualCheck.matches(VisualCheck.java:94)\n\tat io.github.raktimchandra.testharness.suites.ui.VisualRegressionTest.booking_form_with_a_check_digit_error(VisualRegressionTest.java:70)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat java.base/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:387)\n\tat java.base/java.util.concurrent.ForkJoinPool$WorkQu"
+        },
+        {
+          "name": "io.github.raktimchandra.testharness.suites.ui.VisualRegressionTest: Visual regression.clerk_search_form(WebDriver, Waits)",
+          "details": "java.lang.AssertionError: Visual mismatch 'clerk-search-form': 1.685% of pixels differ (allowed 0.200%); diff at target/visual/diff/chrome-ci/clerk-search-form-diff.png\n\tat io.github.raktimchandra.testharness.ui.visual.VisualCheck.matches(VisualCheck.java:94)\n\tat io.github.raktimchandra.testharness.suites.ui.VisualRegressionTest.clerk_search_form(VisualRegressionTest.java:88)\n\tat java.base/java.lang.reflect.Method.invoke(Method.java:580)\n\tat java.base/java.util.concurrent.ForkJoinTask.doExec(ForkJoinTask.java:387)\n\tat java.base/java.util.concurrent.ForkJoinPool$WorkQueue.tryRemoveAndExec(ForkJ"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "build_type": "TestHarness_Perf",
+      "state": "finished",
+      "status": "SUCCESS",
+      "status_text": "Success",
+      "started": "20261016T105629+0000",
+      "finished": "20261016T105742+0000",
+      "tests": 0,
+      "passed": 0,
+      "failed": 0,
+      "ignored": 0
+    },
+    {
+      "id": 12,
+      "build_type": "TestHarness_Mutation",
+      "state": "finished",
+      "status": "SUCCESS",
+      "status_text": "Tests passed: 69",
+      "started": "20261016T105742+0000",
+      "finished": "20261016T105827+0000",
+      "tests": 69,
+      "passed": 69,
+      "failed": 0,
+      "ignored": 0
+    }
+  ],
+  "finished": "2026-10-16T10:58:46Z",
+  "success": false
+}
