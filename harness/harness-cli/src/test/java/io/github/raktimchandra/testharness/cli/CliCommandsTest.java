@@ -129,7 +129,9 @@ class CliCommandsTest {
         assertThat(mvnwLog()).isEmpty();
         Out real = run("rerun-failed", "--", "-Dextra.flag=1");
         assertThat(real.code()).as(real.err()).isZero();
-        assertThat(mvnwLog()).contains("verify -pl suites/api-suite -Dharness.select=", "-Dsurefire.failIfNoSpecifiedTests=false -Dextra.flag=1");
+        // separate fragments: on Windows the properties arrive quoted (Processes.forPlatform)
+        assertThat(mvnwLog()).contains("verify -pl suites/api-suite", "-Dharness.select=",
+                "-Dsurefire.failIfNoSpecifiedTests=false", "-Dextra.flag=1");
         assertThat(repo.resolve("target/harness/rerun-failed.txt")).content().contains("a.ATest#bad");
     }
 
