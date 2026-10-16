@@ -16,17 +16,18 @@ GitHub Actions
 
 ## Results (measured)
 
-From real runs on 2026-10-14 and 2026-10-15 — method, machine and raw numbers for every row are in
+From real runs on 2026-10-14 to 2026-10-16 — method, machine and raw numbers for every row are in
 [RESULTS.md](RESULTS.md). Nothing in this table is estimated.
 
 | | |
 |---|---|
-| Tests in one `verify` | **458 JVM tests + 31 Vitest + 1 Gatling simulation**, 0 failed (5 visual checks skip outside CI by design) |
-| Wall-clock, clean build + everything (2 vCPU sandbox) | **5 min 51 s** |
+| Tests in one `verify` | **485 JVM tests + 40 Vitest + 1 Gatling simulation**, 0 failed (5 visual checks skip outside CI by design) |
+| Wall-clock, clean build + everything (2 vCPU sandbox) | **5 min 54 s** |
 | Fault seeding: 6 bugs × 8 suite types (CI) | **6/6 caught** by at least one suite · API 100 % · BDD 83 % · contract, security, UI 33 % each · the race bug caught by **one test of 151** |
 | Mutation score, domain rules (PIT, STRONGER) | **95.1 % → 100 %** (143 mutants) after turning the 7 survivors into tests |
 | Test impact analysis, per-test JaCoCo | **6/6 seeded bugs still caught** by the selected subset; wall-clock saved **3.8–21.6 %** (and why so little) |
 | Flaky-test detection (20 runs, one commit, CI) | deliberately flaky test scored **0.368** and was auto-quarantined; its stable control scored 0 |
+| A second, unrelated system (PortSync: Kafka + Spring + React) | **42 tests, 0 failures, 0 axe violations** in CI with the framework unchanged; three ISO 6346 implementations agree on every number tried |
 | Self-healing locators | **1 heal in 26 UI tests** — the demo that renames a `data-testid` — reported with the exact fix, never silent |
 | Cross-browser | UI suite passes in **Chrome 154, Firefox 157 and Edge 154** in CI, both directly and on **Selenium Grid** |
 | Accessibility (axe-core, WCAG 2.0/2.1 A+AA) | **0 violations** on 9 page states × 3 browsers |
@@ -82,6 +83,12 @@ From real runs on 2026-10-14 and 2026-10-15 — method, machine and raw numbers 
 - **AI as a drafting tool, never a committer.** Any OpenAI-compatible or Anthropic endpoint
   via an API key; drafts Gherkin from a user story (parsed, banner-marked, `@draft`, written
   outside the source tree) and summarises failed runs. Everything works without it.
+- **A quality dashboard that reports only what was measured.** Pass rate, flakiness,
+  quarantine, coverage, mutation, accessibility, visual review, the defect detection matrix
+  and TIA in one static page built from the files runs leave behind; missing data is listed,
+  never filled in. Its first real data exposed a coverage-measurement bug in the framework.
+- **Not tied to its demo app.** The same framework drives PortSync, an event-driven Kafka
+  system, through a small adapter (`adapters/portsync`) — API, contract, UI, a11y and BDD.
 - **One CLI.** `./th run --suite ui --browser firefox --tags smoke`, `./th rerun-failed`,
   `./th report`, `./th history flaky`, `./th tia select`, `./th ai gherkin`.
 - **Measured, not claimed, parallel speed-up.** Grid timings at 1/4/8 workers with test
@@ -148,10 +155,12 @@ Or through the `th` command (Windows: `th.cmd`), after `./mvnw install -DskipTes
 ./th rerun-failed                         # only what failed last time, per module
 ./th report                               # generate + open the Allure report
 ./th history flaky --jsonl suites         # flakiness leaderboard from recorded history
+./th dashboard --open                     # the quality dashboard from your last runs
 ./th --help                               # everything else (tia, ai, history quarantine)
 ```
 
 Windows, step by step and one command at a time: [docs/WINDOWS.md](docs/WINDOWS.md).
+Adding your first test: [docs/NEW_TEST_IN_5_MINUTES.md](docs/NEW_TEST_IN_5_MINUTES.md).
 
 Common variations:
 
@@ -188,6 +197,11 @@ Demo password: `gate-demo-pass` (override with `GATE_SEED_PASSWORD`). Error code
 
 ![Allure overview from a real run](docs/images/allure-overview.png)
 
+The quality dashboard (`./th dashboard`), rendered from a real local build plus the
+committed 20-run flaky-test demo:
+
+![Quality dashboard](docs/images/dashboard.png)
+
 ### Seeded defects
 
 | Bug | What goes wrong |
@@ -217,8 +231,8 @@ Switch them on for a run with `-Dharness.sut.seeded-bugs=OFF_BY_ONE_CAPACITY,RAC
 |---|---|
 | 1 — SUT, framework core, API/UI/BDD suites, CI, docs | **done** |
 | 2 — Selenium Grid in Compose, visual regression, axe-core a11y, Pact, Gatling, security smoke | **done** |
-| 3 — fault-seeding experiment, flaky-test intelligence, honest self-healing locators, test impact analysis, PIT, AI-assisted test design | **done** (this release) |
-| 4 — React quality dashboard, CLI, "new test in 5 minutes" guide, PortSync adapter | planned |
+| 3 — fault-seeding experiment, flaky-test intelligence, honest self-healing locators, test impact analysis, PIT, AI-assisted test design | **done** |
+| 4 — React quality dashboard, CLI, "new test in 5 minutes" guide, PortSync adapter | **done** (this release) |
 | 5 — full CI/CD with quality gates, TeamCity Kotlin DSL, CIForge pipeline | planned |
 
 Changes per phase: [CHANGELOG.md](CHANGELOG.md).
