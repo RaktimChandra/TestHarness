@@ -227,16 +227,26 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - name: Find the DSL libraries inside the TeamCity server image
+      # The Kotlin DSL library is served by a TeamCity server (it includes classes generated
+      # from the server's plugins), so start a throwaway server just to resolve it.
+      - name: Start a throwaway TeamCity server (DSL library repository only)
         run: |
-          docker pull -q jetbrains/teamcity-server:2025.07
-          cid=$(docker create jetbrains/teamcity-server:2025.07)
-          docker export "$cid" | tar -t | grep -iE 'configs-dsl|dsl-plugin|kotlin-dsl' | head -60 | tee "$RUNNER_TEMP/dsl-files.txt"
-          echo "::error title=dsl files::$(sed -e 's/%/%25/g' "$RUNNER_TEMP/dsl-files.txt" | awk 'BEGIN{ORS="%0A"} {print}')"
+          docker run -d --name teamcity -p 8111:8111 \
+            -e TEAMCITY_SERVER_OPTS="-Dteamcity.startup.maintenance=false -Dteamcity.licenseAgreement.accepted=true" \
+            jetbrains/teamcity-server:2025.07
+          url=http://localhost:8111/app/dsl-plugins-repository/org/jetbrains/teamcity/configs-dsl-kotlin-latest/1.0-SNAPSHOT/maven-metadata.xml
+          for i in $(seq 1 120); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' "$url" || true)
+            [ "$code" = 200 ] && { echo "DSL repository ready after $((i*5)) s"; exit 0; }
+            sleep 5
+          done
+          docker logs --tail 60 teamcity > "$RUNNER_TEMP/teamcity.log" 2>&1
+          echo "last HTTP status: $code" >> "$RUNNER_TEMP/teamcity.log"
+          exit 1
       - name: Compile .teamcity/settings.kts and generate the project configuration
         run: |
           set -o pipefail
-          ./mvnw -B -ntp -f .teamcity/pom.xml teamcity-configs:generate 2>&1 | tee "$RUNNER_TEMP/teamcity.log"
+          ./mvnw -B -ntp -f .teamcity/pom.xml teamcity-configs:generate 2>&1 | tee -a "$RUNNER_TEMP/teamcity.log"
           echo "### TeamCity DSL" >> "$GITHUB_STEP_SUMMARY"
           echo "Generated $(find .teamcity/target/generated-configs -type f | wc -l) files; build types:" >> "$GITHUB_STEP_SUMMARY"
           find .teamcity/target/generated-configs -name '*.kts' -o -name '*.xml' | sed 's/^/- /' | head -40 >> "$GITHUB_STEP_SUMMARY"
