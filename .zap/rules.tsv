@@ -1,0 +1,2 @@
+# ZAP baseline rule triage for security.yml. Columns: rule id, action (IGNORE/WARN/FAIL), reason.
+# Anything not listed uses ZAP defaults; with fail_action every WARN fails the job.

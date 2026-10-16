@@ -1,0 +1,74 @@
+# Security checks that need the network or a running app, alongside the security smoke tests
+# in the API suite (ci.yml):
+#   dependencies - OSV-Scanner over every lockfile and pom (Maven transitive deps resolved),
+#                  fails on any known vulnerability not explained in osv-scanner.toml
+#   zap-baseline - OWASP ZAP passive scan of the running SUT; fails on any warning not
+#                  triaged in .zap/rules.tsv (each IGNORE there carries its reason)
+name: security
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: '17 2 * * 1'   # Mondays 07:47 IST: new advisories appear without code changes
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dependencies:
+    name: Known vulnerabilities in dependencies (OSV-Scanner)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    env:
+      OSV_VERSION: v2.7.0
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install OSV-Scanner (checksum verified)
+        run: |
+          base="https://github.com/google/osv-scanner/releases/download/$OSV_VERSION"
+          curl -fsSLo osv-scanner_linux_amd64 "$base/osv-scanner_linux_amd64"
+          curl -fsSLo SHA256SUMS "$base/osv-scanner_SHA256SUMS"
+          grep ' osv-scanner_linux_amd64$' SHA256SUMS | sha256sum -c -
+          install -m 755 osv-scanner_linux_amd64 /usr/local/bin/osv-scanner
+          rm osv-scanner_linux_amd64 SHA256SUMS
+          osv-scanner --version
+      - name: Scan
+        run: |
+          set -o pipefail
+          osv-scanner scan source --recursive --config osv-scanner.toml --format markdown . | tee "$RUNNER_TEMP/osv.md"
+      - name: Summary
+        if: always()
+        run: |
+          { echo "### OSV-Scanner $OSV_VERSION"; cat "$RUNNER_TEMP/osv.md" 2>/dev/null || echo "no output"; } >> "$GITHUB_STEP_SUMMARY"
+
+  zap-baseline:
+    name: OWASP ZAP baseline scan of the SUT
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    env:
+      GATE_TEST_SUPPORT_KEY: zap-${{ github.run_id }}
+      GATE_JWT_SECRET: zap-${{ github.run_id }}-0123456789abcdef0123456789
+      GATE_SEED_PASSWORD: zap-${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Start the SUT
+        run: docker compose up -d --build --wait
+      - name: ZAP baseline (passive scan of everything the spider reaches)
+        uses: zaproxy/action-baseline@v0.15.0
+        with:
+          target: http://localhost:8080
+          rules_file_name: .zap/rules.tsv
+          cmd_options: -j
+          allow_issue_writing: false
+          fail_action: true
+          artifact_name: zap-baseline
+      - name: Stop
+        if: always()
+        run: docker compose down -v

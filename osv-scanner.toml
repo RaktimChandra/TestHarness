@@ -1,0 +1,3 @@
+# OSV-Scanner configuration (security.yml). Every ignored vulnerability must say why it does
+# not apply and when it is reviewed again; an expired ignore fails the scan again.
+# Format: https://google.github.io/osv-scanner/configuration/
