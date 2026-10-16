@@ -1,0 +1,6 @@
+quarantine.mode=exclude: [INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0
+  ran: Last place race (flaky demo)
+  </testcase>
+quarantine.mode=only: [ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0
+  ran: Last place race (flaky demo)
+  </testcase>
