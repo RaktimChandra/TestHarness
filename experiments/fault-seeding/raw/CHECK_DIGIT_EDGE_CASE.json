@@ -6,23 +6,38 @@
       "failed": 0,
       "skipped": 0,
       "exit_code": 0,
-      "seconds": 36.0,
+      "seconds": 37.0,
       "detected": false,
       "failures": [],
       "note": ""
     },
     "api": {
-      "tests": 85,
-      "failed": 4,
+      "tests": 92,
+      "failed": 8,
       "skipped": 0,
       "exit_code": 1,
-      "seconds": 36.0,
+      "seconds": 38.0,
       "detected": true,
       "failures": [
+        {
+          "test": "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one",
+          "type": "AssertionError",
+          "message": "Expected size: 5 but was: 4 in:"
+        },
         {
           "test": "Booking API > a_generated_remainder_ten_container_is_accepted",
           "type": "AssertionError",
           "message": "Expected HTTP 201 but was 400."
+        },
+        {
+          "test": "Booking API > the_direction_asked_for_is_the_direction_booked(String)[1]",
+          "type": "AssertionError",
+          "message": "Expected HTTP 201 but was 400."
+        },
+        {
+          "test": "Booking API > capacity_is_enforced_at_the_boundary",
+          "type": "AssertionError",
+          "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
         },
         {
           "test": "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[2]",
@@ -30,12 +45,17 @@
           "message": "Expected HTTP 201 but was 400."
         },
         {
-          "test": "cancel > another_driver_cannot_cancel_it",
+          "test": "reschedule > clerks_cannot_reschedule_for_drivers",
           "type": "AssertionError",
           "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
         },
         {
-          "test": "cancel > clerks_cannot_cancel_and_unknown_references_are_404",
+          "test": "cancel > cancelling_twice_is_an_invalid_transition",
+          "type": "AssertionError",
+          "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
+        },
+        {
+          "test": "Search and object-level access > a_driver_lists_only_their_own_bookings",
           "type": "AssertionError",
           "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
         }
@@ -43,28 +63,13 @@
       "note": ""
     },
     "bdd": {
-      "tests": 15,
-      "failed": 4,
+      "tests": 20,
+      "failed": 1,
       "skipped": 0,
       "exit_code": 1,
-      "seconds": 32.0,
+      "seconds": 38.0,
       "detected": true,
       "failures": [
-        {
-          "test": "RunBddSuite > A clerk checks a truck in from the gate screen",
-          "type": "AssertionError",
-          "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
-        },
-        {
-          "test": "RunBddSuite > Drivers cannot check themselves in",
-          "type": "AssertionError",
-          "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
-        },
-        {
-          "test": "RunBddSuite > Check-in is refused before the window opens",
-          "type": "AssertionError",
-          "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
-        },
         {
           "test": "RunBddSuite > Example #1.2",
           "type": "AssertionError",
@@ -78,7 +83,7 @@
       "failed": 1,
       "skipped": 0,
       "exit_code": 1,
-      "seconds": 25.0,
+      "seconds": 23.0,
       "detected": true,
       "failures": [
         {
@@ -93,38 +98,37 @@
       "tests": 0,
       "failed": 0,
       "skipped": 0,
-      "exit_code": 0,
-      "seconds": 50.0,
-      "detected": false,
+      "exit_code": 1,
+      "seconds": 48.0,
+      "detected": true,
       "failures": [],
-      "note": "> request count                                                                      |       296 |       294 |         2\n> min response time (ms)                                                             |         2 |         2 |         4\n> max response time (ms)                                                             |       144 |       144 |        13\n> mean response time (ms)                                                            |        20 |        20 |         9\n> response time std deviation (ms)                                                   |        30 |        30 |         5\n> response time 50th percentile (ms)                                                 |         5 |         5 |         9\n> response time 75th percentile (ms)                                                 |         9 |         9 |        13\n> response time 95th percentile (ms)                                                 |        78 |        78 |        13\n> response time 99th percentile (ms)                                                 |        85 |        85 |        13\n> mean throughput (rps)                                                              |      9.87 |       9.8 |      0.07\n---- Response Time Distribution ----------------------------------------------------------------------------------------\n> OK: t < 800 ms                                                                                            294 (99.32%)"
+      "note": "> request count                                                                      |       292 |       288 |         4\n> min response time (ms)                                                             |         2 |         2 |         3\n> max response time (ms)                                                             |        96 |        96 |        17\n> mean response time (ms)                                                            |        20 |        21 |         7\n> response time std deviation (ms)                                                   |        30 |        30 |         6\n> response time 50th percentile (ms)                                                 |         6 |         6 |         4\n> response time 75th percentile (ms)                                                 |         9 |         9 |        11\n> response time 95th percentile (ms)                                                 |        79 |        79 |        17\n> response time 99th percentile (ms)                                                 |        85 |        85 |        17\n> mean throughput (rps)                                                              |      9.73 |       9.6 |      0.13\n---- Response Time Distribution ----------------------------------------------------------------------------------------\n> OK: t < 800 ms                                                                                            288 (98.63%)"
     },
     "security": {
       "tests": 17,
-      "failed": 1,
+      "failed": 0,
       "skipped": 0,
-      "exit_code": 1,
+      "exit_code": 0,
       "seconds": 27.0,
-      "detected": true,
-      "failures": [
-        {
-          "test": "Security smoke > a_driver_cannot_read_change_or_cancel_another_drivers_booking",
-          "type": "AssertionError",
-          "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
-        }
-      ],
+      "detected": false,
+      "failures": [],
       "note": ""
     },
     "ui": {
-      "tests": 17,
-      "failed": 1,
+      "tests": 20,
+      "failed": 2,
       "skipped": 0,
       "exit_code": 1,
-      "seconds": 51.0,
+      "seconds": 82.0,
       "detected": true,
       "failures": [
         {
           "test": "Booking journey > a_remainder_ten_container_number_is_accepted_end_to_end",
+          "type": "TimeoutException",
+          "message": "Expected condition failed: waiting 10000 ms for By.cssSelector: [data-testid=\"driver-notice\"] to contain text 'Booked '"
+        },
+        {
+          "test": "Booking journey > a_driver_books_a_slot_and_sees_it_in_their_bookings",
           "type": "TimeoutException",
           "message": "Expected condition failed: waiting 10000 ms for By.cssSelector: [data-testid=\"driver-notice\"] to contain text 'Booked '"
         }
@@ -136,7 +140,7 @@
       "failed": 0,
       "skipped": 0,
       "exit_code": 0,
-      "seconds": 31.0,
+      "seconds": 32.0,
       "detected": false,
       "failures": [],
       "note": ""

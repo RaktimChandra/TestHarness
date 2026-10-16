@@ -12,11 +12,11 @@
       "note": ""
     },
     "api": {
-      "tests": 85,
+      "tests": 92,
       "failed": 3,
       "skipped": 0,
       "exit_code": 1,
-      "seconds": 35.0,
+      "seconds": 38.0,
       "detected": true,
       "failures": [
         {
@@ -38,11 +38,11 @@
       "note": ""
     },
     "bdd": {
-      "tests": 15,
+      "tests": 20,
       "failed": 1,
       "skipped": 0,
       "exit_code": 1,
-      "seconds": 33.0,
+      "seconds": 37.0,
       "detected": true,
       "failures": [
         {
@@ -58,7 +58,7 @@
       "failed": 1,
       "skipped": 0,
       "exit_code": 1,
-      "seconds": 24.0,
+      "seconds": 23.0,
       "detected": true,
       "failures": [
         {
@@ -74,23 +74,23 @@
       "failed": 0,
       "skipped": 0,
       "exit_code": 0,
-      "seconds": 47.0,
+      "seconds": 48.0,
       "detected": false,
       "failures": [],
-      "note": "> request count                                                                      |       300 |       300 |         -\n> min response time (ms)                                                             |         2 |         2 |         -\n> max response time (ms)                                                             |        90 |        90 |         -\n> mean response time (ms)                                                            |        20 |        20 |         -\n> response time std deviation (ms)                                                   |        29 |        29 |         -\n> response time 50th percentile (ms)                                                 |         5 |         5 |         -\n> response time 75th percentile (ms)                                                 |         8 |         8 |         -\n> response time 95th percentile (ms)                                                 |        78 |        78 |         -\n> response time 99th percentile (ms)                                                 |        82 |        82 |         -\n> mean throughput (rps)                                                              |        10 |        10 |         -\n---- Response Time Distribution ----------------------------------------------------------------------------------------\n> OK: t < 800 ms                                                                                            300   (100%)"
+      "note": "> request count                                                                      |       300 |       300 |         -\n> min response time (ms)                                                             |         2 |         2 |         -\n> max response time (ms)                                                             |        84 |        84 |         -\n> mean response time (ms)                                                            |        20 |        20 |         -\n> response time std deviation (ms)                                                   |        29 |        29 |         -\n> response time 50th percentile (ms)                                                 |         5 |         5 |         -\n> response time 75th percentile (ms)                                                 |         8 |         8 |         -\n> response time 95th percentile (ms)                                                 |        79 |        79 |         -\n> response time 99th percentile (ms)                                                 |        83 |        83 |         -\n> mean throughput (rps)                                                              |        10 |        10 |         -\n---- Response Time Distribution ----------------------------------------------------------------------------------------\n> OK: t < 800 ms                                                                                            300   (100%)"
     },
     "security": {
       "tests": 17,
       "failed": 0,
       "skipped": 0,
       "exit_code": 0,
-      "seconds": 26.0,
+      "seconds": 27.0,
       "detected": false,
       "failures": [],
       "note": ""
     },
     "ui": {
-      "tests": 17,
+      "tests": 20,
       "failed": 0,
       "skipped": 0,
       "exit_code": 0,

@@ -5,27 +5,27 @@
       "failed": 0,
       "skipped": 0,
       "exit_code": 0,
-      "seconds": 36.0,
+      "seconds": 35.0,
       "detected": false,
       "failures": [],
       "note": ""
     },
     "api": {
-      "tests": 85,
+      "tests": 92,
       "failed": 0,
       "skipped": 0,
       "exit_code": 0,
-      "seconds": 36.0,
+      "seconds": 39.0,
       "detected": false,
       "failures": [],
       "note": ""
     },
     "bdd": {
-      "tests": 15,
+      "tests": 20,
       "failed": 0,
       "skipped": 0,
       "exit_code": 0,
-      "seconds": 36.0,
+      "seconds": 38.0,
       "detected": false,
       "failures": [],
       "note": ""
@@ -35,7 +35,7 @@
       "failed": 0,
       "skipped": 0,
       "exit_code": 0,
-      "seconds": 28.0,
+      "seconds": 24.0,
       "detected": false,
       "failures": [],
       "note": ""
@@ -45,27 +45,27 @@
       "failed": 0,
       "skipped": 0,
       "exit_code": 0,
-      "seconds": 47.0,
+      "seconds": 48.0,
       "detected": false,
       "failures": [],
-      "note": "> request count                                                                      |       300 |       300 |         -\n> min response time (ms)                                                             |         2 |         2 |         -\n> max response time (ms)                                                             |       101 |       101 |         -\n> mean response time (ms)                                                            |        20 |        20 |         -\n> response time std deviation (ms)                                                   |        29 |        29 |         -\n> response time 50th percentile (ms)                                                 |         6 |         6 |         -\n> response time 75th percentile (ms)                                                 |         9 |         9 |         -\n> response time 95th percentile (ms)                                                 |        79 |        79 |         -\n> response time 99th percentile (ms)                                                 |        83 |        83 |         -\n> mean throughput (rps)                                                              |        10 |        10 |         -\n---- Response Time Distribution ----------------------------------------------------------------------------------------\n> OK: t < 800 ms                                                                                            300   (100%)"
+      "note": "> request count                                                                      |       300 |       300 |         -\n> min response time (ms)                                                             |         3 |         3 |         -\n> max response time (ms)                                                             |        93 |        93 |         -\n> mean response time (ms)                                                            |        20 |        20 |         -\n> response time std deviation (ms)                                                   |        29 |        29 |         -\n> response time 50th percentile (ms)                                                 |         6 |         6 |         -\n> response time 75th percentile (ms)                                                 |         9 |         9 |         -\n> response time 95th percentile (ms)                                                 |        80 |        80 |         -\n> response time 99th percentile (ms)                                                 |        85 |        85 |         -\n> mean throughput (rps)                                                              |        10 |        10 |         -\n---- Response Time Distribution ----------------------------------------------------------------------------------------\n> OK: t < 800 ms                                                                                            300   (100%)"
     },
     "security": {
       "tests": 17,
       "failed": 0,
       "skipped": 0,
       "exit_code": 0,
-      "seconds": 29.0,
+      "seconds": 27.0,
       "detected": false,
       "failures": [],
       "note": ""
     },
     "ui": {
-      "tests": 17,
+      "tests": 20,
       "failed": 0,
       "skipped": 0,
       "exit_code": 0,
-      "seconds": 50.0,
+      "seconds": 51.0,
       "detected": false,
       "failures": [],
       "note": ""
@@ -106,18 +106,23 @@
         "failed": 0,
         "tests": 9,
         "exit_code": 0,
-        "seconds": 27.0,
+        "seconds": 25.0,
         "failures": []
       },
       "api": {
         "status": "caught",
         "failed": 4,
-        "tests": 85,
+        "tests": 92,
         "exit_code": 1,
-        "seconds": 35.0,
+        "seconds": 37.0,
         "failures": [
           {
-            "test": "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[5]",
+            "test": "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[8]",
+            "type": "AssertionError",
+            "message": "Expected HTTP 400 but was 201."
+          },
+          {
+            "test": "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[12]",
             "type": "AssertionError",
             "message": "Expected HTTP 400 but was 201."
           },
@@ -127,12 +132,7 @@
             "message": "Expected HTTP 400 but was 201."
           },
           {
-            "test": "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[10]",
-            "type": "AssertionError",
-            "message": "Expected HTTP 400 but was 201."
-          },
-          {
-            "test": "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[6]",
+            "test": "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[9]",
             "type": "AssertionError",
             "message": "Expected HTTP 400 but was 201."
           }
@@ -149,7 +149,7 @@
       "ui": {
         "status": "escaped",
         "failed": 0,
-        "tests": 17,
+        "tests": 20,
         "exit_code": 0,
         "seconds": 48.0,
         "failures": []
@@ -159,123 +159,7 @@
         "failed": 0,
         "tests": 3,
         "exit_code": 0,
-        "seconds": 36.0,
-        "failures": []
-      },
-      "visual": {
-        "status": "escaped",
-        "failed": 0,
-        "tests": 5,
-        "exit_code": 0,
-        "seconds": 32.0,
-        "failures": []
-      },
-      "bdd": {
-        "status": "caught",
-        "failed": 2,
-        "tests": 15,
-        "exit_code": 1,
         "seconds": 35.0,
-        "failures": [
-          {
-            "test": "RunBddSuite > Example #1.4",
-            "type": "AssertionError",
-            "message": "[HTTP status]"
-          },
-          {
-            "test": "RunBddSuite > Example #1.3",
-            "type": "AssertionError",
-            "message": "[HTTP status]"
-          }
-        ]
-      },
-      "perf": {
-        "status": "escaped",
-        "failed": 0,
-        "tests": 0,
-        "exit_code": 0,
-        "seconds": 49.0,
-        "failures": []
-      }
-    },
-    "CHECK_DIGIT_EDGE_CASE": {
-      "contract": {
-        "status": "caught",
-        "failed": 1,
-        "tests": 9,
-        "exit_code": 1,
-        "seconds": 25.0,
-        "failures": [
-          {
-            "test": "PactProviderTest > interactionHonoursTheContract(PactVerificationContext, HttpRequest)[1]",
-            "type": "AssertionError",
-            "message": "gate-ui - Upon a booking for a full slot"
-          }
-        ]
-      },
-      "api": {
-        "status": "caught",
-        "failed": 4,
-        "tests": 85,
-        "exit_code": 1,
-        "seconds": 36.0,
-        "failures": [
-          {
-            "test": "Booking API > a_generated_remainder_ten_container_is_accepted",
-            "type": "AssertionError",
-            "message": "Expected HTTP 201 but was 400."
-          },
-          {
-            "test": "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[2]",
-            "type": "AssertionError",
-            "message": "Expected HTTP 201 but was 400."
-          },
-          {
-            "test": "cancel > another_driver_cannot_cancel_it",
-            "type": "AssertionError",
-            "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
-          },
-          {
-            "test": "cancel > clerks_cannot_cancel_and_unknown_references_are_404",
-            "type": "AssertionError",
-            "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
-          }
-        ]
-      },
-      "security": {
-        "status": "caught",
-        "failed": 1,
-        "tests": 17,
-        "exit_code": 1,
-        "seconds": 27.0,
-        "failures": [
-          {
-            "test": "Security smoke > a_driver_cannot_read_change_or_cancel_another_drivers_booking",
-            "type": "AssertionError",
-            "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
-          }
-        ]
-      },
-      "ui": {
-        "status": "caught",
-        "failed": 1,
-        "tests": 17,
-        "exit_code": 1,
-        "seconds": 51.0,
-        "failures": [
-          {
-            "test": "Booking journey > a_remainder_ten_container_number_is_accepted_end_to_end",
-            "type": "TimeoutException",
-            "message": "Expected condition failed: waiting 10000 ms for By.cssSelector: [data-testid=\"driver-notice\"] to contain text 'Booked '"
-          }
-        ]
-      },
-      "a11y": {
-        "status": "escaped",
-        "failed": 0,
-        "tests": 3,
-        "exit_code": 0,
-        "seconds": 36.0,
         "failures": []
       },
       "visual": {
@@ -288,30 +172,20 @@
       },
       "bdd": {
         "status": "caught",
-        "failed": 4,
-        "tests": 15,
+        "failed": 2,
+        "tests": 20,
         "exit_code": 1,
-        "seconds": 32.0,
+        "seconds": 34.0,
         "failures": [
           {
-            "test": "RunBddSuite > A clerk checks a truck in from the gate screen",
+            "test": "RunBddSuite > Example #1.6",
             "type": "AssertionError",
-            "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
+            "message": "[HTTP status]"
           },
           {
-            "test": "RunBddSuite > Drivers cannot check themselves in",
+            "test": "RunBddSuite > Example #1.5",
             "type": "AssertionError",
-            "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
-          },
-          {
-            "test": "RunBddSuite > Check-in is refused before the window opens",
-            "type": "AssertionError",
-            "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
-          },
-          {
-            "test": "RunBddSuite > Example #1.2",
-            "type": "AssertionError",
-            "message": "Expected HTTP 201 but was 400."
+            "message": "[HTTP status]"
           }
         ]
       },
@@ -320,7 +194,137 @@
         "failed": 0,
         "tests": 0,
         "exit_code": 0,
-        "seconds": 50.0,
+        "seconds": 48.0,
+        "failures": []
+      }
+    },
+    "CHECK_DIGIT_EDGE_CASE": {
+      "contract": {
+        "status": "caught",
+        "failed": 1,
+        "tests": 9,
+        "exit_code": 1,
+        "seconds": 23.0,
+        "failures": [
+          {
+            "test": "PactProviderTest > interactionHonoursTheContract(PactVerificationContext, HttpRequest)[1]",
+            "type": "AssertionError",
+            "message": "gate-ui - Upon a booking for a full slot"
+          }
+        ]
+      },
+      "api": {
+        "status": "caught",
+        "failed": 8,
+        "tests": 92,
+        "exit_code": 1,
+        "seconds": 38.0,
+        "failures": [
+          {
+            "test": "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one",
+            "type": "AssertionError",
+            "message": "Expected size: 5 but was: 4 in:"
+          },
+          {
+            "test": "Booking API > a_generated_remainder_ten_container_is_accepted",
+            "type": "AssertionError",
+            "message": "Expected HTTP 201 but was 400."
+          },
+          {
+            "test": "Booking API > the_direction_asked_for_is_the_direction_booked(String)[1]",
+            "type": "AssertionError",
+            "message": "Expected HTTP 201 but was 400."
+          },
+          {
+            "test": "Booking API > capacity_is_enforced_at_the_boundary",
+            "type": "AssertionError",
+            "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
+          },
+          {
+            "test": "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[2]",
+            "type": "AssertionError",
+            "message": "Expected HTTP 201 but was 400."
+          },
+          {
+            "test": "reschedule > clerks_cannot_reschedule_for_drivers",
+            "type": "AssertionError",
+            "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
+          },
+          {
+            "test": "cancel > cancelling_twice_is_an_invalid_transition",
+            "type": "AssertionError",
+            "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
+          },
+          {
+            "test": "Search and object-level access > a_driver_lists_only_their_own_bookings",
+            "type": "AssertionError",
+            "message": "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
+          }
+        ]
+      },
+      "security": {
+        "status": "escaped",
+        "failed": 0,
+        "tests": 17,
+        "exit_code": 0,
+        "seconds": 27.0,
+        "failures": []
+      },
+      "ui": {
+        "status": "caught",
+        "failed": 2,
+        "tests": 20,
+        "exit_code": 1,
+        "seconds": 82.0,
+        "failures": [
+          {
+            "test": "Booking journey > a_remainder_ten_container_number_is_accepted_end_to_end",
+            "type": "TimeoutException",
+            "message": "Expected condition failed: waiting 10000 ms for By.cssSelector: [data-testid=\"driver-notice\"] to contain text 'Booked '"
+          },
+          {
+            "test": "Booking journey > a_driver_books_a_slot_and_sees_it_in_their_bookings",
+            "type": "TimeoutException",
+            "message": "Expected condition failed: waiting 10000 ms for By.cssSelector: [data-testid=\"driver-notice\"] to contain text 'Booked '"
+          }
+        ]
+      },
+      "a11y": {
+        "status": "escaped",
+        "failed": 0,
+        "tests": 3,
+        "exit_code": 0,
+        "seconds": 37.0,
+        "failures": []
+      },
+      "visual": {
+        "status": "escaped",
+        "failed": 0,
+        "tests": 5,
+        "exit_code": 0,
+        "seconds": 32.0,
+        "failures": []
+      },
+      "bdd": {
+        "status": "caught",
+        "failed": 1,
+        "tests": 20,
+        "exit_code": 1,
+        "seconds": 38.0,
+        "failures": [
+          {
+            "test": "RunBddSuite > Example #1.2",
+            "type": "AssertionError",
+            "message": "Expected HTTP 201 but was 400."
+          }
+        ]
+      },
+      "perf": {
+        "status": "caught",
+        "failed": 0,
+        "tests": 0,
+        "exit_code": 1,
+        "seconds": 48.0,
         "failures": []
       }
     },
@@ -330,15 +334,15 @@
         "failed": 0,
         "tests": 9,
         "exit_code": 0,
-        "seconds": 27.0,
+        "seconds": 25.0,
         "failures": []
       },
       "api": {
         "status": "caught",
         "failed": 3,
-        "tests": 85,
+        "tests": 92,
         "exit_code": 1,
-        "seconds": 36.0,
+        "seconds": 38.0,
         "failures": [
           {
             "test": "reschedule > another_driver_cannot_reschedule_it",
@@ -362,7 +366,7 @@
         "failed": 1,
         "tests": 17,
         "exit_code": 1,
-        "seconds": 28.0,
+        "seconds": 27.0,
         "failures": [
           {
             "test": "Security smoke > a_driver_cannot_read_change_or_cancel_another_drivers_booking",
@@ -374,9 +378,9 @@
       "ui": {
         "status": "escaped",
         "failed": 0,
-        "tests": 17,
+        "tests": 20,
         "exit_code": 0,
-        "seconds": 58.0,
+        "seconds": 48.0,
         "failures": []
       },
       "a11y": {
@@ -384,7 +388,7 @@
         "failed": 0,
         "tests": 3,
         "exit_code": 0,
-        "seconds": 35.0,
+        "seconds": 34.0,
         "failures": []
       },
       "visual": {
@@ -392,15 +396,15 @@
         "failed": 0,
         "tests": 5,
         "exit_code": 0,
-        "seconds": 33.0,
+        "seconds": 32.0,
         "failures": []
       },
       "bdd": {
         "status": "caught",
         "failed": 1,
-        "tests": 15,
+        "tests": 20,
         "exit_code": 1,
-        "seconds": 34.0,
+        "seconds": 37.0,
         "failures": [
           {
             "test": "RunBddSuite > Drivers cannot see each other's bookings",
@@ -424,7 +428,7 @@
         "failed": 1,
         "tests": 9,
         "exit_code": 1,
-        "seconds": 24.0,
+        "seconds": 23.0,
         "failures": [
           {
             "test": "PactProviderTest > interactionHonoursTheContract(PactVerificationContext, HttpRequest)[1]",
@@ -436,9 +440,9 @@
       "api": {
         "status": "caught",
         "failed": 3,
-        "tests": 85,
+        "tests": 92,
         "exit_code": 1,
-        "seconds": 35.0,
+        "seconds": 38.0,
         "failures": [
           {
             "test": "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one",
@@ -462,13 +466,13 @@
         "failed": 0,
         "tests": 17,
         "exit_code": 0,
-        "seconds": 26.0,
+        "seconds": 27.0,
         "failures": []
       },
       "ui": {
         "status": "escaped",
         "failed": 0,
-        "tests": 17,
+        "tests": 20,
         "exit_code": 0,
         "seconds": 49.0,
         "failures": []
@@ -492,9 +496,9 @@
       "bdd": {
         "status": "caught",
         "failed": 1,
-        "tests": 15,
+        "tests": 20,
         "exit_code": 1,
-        "seconds": 33.0,
+        "seconds": 37.0,
         "failures": [
           {
             "test": "RunBddSuite > A slot cannot take more trucks than its capacity",
@@ -508,7 +512,7 @@
         "failed": 0,
         "tests": 0,
         "exit_code": 0,
-        "seconds": 47.0,
+        "seconds": 48.0,
         "failures": []
       }
     },
@@ -518,15 +522,15 @@
         "failed": 0,
         "tests": 9,
         "exit_code": 0,
-        "seconds": 23.0,
+        "seconds": 29.0,
         "failures": []
       },
       "api": {
         "status": "caught",
         "failed": 1,
-        "tests": 85,
+        "tests": 92,
         "exit_code": 1,
-        "seconds": 26.0,
+        "seconds": 42.0,
         "failures": [
           {
             "test": "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one",
@@ -540,15 +544,15 @@
         "failed": 0,
         "tests": 17,
         "exit_code": 0,
-        "seconds": 19.0,
+        "seconds": 30.0,
         "failures": []
       },
       "ui": {
         "status": "escaped",
         "failed": 0,
-        "tests": 17,
+        "tests": 20,
         "exit_code": 0,
-        "seconds": 34.0,
+        "seconds": 65.0,
         "failures": []
       },
       "a11y": {
@@ -556,7 +560,7 @@
         "failed": 0,
         "tests": 3,
         "exit_code": 0,
-        "seconds": 24.0,
+        "seconds": 36.0,
         "failures": []
       },
       "visual": {
@@ -564,15 +568,15 @@
         "failed": 0,
         "tests": 5,
         "exit_code": 0,
-        "seconds": 21.0,
+        "seconds": 32.0,
         "failures": []
       },
       "bdd": {
         "status": "escaped",
         "failed": 0,
-        "tests": 15,
+        "tests": 20,
         "exit_code": 0,
-        "seconds": 22.0,
+        "seconds": 39.0,
         "failures": []
       },
       "perf": {
@@ -580,7 +584,7 @@
         "failed": 0,
         "tests": 0,
         "exit_code": 0,
-        "seconds": 43.0,
+        "seconds": 49.0,
         "failures": []
       }
     },
@@ -596,9 +600,9 @@
       "api": {
         "status": "caught",
         "failed": 6,
-        "tests": 85,
+        "tests": 92,
         "exit_code": 1,
-        "seconds": 34.0,
+        "seconds": 37.0,
         "failures": [
           {
             "test": "Auth API > seeded_users_log_in_and_receive_a_bearer_token(String, String)[1]",
@@ -623,7 +627,7 @@
           {
             "test": "Slots API > a_slot_requested_in_utc_is_reported_in_terminal_time",
             "type": "AssertionFailedError",
-            "message": "expected: 2026-10-16T08:30:00Z"
+            "message": "expected: 2026-10-17T08:30:00Z"
           },
           {
             "test": "Slots API > slot_times_are_the_terminal_wall_clock_with_its_offset",
@@ -643,9 +647,9 @@
       "ui": {
         "status": "caught",
         "failed": 3,
-        "tests": 17,
+        "tests": 20,
         "exit_code": 1,
-        "seconds": 54.0,
+        "seconds": 57.0,
         "failures": [
           {
             "test": "Booking journey > the_slot_table_shows_the_terminal_time_and_live_remaining_places",
@@ -669,7 +673,7 @@
         "failed": 0,
         "tests": 3,
         "exit_code": 0,
-        "seconds": 34.0,
+        "seconds": 35.0,
         "failures": []
       },
       "visual": {
@@ -677,15 +681,15 @@
         "failed": 0,
         "tests": 5,
         "exit_code": 0,
-        "seconds": 29.0,
+        "seconds": 32.0,
         "failures": []
       },
       "bdd": {
         "status": "caught",
         "failed": 1,
-        "tests": 15,
+        "tests": 20,
         "exit_code": 1,
-        "seconds": 33.0,
+        "seconds": 37.0,
         "failures": [
           {
             "test": "RunBddSuite > A driver books from the booking screen",
@@ -707,12 +711,12 @@
   "detection_rate_per_suite": {
     "contract": 0.3333333333333333,
     "api": 1.0,
-    "security": 0.3333333333333333,
+    "security": 0.16666666666666666,
     "ui": 0.3333333333333333,
     "a11y": 0.0,
     "visual": 0.0,
     "bdd": 0.8333333333333334,
-    "perf": 0.0
+    "perf": 0.16666666666666666
   },
   "caught_by": {
     "API_SKIPS_CONTAINER_VALIDATION": [
@@ -722,9 +726,9 @@
     "CHECK_DIGIT_EDGE_CASE": [
       "contract",
       "api",
-      "security",
       "ui",
-      "bdd"
+      "bdd",
+      "perf"
     ],
     "MISSING_AUTHORISATION_CHECK": [
       "api",
