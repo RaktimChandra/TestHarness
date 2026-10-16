@@ -4,7 +4,9 @@
 # Difference from a developer's Windows machine, and why: hosted Windows runners cannot run
 # Linux containers, so Testcontainers' PostgreSQL is replaced by the PostgreSQL installed on
 # the runner (-Dharness.db.url, the same switch the Compose setup uses), and the SUT's own
-# Testcontainers integration tests (gate-api) run in the Linux build job only.
+# Testcontainers integration tests (gate-api) run in the Linux build job only. There are no
+# Windows visual baselines (baselines are per platform and rendered by visual-baselines.yml on
+# Linux), so the visual checks write Windows candidates and skip instead of failing.
 name: windows
 
 on:
@@ -65,11 +67,11 @@ jobs:
       - name: 'WINDOWS.md step 4: UI suite in Chrome'
         run: >
           .\mvnw.cmd -B -ntp verify -pl suites/ui-suite "-Dharness.ui.browser=chrome"
-          "-Dharness.visual.platform=chrome-windows" "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_ui" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
+          "-Dharness.visual.platform=chrome-windows" "-Dharness.visual.require-baseline=false" "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_ui" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
       - name: 'WINDOWS.md step 4: UI suite in Edge'
         run: >
           .\mvnw.cmd -B -ntp verify -pl suites/ui-suite "-Dharness.ui.browser=edge"
-          "-Dharness.visual.platform=edge-windows" "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_ui" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
+          "-Dharness.visual.platform=edge-windows" "-Dharness.visual.require-baseline=false" "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_ui" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
       - name: 'WINDOWS.md step 4: BDD suite, @smoke'
         run: >
           .\mvnw.cmd -B -ntp verify -pl suites/bdd-suite "-Dcucumber.filter.tags=@smoke"

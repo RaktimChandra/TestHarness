@@ -73,7 +73,7 @@ class SlaScenariosTest extends LiveTest {
         List<String> eventNames = new CopyOnWriteArrayList<>();
         List<String> firstLines = new CopyOnWriteArrayList<>();
         HttpClient http = HttpClient.newBuilder().version(HttpClient.Version.HTTP_1_1).build();
-        HttpRequest req = HttpRequest.newBuilder(URI.create(PortSync.get().apiUrl() + "/api/events/stream"))
+        HttpRequest req = HttpRequest.newBuilder(URI.create(PortSync.get().apiUrl() + "/api/stream"))
                 .header("Accept", "text/event-stream").build();
         CompletableFuture<Void> reader = http.sendAsync(req, HttpResponse.BodyHandlers.ofInputStream())
                 .thenAccept(res -> {
