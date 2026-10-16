@@ -234,15 +234,17 @@ jobs:
           docker run -d --name teamcity -p 8111:8111 \
             -e TEAMCITY_SERVER_OPTS="-Dteamcity.startup.maintenance=false -Dteamcity.licenseAgreement.accepted=true" \
             jetbrains/teamcity-server:2025.07
-          url=http://localhost:8111/app/dsl-plugins-repository/org/jetbrains/teamcity/configs-dsl-kotlin-latest/1.0-SNAPSHOT/maven-metadata.xml
+          # Ready once the web app answers (401 = up, authentication required).
           for i in $(seq 1 60); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' "$url" || true)
-            [ "$code" = 200 ] && { echo "DSL repository ready after $((i*5)) s"; exit 0; }
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8111/ || true)
+            if [ "$code" = 401 ] || [ "$code" = 200 ]; then echo "server up after $((i*5)) s"; break; fi
             sleep 5
           done
-          { echo "last HTTP status: $code"; curl -s -o /dev/null -w 'root: %{http_code} -> %{redirect_url}\n' http://localhost:8111/ || true;
-            docker exec teamcity sh -c 'tail -n 60 /opt/teamcity/logs/teamcity-server.log'; } > "$RUNNER_TEMP/teamcity.log" 2>&1
-          exit 1
+          for a in configs-dsl-kotlin-latest configs-dsl-kotlin-plugins-latest; do
+            curl -s -o /dev/null -w "$a pom: %{http_code}\n" \
+              "http://localhost:8111/app/dsl-plugins-repository/org/jetbrains/teamcity/$a/1.0-SNAPSHOT/$a-1.0-SNAPSHOT.pom" \
+              | tee -a "$RUNNER_TEMP/teamcity.log"
+          done
       - name: Compile .teamcity/settings.kts and generate the project configuration
         run: |
           set -o pipefail
