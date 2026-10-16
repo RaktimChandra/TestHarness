@@ -88,6 +88,14 @@ class CliTest {
         Out quarantine = run("history", "quarantine", "--jsonl", file.toString(), "--write", q.toString());
         assertThat(quarantine.out()).contains("1 test(s) quarantined").contains("X#flaky");
         assertThat(q).content().contains("X#flaky").doesNotContain("X#stable");
+
+        Path d = tmp.resolve("shard-durations.json");
+        Out durations = run("history", "durations", "--jsonl", file.toString(), "--out", d.toString(), "--shards", "2");
+        assertThat(durations.out()).contains("2 tests, 20 ms in total").contains("shard 1/2: 10 ms", "shard 2/2: 10 ms");
+        assertThat(d).content().contains("\"X#flaky\" : 10", "\"X#stable\" : 10");
+        Path empty = tmp.resolve("empty.jsonl");
+        HistoryJson.append(empty, List.of());
+        assertThat(run("history", "durations", "--jsonl", empty.toString(), "--out", d.toString()).code()).isEqualTo(1);
     }
 
     @Test

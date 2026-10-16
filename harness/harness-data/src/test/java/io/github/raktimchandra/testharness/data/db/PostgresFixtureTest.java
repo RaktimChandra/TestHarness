@@ -12,7 +12,9 @@ class PostgresFixtureTest {
     void startsOnceSeedsAndQueriesWithBoundParameters() {
         PostgresFixture db = PostgresFixture.shared();
         assertThat(PostgresFixture.shared()).isSameAs(db);
-        assertThat(db.isContainer()).isTrue();
+        // A container, unless an external database is configured (the Windows CI job has no
+        // Linux containers and points -Dharness.db.url at the runner's PostgreSQL).
+        assertThat(db.isContainer()).isEqualTo(System.getProperty("harness.db.url") == null);
         assertThat(db.jdbcUrl()).startsWith("jdbc:postgresql://");
         db.runScript("/db/fixture.sql");
         Jdbc jdbc = db.jdbc();

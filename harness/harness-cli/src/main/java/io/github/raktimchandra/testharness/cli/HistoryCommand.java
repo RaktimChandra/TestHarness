@@ -5,11 +5,13 @@ import io.github.raktimchandra.testharness.insights.history.HistoryJson;
 import io.github.raktimchandra.testharness.insights.history.HistoryStore;
 import io.github.raktimchandra.testharness.insights.history.Quarantine;
 import io.github.raktimchandra.testharness.insights.history.TestResult;
+import io.github.raktimchandra.testharness.insights.select.ShardPlan;
 import java.io.PrintWriter;
 import java.nio.file.Path;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import picocli.CommandLine.ArgGroup;
 import picocli.CommandLine.Command;
@@ -20,7 +22,8 @@ import picocli.CommandLine.Spec;
 import picocli.CommandLine.Model.CommandSpec;
 
 @Command(name = "history", mixinStandardHelpOptions = true, description = "Test run history: ingest, flakiness, quarantine.",
-        subcommands = {HistoryCommand.Ingest.class, HistoryCommand.Flaky.class, HistoryCommand.QuarantineCmd.class})
+        subcommands = {HistoryCommand.Ingest.class, HistoryCommand.Flaky.class, HistoryCommand.QuarantineCmd.class,
+                HistoryCommand.Durations.class})
 class HistoryCommand {
 
     @Command(name = "ingest", mixinStandardHelpOptions = true, description = "Load JSON Lines history (target/test-history) into PostgreSQL.")
@@ -99,6 +102,46 @@ class HistoryCommand {
             if (write != null) {
                 q.write(write);
                 out.println("Written to " + write);
+            }
+            return 0;
+        }
+    }
+
+    @Command(name = "durations", mixinStandardHelpOptions = true,
+            description = "Mean duration per test from history, for duration-balanced sharding (-Dharness.shard.durations).")
+    static class Durations implements Callable<Integer> {
+        @Spec
+        CommandSpec spec;
+
+        @Mixin
+        HistorySource source;
+
+        @Option(names = "--out", defaultValue = "shard-durations.json", description = "file to write")
+        Path outFile;
+
+        @Option(names = "--shards", description = "also print the plan for this many shards")
+        Integer shards;
+
+        @Option(names = "--suite", description = "only this suite's results, e.g. ui-suite (for the printed plan)")
+        String suite;
+
+        @Override
+        public Integer call() {
+            PrintWriter out = spec.commandLine().getOut();
+            Map<String, Long> durations = ShardPlan.durationsFrom(source.load().stream()
+                    .filter(r -> suite == null || suite.equals(r.suite())).toList());
+            if (durations.isEmpty()) {
+                spec.commandLine().getErr().println("No timed results in the history; nothing written.");
+                return 1;
+            }
+            ShardPlan.write(durations, outFile);
+            out.printf("%d tests, %d ms in total, written to %s%n", durations.size(),
+                    durations.values().stream().mapToLong(Long::longValue).sum(), outFile);
+            if (shards != null) {
+                long[] load = ShardPlan.of(durations, shards).plannedLoad();
+                for (int i = 0; i < load.length; i++) {
+                    out.printf("  shard %d/%d: %d ms%n", i + 1, shards, load[i]);
+                }
             }
             return 0;
         }

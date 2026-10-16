@@ -1,0 +1,124 @@
+# Executes .teamcity/settings.kts on a real TeamCity: a throwaway TeamCity 2025.07 server and
+# one agent (docker/teamcity-agent.Dockerfile: JDK 21, Docker, Chrome) on this runner. The
+# server imports the settings from this repository (versioned settings, Kotlin DSL) and runs
+# the chain; tools/teamcity_run.py drives it over REST and records every build's result.
+# Results are pushed to the branch teamcity/<run id>.
+name: teamcity
+
+on:
+  pull_request:
+    paths:
+      - '.teamcity/**'
+      - 'docker/teamcity-agent.Dockerfile'
+      - 'tools/teamcity_run.py'
+      - '.github/workflows/teamcity.yml'
+  workflow_dispatch:
+    inputs:
+      builds:
+        description: Builds to queue (their snapshot dependencies run first)
+        default: 'ApiSuite,BddSuite,UiSuite_chrome_1,UiSuite_chrome_2,Perf,Mutation'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: teamcity-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  teamcity:
+    name: settings.kts on TeamCity 2025.07 (server + agent)
+    runs-on: ubuntu-24.04
+    timeout-minutes: 180
+    env:
+      BRANCH: ${{ github.head_ref || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Start the server (fresh data directory)
+        run: |
+          mkdir -p "$RUNNER_TEMP/tc/data" && chmod -R 777 "$RUNNER_TEMP/tc"
+          docker run -d --name tc-server --network host \
+            -v "$RUNNER_TEMP/tc/data:/data/teamcity_server/datadir" \
+            -e TEAMCITY_SERVER_OPTS="-Dteamcity.startup.maintenance=false -Dteamcity.licenseAgreement.accepted=true" \
+            jetbrains/teamcity-server:2025.07
+      - name: Build the agent image
+        run: docker build -t th-teamcity-agent -f docker/teamcity-agent.Dockerfile docker
+      - name: Wait for the server and read the super-user token
+        run: |
+          for i in $(seq 1 120); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8111/app/rest/server || true)
+            [ "$code" = "401" ] && break; sleep 5
+          done
+          for i in $(seq 1 60); do
+            # the log belongs to the container's user; read it through the container
+            token=$(docker exec tc-server sh -c "grep -ho 'Super user authentication token: [0-9]*' /opt/teamcity/logs/teamcity-server.log" 2>/dev/null | tail -1 | awk '{print $NF}')
+            [ -n "$token" ] && break; sleep 5
+          done
+          [ -n "$token" ] || { echo "::error::no super-user token in the server log"; exit 1; }
+          echo "::add-mask::$token"
+          echo "$token" > "$RUNNER_TEMP/tc/token"
+      - name: Start the agent
+        run: |
+          docker run -d --name tc-agent --network host \
+            --group-add "$(stat -c %g /var/run/docker.sock)" -v /var/run/docker.sock:/var/run/docker.sock \
+            -e SERVER_URL=http://localhost:8111 -e AGENT_NAME=gh-runner-agent \
+            -e GATE_SEED_PASSWORD="tc-${{ github.run_id }}" \
+            th-teamcity-agent
+      - name: Import the settings and run the builds
+        run: |
+          python3 tools/teamcity_run.py --token-file "$RUNNER_TEMP/tc/token" \
+            --repo "https://github.com/${{ github.repository }}.git" --branch "$BRANCH" \
+            --builds '${{ inputs.builds || 'ApiSuite,BddSuite,UiSuite_chrome_1,UiSuite_chrome_2,Perf,Mutation' }}' \
+            --out out | tee "$RUNNER_TEMP/teamcity-run.log"
+      - name: Summary
+        if: always()
+        run: |
+          [ -f out/teamcity-run.md ] && cat out/teamcity-run.md >> "$GITHUB_STEP_SUMMARY"
+          python3 - <<'PY' || true
+          import json
+          r = json.load(open("out/teamcity-run.json"))
+          for b in r["builds"]:
+              print(f"::notice title=TeamCity {b['build_type']}::{b['status']} - {b['tests']} tests, {b['failed']} failed - {b['status_text']}")
+          PY
+      - name: Server and agent logs on failure
+        if: failure()
+        run: |
+          { docker exec tc-server tail -n 80 /opt/teamcity/logs/teamcity-server.log; docker logs --tail 60 tc-agent; } > "$RUNNER_TEMP/tc-logs.txt" 2>&1 || true
+      - uses: ./.github/actions/log-tail
+        if: failure()
+        with:
+          file: ${{ runner.temp }}/teamcity-run.log
+      - uses: ./.github/actions/log-tail
+        if: failure()
+        with:
+          file: ${{ runner.temp }}/tc-logs.txt
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: teamcity-run
+          path: out
+          if-no-files-found: ignore
+
+  results:
+    name: Push results
+    needs: teamcity
+    if: always() && needs.teamcity.result != 'cancelled'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        id: download
+        continue-on-error: true
+        with:
+          name: teamcity-run
+          path: experiments/teamcity
+      - if: steps.download.outcome == 'success'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "teamcity/${{ github.run_id }}"
+          git add -f experiments/teamcity
+          git commit -m "experiment: TeamCity run ${{ github.run_id }}"
+          git push origin "teamcity/${{ github.run_id }}"

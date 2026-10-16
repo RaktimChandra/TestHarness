@@ -35,7 +35,9 @@ import org.slf4j.LoggerFactory;
  * <p>Before every capture the page is <b>stabilised</b>: the focused element is blurred and
  * carets, transitions and animations are frozen. Focus rings ({@code :focus-visible}) paint only
  * while the browser window has OS focus, which varies with parallel headless sessions, so
- * leaving them in made one baseline differ by 2–3.5 % between CI jobs. Focus styling is therefore
+ * leaving them in made one baseline differ by 2–3.5 % between CI jobs. The pointer is moved off
+ * the page content too (hover styles), and the capture waits two animation frames so the
+ * changes are painted. Focus styling is therefore
  * outside what visual checks assert (keyboard access is covered by the UI journeys).
  */
 public final class VisualCheck {
@@ -107,9 +109,23 @@ public final class VisualCheck {
             }
             """;
 
+    /** Resolves after two animation frames, i.e. once the blur and style changes are painted. */
+    static final String TWO_FRAMES = """
+            const done = arguments[arguments.length - 1];
+            requestAnimationFrame(() => requestAnimationFrame(() => done(true)));
+            """;
+
     private void stabilise() {
         if (driver instanceof org.openqa.selenium.JavascriptExecutor js) {
             js.executeScript(STABILISE);
+            // The pointer stays where the last click left it; native form controls paint a hover
+            // border (Chrome on Windows: 2.1 % of a capture differed). Park it on the page corner.
+            try {
+                new org.openqa.selenium.interactions.Actions(driver).moveToLocation(0, 0).perform();
+            } catch (RuntimeException unsupported) {
+                // drivers without pointer actions: nothing was hovered by them either
+            }
+            js.executeAsyncScript(TWO_FRAMES);
         }
     }
 

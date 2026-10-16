@@ -14,19 +14,30 @@ public class AuthService {
     private final String dummyHash;
     private final UserRepository users;
     private final PasswordEncoder encoder;
+    private final LoginThrottle throttle;
 
-    public AuthService(UserRepository users, PasswordEncoder encoder) {
+    public AuthService(UserRepository users, PasswordEncoder encoder, LoginThrottle throttle) {
         this.users = users;
         this.encoder = encoder;
+        this.throttle = throttle;
         this.dummyHash = encoder.encode("not-a-real-password");
     }
 
-    public UserRecord authenticate(String username, String password) {
+    /**
+     * Checks a sign-in from {@code client} (the caller's address). Locked usernames and clients
+     * are refused before the password is looked at; see {@link LoginThrottle}.
+     */
+    public UserRecord authenticate(String username, String password, String client) {
+        throttle.check(username, client).ifPresent(lock -> {
+            throw new LoginThrottledException(lock.retryAfter());
+        });
         UserRecord user = users.findByUsername(username == null ? "" : username.strip()).orElse(null);
         boolean ok = encoder.matches(password == null ? "" : password, user == null ? dummyHash : user.passwordHash());
         if (user == null || !ok) {
+            throttle.failed(username, client);
             throw new DomainException(ErrorCode.UNAUTHENTICATED, "Invalid username or password");
         }
+        throttle.succeeded(username);
         return user;
     }
 
