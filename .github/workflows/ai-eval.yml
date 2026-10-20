@@ -4,7 +4,8 @@
 # definitions. One runner per model and prompt variant: "catalogue" (the suite's step
 # definitions in the prompt, th ai gherkin's default) and "phrases" (only phrases of existing
 # features). Optionally a hosted model through the Anthropic API, if the repository has an
-# ANTHROPIC_API_KEY secret. Results are pushed to the branch ai-eval/<run id>.
+# ANTHROPIC_API_KEY secret. Results are pushed to the branch ai-eval/<run id>; from_run
+# collects an earlier run's results again (artifacts are kept for the retention period).
 name: ai-eval
 
 on:
@@ -22,9 +23,13 @@ on:
       hosted_model:
         description: Also evaluate this Anthropic model (needs the ANTHROPIC_API_KEY secret); empty to skip
         default: ''
+      from_run:
+        description: Only collect and push the results of this earlier run (its push failed); empty to evaluate
+        default: ''
 
 permissions:
   contents: read
+  actions: read   # download-artifact from another run (from_run)
 
 env:
   HARNESS_ENV: ci
@@ -33,6 +38,7 @@ env:
 jobs:
   model:
     name: ${{ matrix.model }} (${{ matrix.variant }})
+    if: inputs.from_run == ''
     runs-on: ubuntu-24.04
     timeout-minutes: 240
     strategy:
@@ -89,7 +95,7 @@ jobs:
 
   hosted:
     name: hosted model (Anthropic API)
-    if: inputs.hosted_model != ''
+    if: inputs.hosted_model != '' && inputs.from_run == ''
     runs-on: ubuntu-24.04
     timeout-minutes: 90
     strategy:
@@ -129,6 +135,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: write
+      actions: read
     steps:
       - uses: actions/checkout@v7
       - uses: actions/download-artifact@v8
@@ -136,6 +143,8 @@ jobs:
           pattern: ai-eval-*
           path: experiments/ai/results
           merge-multiple: true
+          run-id: ${{ inputs.from_run || github.run_id }}
+          github-token: ${{ github.token }}
       - name: Summarise
         run: python3 tools/ai_eval_report.py experiments/ai/results | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Push
@@ -143,13 +152,17 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          # The source run, not this one, when only collecting an earlier run's results.
+          RUN='${{ inputs.from_run || github.run_id }}'
           set -o pipefail
           {
-            git checkout -b "ai-eval/${{ github.run_id }}"
+            git checkout -b "ai-eval/$RUN"
             git add -f experiments/ai/results
-            git status --short | head -20
-            git commit -q -m "experiment: AI drafter evaluation from run ${{ github.run_id }}"
-            git push origin "ai-eval/${{ github.run_id }}"
+            # Not "| head": with pipefail, git status dies of SIGPIPE once head has read enough
+            # and the step fails with 141 — what lost three runs' results without an error.
+            git status --short | awk 'NR <= 20'
+            git commit -q -m "experiment: AI drafter evaluation from run $RUN"
+            git push origin "ai-eval/$RUN"
           } 2>&1 | tee "$RUNNER_TEMP/push.log"
       - uses: ./.github/actions/log-tail
         if: failure()
