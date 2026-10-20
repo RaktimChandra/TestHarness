@@ -5,3 +5,4 @@
 10109	IGNORE	(Modern Web Application: informational; the UI is a single-page app by design)
 10027	IGNORE	(Suspicious Comments: words such as "select" and "user" inside the minified React vendor bundle; reviewed, no secrets or internal notes)
 10049	IGNORE	(Non-Storable Content: informational characterisation of caching. The policy is deliberate: content-hashed /assets/* are public and immutable for a year, pages and API responses are no-store; asserted by SecuritySmokeTest)
+10116	IGNORE	(ZAP is Out of Date: the ZAP image is pinned on purpose, so the gate changes only through a reviewed version bump; a moving "stable" tag broke the scan on 2026-10-20)

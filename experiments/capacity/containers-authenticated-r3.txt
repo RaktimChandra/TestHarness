@@ -1,0 +1,66 @@
+NAME                     IMAGE                    COMMAND                  SERVICE    CREATED          STATUS                      PORTS
+testharness-gate-1       testharness/gate:local   "java -XX:MaxRAMPerc…"   gate       14 minutes ago   Up 14 minutes (unhealthy)   127.0.0.1:8080->8080/tcp
+testharness-postgres-1   postgres:16-alpine       "docker-entrypoint.s…"   postgres   14 minutes ago   Up 14 minutes (healthy)     127.0.0.1:5432->5432/tcp
+CONTAINER ID   NAME                     CPU %     MEM USAGE / LIMIT   MEM %     NET I/O           BLOCK I/O         PIDS
+4e2471da8ba0   testharness-gate-1       99.70%    1016MiB / 1GiB      99.19%    1.31GB / 2.06GB   4.84MB / 24.4MB   29
+5d8c67bf2f27   testharness-postgres-1   0.00%     101.8MiB / 512MiB   19.88%    122MB / 1.17GB    6.07MB / 1.05GB   26
+gate-1  | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:142) ~[tomcat-embed-core-10.1.61.jar!/:na]
+gate-1  | 	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.2.19.jar!/:6.2.19]
+gate-1  | 	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.2.19.jar!/:6.2.19]
+gate-1  | 	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:166) ~[tomcat-embed-core-10.1.61.jar!/:na]
+gate-1  | 	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:142) ~[tomcat-embed-core-10.1.61.jar!/:na]
+gate-1  | 	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:164) ~[tomcat-embed-core-10.1.61.jar!/:na]
+gate-1  | 	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:88) ~[tomcat-embed-core-10.1.61.jar!/:na]
+gate-1  | 	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:540) ~[tomcat-embed-core-10.1.61.jar!/:na]
+gate-1  | 	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115) ~[tomcat-embed-core-10.1.61.jar!/:na]
+gate-1  | 	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:86) ~[tomcat-embed-core-10.1.61.jar!/:na]
+gate-1  | 	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:71) ~[tomcat-embed-core-10.1.61.jar!/:na]
+gate-1  | 	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:348) ~[tomcat-embed-core-10.1.61.jar!/:na]
+gate-1  | 	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:413) ~[tomcat-embed-core-10.1.61.jar!/:na]
+gate-1  | 	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:71) ~[tomcat-embed-core-10.1.61.jar!/:na]
+gate-1  | 	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:1308) ~[tomcat-embed-core-10.1.61.jar!/:na]
+gate-1  | 	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:2198) ~[tomcat-embed-core-10.1.61.jar!/:na]
+gate-1  | 	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:74) ~[tomcat-embed-core-10.1.61.jar!/:na]
+gate-1  | 	at java.base/java.lang.VirtualThread.run(Unknown Source) ~[na:na]
+gate-1  | Caused by: java.sql.SQLTransientConnectionException: HikariPool-1 - Connection is not available, request timed out after 30400ms (total=20, active=20, idle=0, waiting=5604)
+gate-1  | 	at com.zaxxer.hikari.pool.HikariPool.createTimeoutException(HikariPool.java:714) ~[HikariCP-6.3.3.jar!/:na]
+gate-1  | 	at com.zaxxer.hikari.pool.HikariPool.getConnection(HikariPool.java:184) ~[HikariCP-6.3.3.jar!/:na]
+gate-1  | 	at com.zaxxer.hikari.pool.HikariPool.getConnection(HikariPool.java:142) ~[HikariCP-6.3.3.jar!/:na]
+gate-1  | 	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:127) ~[HikariCP-6.3.3.jar!/:na]
+gate-1  | 	at org.springframework.jdbc.datasource.DataSourceTransactionManager.doBegin(DataSourceTransactionManager.java:271) ~[spring-jdbc-6.2.19.jar!/:6.2.19]
+gate-1  | 	... 156 common frames omitted
+gate-1  | 
+gate-1  | Exception in thread "http-nio-8080-Poller" java.lang.OutOfMemoryError: Java heap space
+gate-1  | 	at java.base/java.util.HashMap.resize(Unknown Source)
+gate-1  | 	at java.base/java.util.HashMap.putVal(Unknown Source)
+gate-1  | 	at java.base/java.util.HashMap.putIfAbsent(Unknown Source)
+gate-1  | 	at java.base/sun.nio.ch.EPollSelectorImpl.processUpdateQueue(Unknown Source)
+gate-1  | 	at java.base/sun.nio.ch.EPollSelectorImpl.doSelect(Unknown Source)
+gate-1  | 	at java.base/sun.nio.ch.SelectorImpl.lockAndDoSelect(Unknown Source)
+gate-1  | 	at java.base/sun.nio.ch.SelectorImpl.selectNow(Unknown Source)
+gate-1  | 	at org.apache.tomcat.util.net.NioEndpoint$Poller.run(NioEndpoint.java:1071)
+gate-1  | 	at java.base/java.lang.Thread.runWith(Unknown Source)
+gate-1  | 	at java.base/java.lang.Thread.run(Unknown Source)
+gate-1  | Exception in thread "tomcat-handler-228559" java.lang.OutOfMemoryError: Java heap space
+gate-1  | 	at java.base/java.lang.Object.clone(Native Method)
+gate-1  | 	at java.base/java.lang.Throwable.getStackTrace(Unknown Source)
+gate-1  | 	at ch.qos.logback.classic.spi.PackagingDataCalculator.populateFrames(PackagingDataCalculator.java:71)
+gate-1  | 	at ch.qos.logback.classic.spi.PackagingDataCalculator.calculate(PackagingDataCalculator.java:55)
+gate-1  | 	at ch.qos.logback.classic.spi.ThrowableProxy.calculatePackagingData(ThrowableProxy.java:188)
+gate-1  | 	at ch.qos.logback.classic.spi.LoggingEvent.<init>(LoggingEvent.java:148)
+gate-1  | 	at ch.qos.logback.classic.Logger.buildLoggingEventAndAppend(Logger.java:429)
+gate-1  | 	at ch.qos.logback.classic.Logger.filterAndLog_0_Or3Plus(Logger.java:388)
+gate-1  | 	at ch.qos.logback.classic.Logger.log(Logger.java:805)
+gate-1  | 	at org.slf4j.bridge.SLF4JBridgeHandler.callLocationAwareLogger(SLF4JBridgeHandler.java:232)
+gate-1  | 	at org.slf4j.bridge.SLF4JBridgeHandler.publish(SLF4JBridgeHandler.java:313)
+gate-1  | 	at java.logging/java.util.logging.Logger.log(Unknown Source)
+gate-1  | 	at java.logging/java.util.logging.Logger.doLog(Unknown Source)
+gate-1  | 	at java.logging/java.util.logging.Logger.logp(Unknown Source)
+gate-1  | 	at org.apache.juli.logging.DirectJDKLog.log(DirectJDKLog.java:170)
+gate-1  | 	at org.apache.juli.logging.DirectJDKLog.error(DirectJDKLog.java:141)
+gate-1  | 	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:1446)
+gate-1  | 	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:2198)
+gate-1  | 	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:74)
+gate-1  | 	at java.base/java.lang.Thread.runWith(Unknown Source)
+gate-1  | 	at java.base/java.lang.VirtualThread.run(Unknown Source)
+gate-1  | Exception in thread "http-nio-8080-Acceptor" java.lang.OutOfMemoryError: Java heap space
