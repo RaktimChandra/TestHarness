@@ -1,0 +1,258 @@
+{
+  "started": "2026-10-16T11:20:11+0000",
+  "mvn": "/home/claude/mvnl -B",
+  "runs": {
+    "OFF_BY_ONE_CAPACITY": {
+      "changed_file": "sut/gate-domain/src/main/java/io/github/raktimchandra/gate/domain/CapacityPolicy.java",
+      "selected": {
+        "exit": 0,
+        "maven_seconds": 147.3,
+        "tests": 99,
+        "failed": 4,
+        "sum_test_seconds": 212.7,
+        "failing": [
+          "reschedule > to_a_full_slot_is_rejected_and_nothing_changes",
+          "Booking API > capacity_is_enforced_at_the_boundary",
+          "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one",
+          "RunBddSuite > A slot cannot take more trucks than its capacity"
+        ],
+        "caught": true
+      },
+      "selector_output": [
+        "sut/gate-domain/src/main/java/io/github/raktimchandra/gate/domain/CapacityPolicy.java: 81 test(s) executed this file",
+        "81 of 138 tests selected; estimated 108.9 s of 163.0 s test time",
+        "Selection written to experiments/tia/repeats/r3/selection-OFF_BY_ONE_CAPACITY.txt  (run with: harness run --select experiments/tia/repeats/r3/selection-OFF_BY_ONE_CAPACITY.txt)"
+      ],
+      "full": {
+        "exit": 0,
+        "maven_seconds": 166.1,
+        "tests": 159,
+        "failed": 4,
+        "sum_test_seconds": 246.0,
+        "failing": [
+          "reschedule > to_a_full_slot_is_rejected_and_nothing_changes",
+          "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one",
+          "Booking API > capacity_is_enforced_at_the_boundary",
+          "RunBddSuite > A slot cannot take more trucks than its capacity"
+        ],
+        "caught": true
+      }
+    },
+    "CHECK_DIGIT_EDGE_CASE": {
+      "changed_file": "sut/gate-domain/src/main/java/io/github/raktimchandra/gate/domain/ContainerNumber.java",
+      "selected": {
+        "exit": 0,
+        "maven_seconds": 142.1,
+        "tests": 78,
+        "failed": 11,
+        "sum_test_seconds": 207.0,
+        "failing": [
+          "check-in > too_early_is_rejected",
+          "reschedule > moves_the_booking_and_both_slots_reflect_it",
+          "cancel > another_driver_cannot_cancel_it",
+          "cancel > cancelling_frees_the_place",
+          "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one",
+          "Booking API > a_generated_remainder_ten_container_is_accepted",
+          "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[2]",
+          "Search and object-level access > injection_payloads_in_filters_are_treated_as_plain_values",
+          "Booking journey > a_remainder_ten_container_number_is_accepted_end_to_end",
+          "Booking journey > a_driver_books_a_slot_and_sees_it_in_their_bookings",
+          "RunBddSuite > Drivers cannot check themselves in"
+        ],
+        "caught": true
+      },
+      "selector_output": [
+        "sut/gate-domain/src/main/java/io/github/raktimchandra/gate/domain/ContainerNumber.java: 66 test(s) executed this file",
+        "66 of 138 tests selected; estimated 98.0 s of 163.0 s test time",
+        "Selection written to experiments/tia/repeats/r3/selection-CHECK_DIGIT_EDGE_CASE.txt  (run with: harness run --select experiments/tia/repeats/r3/selection-CHECK_DIGIT_EDGE_CASE.txt)"
+      ],
+      "full": {
+        "exit": 0,
+        "maven_seconds": 169.1,
+        "tests": 159,
+        "failed": 7,
+        "sum_test_seconds": 250.6,
+        "failing": [
+          "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one",
+          "Booking API > a_generated_remainder_ten_container_is_accepted",
+          "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[2]",
+          "Booking API > a_container_can_have_only_one_open_appointment",
+          "Search and object-level access > a_clerk_can_read_any_booking",
+          "Booking journey > a_remainder_ten_container_number_is_accepted_end_to_end",
+          "RunBddSuite > Example #1.2"
+        ],
+        "caught": true
+      }
+    },
+    "TIMEZONE_SLOT_TIMES": {
+      "changed_file": "sut/gate-domain/src/main/java/io/github/raktimchandra/gate/domain/SlotTimes.java",
+      "selected": {
+        "exit": 0,
+        "maven_seconds": 148.9,
+        "tests": 122,
+        "failed": 10,
+        "sum_test_seconds": 224.0,
+        "failing": [
+          "Slots API > listing_by_date_includes_new_slots_in_start_order",
+          "Slots API > a_slot_requested_in_utc_is_reported_in_terminal_time",
+          "Slots API > slot_times_are_the_terminal_wall_clock_with_its_offset",
+          "Auth API > seeded_users_log_in_and_receive_a_bearer_token(String, String)[2]",
+          "Auth API > seeded_users_log_in_and_receive_a_bearer_token(String, String)[1]",
+          "Booking API > the_booking_reports_the_slot_time_exactly_as_the_slot_does",
+          "Booking journey > the_slot_table_shows_the_terminal_time_and_live_remaining_places",
+          "Booking journey > a_driver_books_a_slot_and_sees_it_in_their_bookings",
+          "Reschedule, cancel and check-in journeys > a_driver_reschedules_to_another_slot",
+          "RunBddSuite > A driver books from the booking screen"
+        ],
+        "caught": true
+      },
+      "selector_output": [
+        "sut/gate-domain/src/main/java/io/github/raktimchandra/gate/domain/SlotTimes.java: 101 test(s) executed this file",
+        "101 of 138 tests selected; estimated 119.3 s of 163.0 s test time",
+        "Selection written to experiments/tia/repeats/r3/selection-TIMEZONE_SLOT_TIMES.txt  (run with: harness run --select experiments/tia/repeats/r3/selection-TIMEZONE_SLOT_TIMES.txt)"
+      ],
+      "full": {
+        "exit": 0,
+        "maven_seconds": 169.4,
+        "tests": 159,
+        "failed": 10,
+        "sum_test_seconds": 253.5,
+        "failing": [
+          "Slots API > listing_by_date_includes_new_slots_in_start_order",
+          "Slots API > a_slot_requested_in_utc_is_reported_in_terminal_time",
+          "Slots API > slot_times_are_the_terminal_wall_clock_with_its_offset",
+          "Auth API > seeded_users_log_in_and_receive_a_bearer_token(String, String)[1]",
+          "Auth API > seeded_users_log_in_and_receive_a_bearer_token(String, String)[2]",
+          "Booking API > the_booking_reports_the_slot_time_exactly_as_the_slot_does",
+          "Booking journey > the_slot_table_shows_the_terminal_time_and_live_remaining_places",
+          "Booking journey > a_driver_books_a_slot_and_sees_it_in_their_bookings",
+          "Reschedule, cancel and check-in journeys > a_driver_reschedules_to_another_slot",
+          "RunBddSuite > A driver books from the booking screen"
+        ],
+        "caught": true
+      }
+    },
+    "RACE_ON_LAST_SLOT": {
+      "changed_file": "sut/gate-api/src/main/java/io/github/raktimchandra/gate/api/service/BookingService.java",
+      "selected": {
+        "exit": 0,
+        "maven_seconds": 148.9,
+        "tests": 89,
+        "failed": 1,
+        "sum_test_seconds": 221.6,
+        "failing": [
+          "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one"
+        ],
+        "caught": true
+      },
+      "selector_output": [
+        "sut/gate-api/src/main/java/io/github/raktimchandra/gate/api/service/BookingService.java: 75 test(s) executed this file",
+        "75 of 138 tests selected; estimated 109.1 s of 163.0 s test time",
+        "Selection written to experiments/tia/repeats/r3/selection-RACE_ON_LAST_SLOT.txt  (run with: harness run --select experiments/tia/repeats/r3/selection-RACE_ON_LAST_SLOT.txt)"
+      ],
+      "full": {
+        "exit": 0,
+        "maven_seconds": 160.4,
+        "tests": 159,
+        "failed": 1,
+        "sum_test_seconds": 241.4,
+        "failing": [
+          "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one"
+        ],
+        "caught": true
+      }
+    },
+    "MISSING_AUTHORISATION_CHECK": {
+      "changed_file": "sut/gate-domain/src/main/java/io/github/raktimchandra/gate/domain/BookingAccessPolicy.java",
+      "selected": {
+        "exit": 0,
+        "maven_seconds": 104.0,
+        "tests": 53,
+        "failed": 5,
+        "sum_test_seconds": 134.8,
+        "failing": [
+          "cancel > another_driver_cannot_cancel_it",
+          "reschedule > another_driver_cannot_reschedule_it",
+          "Search and object-level access > a_driver_cannot_read_another_drivers_booking",
+          "Security smoke > a_driver_cannot_read_change_or_cancel_another_drivers_booking",
+          "RunBddSuite > Drivers cannot see each other's bookings"
+        ],
+        "caught": true
+      },
+      "selector_output": [
+        "sut/gate-domain/src/main/java/io/github/raktimchandra/gate/domain/BookingAccessPolicy.java: 41 test(s) executed this file",
+        "41 of 138 tests selected; estimated 71.3 s of 163.0 s test time",
+        "Selection written to experiments/tia/repeats/r3/selection-MISSING_AUTHORISATION_CHECK.txt  (run with: harness run --select experiments/tia/repeats/r3/selection-MISSING_AUTHORISATION_CHECK.txt)"
+      ],
+      "full": {
+        "exit": 0,
+        "maven_seconds": 147.1,
+        "tests": 159,
+        "failed": 5,
+        "sum_test_seconds": 216.6,
+        "failing": [
+          "reschedule > another_driver_cannot_reschedule_it",
+          "cancel > another_driver_cannot_cancel_it",
+          "Search and object-level access > a_driver_cannot_read_another_drivers_booking",
+          "Security smoke > a_driver_cannot_read_change_or_cancel_another_drivers_booking",
+          "RunBddSuite > Drivers cannot see each other's bookings"
+        ],
+        "caught": true
+      }
+    },
+    "API_SKIPS_CONTAINER_VALIDATION": {
+      "changed_file": "sut/gate-api/src/main/java/io/github/raktimchandra/gate/api/service/BookingService.java",
+      "selected": {
+        "exit": 0,
+        "maven_seconds": 122.3,
+        "tests": 89,
+        "failed": 6,
+        "sum_test_seconds": 174.5,
+        "failing": [
+          "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[8]",
+          "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[12]",
+          "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[7]",
+          "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[9]",
+          "RunBddSuite > Example #1.6",
+          "RunBddSuite > Example #1.5"
+        ],
+        "caught": true
+      },
+      "selector_output": [
+        "sut/gate-api/src/main/java/io/github/raktimchandra/gate/api/service/BookingService.java: 75 test(s) executed this file",
+        "75 of 138 tests selected; estimated 109.1 s of 163.0 s test time",
+        "Selection written to experiments/tia/repeats/r3/selection-API_SKIPS_CONTAINER_VALIDATION.txt  (run with: harness run --select experiments/tia/repeats/r3/selection-API_SKIPS_CONTAINER_VALIDATION.txt)"
+      ],
+      "full": {
+        "exit": 0,
+        "maven_seconds": 142.4,
+        "tests": 159,
+        "failed": 6,
+        "sum_test_seconds": 208.4,
+        "failing": [
+          "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[7]",
+          "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[9]",
+          "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[12]",
+          "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[8]",
+          "RunBddSuite > Example #1.6",
+          "RunBddSuite > Example #1.5"
+        ],
+        "caught": true
+      }
+    }
+  },
+  "record": {
+    "exit": 0,
+    "seconds": 190.9,
+    "tests": 159,
+    "failed": 0,
+    "sum_test_seconds": 151.9,
+    "failing": []
+  },
+  "map": {
+    "tests": 138,
+    "files": 47,
+    "sum_test_ms": 163006
+  },
+  "finished": "2026-10-16T11:52:54+0000"
+}
