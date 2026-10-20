@@ -26,7 +26,7 @@ From real runs on 2026-10-14 to 2026-10-20 — method, machine and raw numbers f
 
 | | |
 |---|---|
-| Tests in one `verify` | **526 JVM tests + 32 Vitest + 1 Gatling simulation**, 0 failed (5 visual checks skip outside CI by design); dashboard: 9 more Vitest |
+| Tests in one `verify` | **534 JVM tests + 32 Vitest + 1 Gatling simulation**, 0 failed (5 visual checks skip outside CI by design); dashboard: 9 more Vitest |
 | Wall-clock, clean build + everything (2 vCPU sandbox) | **6 min 32 s** |
 | Fault seeding: 6 bugs × 8 suite types (CI), **run three times** | **6/6 caught** by at least one suite in every run · API 6/6/6 · BDD 5/5/5 · contract, UI 2/2/2 · security 2/1/1 · Gatling 0/1/1 · the race bug caught by **one test of 151** · 46 of 48 cells gave the same verdict all three times |
 | Mutation score, domain rules (PIT, STRONGER) | **95.1 % → 100 %** (143 mutants) after turning the 7 survivors into tests |

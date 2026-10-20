@@ -30,7 +30,7 @@ likely to ask, with honest answers. Every number links back to a run in
 > testing took the domain rules from 95.1 % to 100 %. Test impact analysis caught the bug in
 > 18 of 18 selected runs — but saved only 4–33 % of the time, and I explain why.
 >
-> Everything is one command: `./mvnw verify`, 526 JVM tests in six and a half minutes on a
+> Everything is one command: `./mvnw verify`, 534 JVM tests in six and a half minutes on a
 > 2-vCPU machine. CI runs it across Chrome, Firefox and Edge, sharded by recorded duration, on
 > Selenium Grid, with a single quality gate, plus OSV and ZAP scans and a Windows job. The same
 > pipeline runs on a real TeamCity server and on CIForge, my own CI orchestrator. And to show

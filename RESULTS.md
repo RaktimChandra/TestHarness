@@ -616,31 +616,32 @@ Getting there took six CI iterations and fixed three real defects in the DSL (DE
 
 ### 30. One-command build — sandbox, 2026-10-20
 
-**Method:** as §16, `mvn -o clean install` on commit `dc4c3e7` (version 1.1.0); counts from the
+**Method:** as §16, `mvn -o clean install` on commit `57c48a1` (version 1.1.0); counts from the
 surefire XML by `.github/scripts/test_summary.py`.
 
 | Module | Tests | Failed | Errors | Skipped | Σ test time (s) |
 |---|---:|---:|---:|---:|---:|
 | sut/gate-domain | 69 | 0 | 0 | 0 | 0.4 |
-| sut/gate-api (+ throttle unit and integration tests, security headers, caching) | 26 | 0 | 0 | 0 | 8.0 |
-| harness/harness-core (+ relaxed environment keys) | 44 | 0 | 0 | 0 | 2.8 |
+| sut/gate-api (+ throttle unit and integration tests, security headers, caching) | 26 | 0 | 0 | 0 | 8.3 |
+| harness/harness-core (+ relaxed environment keys) | 44 | 0 | 0 | 0 | 3.2 |
 | harness/harness-reporting | 8 | 0 | 0 | 0 | 0.2 |
-| harness/harness-data | 75 | 0 | 0 | 0 | 3.9 |
-| harness/harness-api | 13 | 0 | 0 | 0 | 1.2 |
-| harness/harness-ui (+ known accessibility issues) | 46 | 0 | 0 | 0 | 22.3 |
-| harness/harness-bdd (+ hooks through the real Cucumber engine) | 4 | 0 | 0 | 0 | 2.5 |
-| harness/harness-insights (+ duration shard plan) | 49 | 0 | 0 | 0 | 5.0 |
-| harness/harness-cli (+ every command against a fake repository) | 19 | 0 | 0 | 0 | 6.0 |
-| suites/api-suite (+ brute force, no enumeration, headers, caching) | 112 | 0 | 0 | 0 | 101.6 |
-| suites/ui-suite | 29 | 0 | 0 | 5 | 85.6 |
-| suites/bdd-suite (+ drafted-step coverage) | 24 | 0 | 0 | 1 | 55.5 |
-| adapters/portsync (offline: schemas, architecture, consumer pact) | 8 | 0 | 0 | 0 | 9.8 |
-| **Total (JVM)** | **526** | **0** | **0** | **6** | **304.9** |
+| harness/harness-data | 75 | 0 | 0 | 0 | 4.5 |
+| harness/harness-api | 13 | 0 | 0 | 0 | 1.1 |
+| harness/harness-ui (+ known accessibility issues, anti-aliasing, settled captures, navigation) | 54 | 0 | 0 | 0 | 20.8 |
+| harness/harness-bdd (+ hooks through the real Cucumber engine) | 4 | 0 | 0 | 0 | 2.6 |
+| harness/harness-insights (+ duration shard plan) | 49 | 0 | 0 | 0 | 5.4 |
+| harness/harness-cli (+ every command against a fake repository) | 19 | 0 | 0 | 0 | 6.3 |
+| suites/api-suite (+ brute force, no enumeration, headers, caching) | 112 | 0 | 0 | 0 | 100.0 |
+| suites/ui-suite | 29 | 0 | 0 | 5 | 86.7 |
+| suites/bdd-suite (+ drafted-step coverage) | 24 | 0 | 0 | 1 | 58.0 |
+| adapters/portsync (offline: schemas, architecture, consumer pact) | 8 | 0 | 0 | 0 | 10.0 |
+| **Total (JVM)** | **534** | **0** | **0** | **6** | **307.4** |
 | sut/gate-ui (Vitest) | 32 | 0 | 0 | 0 | — |
 | dashboard (Vitest, run separately) | 9 | 0 | 0 | 0 | — |
-| suites/perf-suite (Gatling) | 1 simulation, 300 requests | 0 KO | — | — | p95 91 ms · p99 102 ms |
+| suites/perf-suite (Gatling) | 1 simulation, 300 requests | 0 KO | — | — | p95 92 ms · p99 98 ms |
+| tools/tests (Python, `unittest`) | 5 | 0 | 0 | 0 | — |
 
-**Wall-clock: 6 min 32 s** (Maven total time; the whole command 10:34:03 → 10:40:38 UTC). Skipped: the 5 visual checks (they run
+**Wall-clock: 6 min 32 s** (Maven total time; the whole command 16:14:04 → 16:20:38 UTC). Skipped: the 5 visual checks (they run
 in CI only, §12) and `DraftStepCoverageTest.reportOnDrafts`, which runs only when
 `-Dai.drafts` points at drafts to score (§43).
 

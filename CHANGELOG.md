@@ -80,7 +80,7 @@ compiling, every test passing, and `./mvnw verify` running end to end.
   known issues any more.
 
 ### Measured
-- Local `clean install` (2 vCPU): **526 JVM tests, 0 failed**, 6 min 32 s.
+- Local `clean install` (2 vCPU): **534 JVM tests, 0 failed**, 6 min 32 s.
 - OSV: 41 advisories on the first scan → 0 untriaged. ZAP: 8 alert types → 6 fixed, now 0 warnings.
 - Windows: 500 tests, 0 failed. TeamCity: every build of the chain green. CIForge in Actions:
   9 of 9 builds, 5 min 25 s.
