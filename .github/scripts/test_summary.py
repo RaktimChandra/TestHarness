@@ -18,9 +18,10 @@ def main() -> int:
     patterns = sys.argv[2:] or ["**/target/surefire-reports/TEST-*.xml"]
     rows = {}
     failures = []
+    skipped = []
     for pattern in patterns:
         for path in glob.glob(pattern, recursive=True):
-            module = path.split("/target/")[0] or "."
+            module = path.replace("\\", "/").split("/target/")[0] or "."
             r = rows.setdefault(module, {"tests": 0, "failed": 0, "errors": 0, "skipped": 0, "time": 0.0})
             root = ET.parse(path).getroot()
             for case in root.iter("testcase"):
@@ -36,6 +37,9 @@ def main() -> int:
                     r["errors"] += 1
                 elif case.find("skipped") is not None:
                     r["skipped"] += 1
+                    why = " ".join((case.find("skipped").get("message") or "").split())[:160]
+                    skipped.append(f"{case.get('classname', '').rsplit('.', 1)[-1]} > {case.get('name')}"
+                                   + (f" ({why})" if why else ""))
     total = {k: sum(r[k] for r in rows.values()) for k in ("tests", "failed", "errors", "skipped", "time")}
     lines = [f"### {label}", "", "| module | tests | failed | errors | skipped | test time (s) |",
              "|---|---:|---:|---:|---:|---:|"]
@@ -53,6 +57,12 @@ def main() -> int:
     compact = "; ".join(f"{m}={r['tests']}/{r['failed']}/{r['errors']}/{r['skipped']}" for m, r in sorted(rows.items()))
     print(f"::notice title={label} (tests/failed/errors/skipped)::total={total['tests']}/{total['failed']}/"
           f"{total['errors']}/{total['skipped']} test-time={total['time']:.1f}s | {compact}")
+    # Which tests were skipped and why, so a skip count can be explained from the checks API.
+    if skipped:
+        listed = "; ".join(skipped)
+        if len(listed) > 3800:
+            listed = listed[:3800] + f" ... ({len(skipped)} in all)"
+        print(f"::notice title={label} skipped tests::{listed}")
     # The failing tests themselves, one annotation each (GitHub shows at most ten per step).
     for f in failures[:8]:
         print(f"::error title={label} failed test::{f}")

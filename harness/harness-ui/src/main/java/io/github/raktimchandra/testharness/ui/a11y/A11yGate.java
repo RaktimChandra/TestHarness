@@ -15,6 +15,12 @@ import java.util.Set;
  * tests do not control, as {@code rule@selector} (comma-separated). A violation whose every
  * element is listed does not count against the thresholds, but is still reported
  * ({@link #known}); any other element, or another rule, still fails.
+ *
+ * <p>axe names an element by the shortest selector that is unique on the page: {@code .tone-warn}
+ * while there is one such element, {@code tr:nth-child(2) > td:nth-child(1) > .tone-warn.pill}
+ * once there are several. So a listed selector matches a target that equals it, or whose last
+ * compound selector (the element itself) has every class, id and tag of the listed one. A
+ * violation counts as known only when axe returned a target for each of its elements.
  */
 public record A11yGate(int maxCritical, int maxSerious, int maxModerate, int maxMinor, Set<String> knownIssues) {
 
@@ -35,7 +41,37 @@ public record A11yGate(int maxCritical, int maxSerious, int maxModerate, int max
 
     private boolean isKnown(A11yReport.Violation v) {
         return !knownIssues.isEmpty() && v.targets() != null && !v.targets().isEmpty()
-                && v.targets().stream().allMatch(t -> knownIssues.contains(v.rule() + "@" + t));
+                && v.targets().size() == v.nodes()
+                && v.targets().stream().allMatch(t -> knownIssues.stream().anyMatch(k -> matches(k, v.rule(), t)));
+    }
+
+    static boolean matches(String known, String rule, String target) {
+        int at = known.indexOf('@');
+        if (at < 0 || !known.substring(0, at).equals(rule)) {
+            return false;
+        }
+        String selector = known.substring(at + 1).strip();
+        if (selector.equals(target.strip())) {
+            return true;
+        }
+        if (selector.isEmpty() || selector.matches(".*[\\s>+~].*")) {
+            return false; // only a single compound selector is matched loosely
+        }
+        String[] parts = target.strip().split("\\s*[\\s>+~]\\s*");
+        Set<String> element = simpleSelectors(parts[parts.length - 1]);
+        Set<String> wanted = simpleSelectors(selector);
+        return !wanted.isEmpty() && element.containsAll(wanted);
+    }
+
+    /** Tag, {@code #id} and {@code .class} parts of one compound selector; pseudo-classes and attributes dropped. */
+    private static Set<String> simpleSelectors(String compound) {
+        String plain = compound.replaceAll(":{1,2}[\\w-]+(\\([^)]*\\))?", "").replaceAll("\\[[^\\]]*\\]", "");
+        Set<String> out = new java.util.HashSet<>();
+        java.util.regex.Matcher m = java.util.regex.Pattern.compile("[.#]?[\\w-]+").matcher(plain);
+        while (m.find()) {
+            out.add(m.group());
+        }
+        return out;
     }
 
     /** Violations excluded from the thresholds because they are listed as known issues. */

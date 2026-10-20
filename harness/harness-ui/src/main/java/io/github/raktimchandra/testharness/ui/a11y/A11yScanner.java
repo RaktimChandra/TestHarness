@@ -46,7 +46,7 @@ public final class A11yScanner {
         }
         List<A11yReport.Violation> violations = new ArrayList<>();
         for (Rule rule : results.getViolations()) {
-            List<String> targets = rule.getNodes().stream().limit(5).map(A11yScanner::target).toList();
+            List<String> targets = rule.getNodes().stream().map(A11yScanner::target).toList();
             violations.add(new A11yReport.Violation(rule.getId(), rule.getImpact(), rule.getHelp(), rule.getHelpUrl(),
                     rule.getNodes().size(), targets));
         }

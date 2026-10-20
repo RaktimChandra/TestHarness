@@ -71,7 +71,7 @@ def clean_reports():
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--mvn", default="./mvnw -B")
-    ap.add_argument("--cli", default="java -jar harness/harness-cli/target/harness-cli-1.0.0-SNAPSHOT.jar")
+    ap.add_argument("--cli", default="java -jar harness/harness-cli/target/harness-cli-1.1.0.jar")
     ap.add_argument("--skip-record", action="store_true")
     ap.add_argument("--out", default="experiments/tia")
     ap.add_argument("--bugs", default=",".join(BUG_FILES))
