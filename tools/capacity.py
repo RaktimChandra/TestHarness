@@ -40,16 +40,19 @@ def parse_gatling(text):
     block = blocks[-1].split("========")[0]
     g = {}
     for line in block.splitlines():
-        m = re.match(r"> (.+?)\s*\|\s*([\d.]+)\s*\|\s*([\d.]+|-)\s*\|\s*([\d.]+|-)", line)
+        # Gatling groups thousands with commas ("1,500"); the first version of this parser did
+        # not, so every level with 1,000+ requests read as 0 requests and "did not keep up".
+        m = re.match(r"> (.+?)\s*\|\s*([\d.,]+)\s*\|\s*([\d.,]+|-)\s*\|\s*([\d.,]+|-)", line)
         if m:
-            g[m.group(1).strip()] = [m.group(2), m.group(3), m.group(4)]
+            g[m.group(1).strip()] = [x.replace(",", "") for x in (m.group(2), m.group(3), m.group(4))]
     reqs = {}
     tables = text.split("---- Requests ----")
     if len(tables) > 1:
         for line in tables[-1].split("\n\n")[0].splitlines():
-            m = re.match(r"> (.+?)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)", line)
+            m = re.match(r"> (.+?)\s*\|\s*([\d,]+)\s*\|\s*([\d,]+)\s*\|\s*([\d,]+)", line)
             if m and m.group(1).strip() != "Global":
-                reqs[m.group(1).strip()] = {"total": int(m.group(2)), "ok": int(m.group(3)), "ko": int(m.group(4))}
+                n = [int(x.replace(",", "")) for x in (m.group(2), m.group(3), m.group(4))]
+                reqs[m.group(1).strip()] = {"total": n[0], "ok": n[1], "ko": n[2]}
     num = lambda k, i=0: float(g[k][i]) if k in g and g[k][i] not in ("-",) else None
     total = int(num("request count") or 0)
     ko = int(num("request count", 2) or 0)

@@ -238,6 +238,9 @@ jobs:
       - run: npm run build
       - name: The page committed into harness-insights matches its source
         run: git diff --exit-code -- ../harness/harness-insights/src/main/resources/io/github/raktimchandra/testharness/insights/dashboard/site/index.html
+      - name: Tests of the Python tools and CI scripts
+        working-directory: .
+        run: python3 -m unittest discover -s tools/tests -v
 
   teamcity-dsl:
     name: TeamCity Kotlin DSL compiles and generates

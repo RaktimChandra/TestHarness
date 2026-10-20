@@ -35,11 +35,22 @@ jobs:
           java-version: '21'
           cache: maven
       - name: Ollama with ${{ matrix.model }}
+        # The Ollama server image (a pinned release) rather than the install script: the first
+        # run of this workflow failed inside install.sh, and a container gives the same server
+        # on any runner with no system changes.
         run: |
-          curl -fsSL https://ollama.com/install.sh | sh
-          for i in $(seq 1 30); do curl -sf http://localhost:11434/api/version && break; sleep 2; done
-          ollama pull '${{ matrix.model }}'
-          ollama list
+          set -o pipefail
+          {
+            docker run -d --name ollama -p 11434:11434 ollama/ollama:0.9.0
+            for i in $(seq 1 60); do curl -sf http://localhost:11434/api/version && break; sleep 2; done
+            curl -sf http://localhost:11434/api/version
+            docker exec ollama ollama pull '${{ matrix.model }}'
+            docker exec ollama ollama list
+          } 2>&1 | tee "$RUNNER_TEMP/ollama.log"
+      - uses: ./.github/actions/log-tail
+        if: failure()
+        with:
+          file: ${{ runner.temp }}/ollama.log
       - name: Build
         run: ./mvnw -B -ntp -q install -DskipTests
       - name: Draft and score
@@ -70,6 +81,7 @@ jobs:
       - name: Summarise
         run: python3 tools/ai_eval_report.py experiments/ai/results | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Push
+        if: hashFiles('experiments/ai/results/**/ai-eval.json') != ''
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

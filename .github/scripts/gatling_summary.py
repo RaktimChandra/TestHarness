@@ -21,16 +21,17 @@ def main() -> int:
     block = blocks[-1].split("========")[0]
     values = {}
     for line in block.splitlines():
-        m = re.match(r"> (.+?)\s*\|\s*([\d.]+)\s*\|\s*([\d.]+|-)\s*\|\s*([\d.]+|-)", line)
+        # Gatling groups thousands with commas ("1,500").
+        m = re.match(r"> (.+?)\s*\|\s*([\d.,]+)\s*\|\s*([\d.,]+|-)\s*\|\s*([\d.,]+|-)", line)
         if m:
-            values[m.group(1).strip()] = (m.group(2), m.group(4))
+            values[m.group(1).strip()] = (m.group(2).replace(",", ""), m.group(4).replace(",", ""))
     requests = {}
     tables = text.split("---- Requests ----")
     if len(tables) > 1:
         for line in tables[-1].split("\n\n")[0].splitlines():
-            m = re.match(r"> (.+?)\s*\|\s*(\d+)\s*\|\s*(\d+)\s*\|\s*(\d+)", line)
+            m = re.match(r"> (.+?)\s*\|\s*([\d,]+)\s*\|\s*([\d,]+)\s*\|\s*([\d,]+)", line)
             if m and m.group(1).strip() != "Global":
-                requests[m.group(1).strip()] = (m.group(2), m.group(4))
+                requests[m.group(1).strip()] = (m.group(2).replace(",", ""), m.group(4).replace(",", ""))
     total, ko = values.get("request count", ("0", "0"))
     ko = "0" if ko == "-" else ko
     get = lambda k: values.get(k, ("?",))[0]
