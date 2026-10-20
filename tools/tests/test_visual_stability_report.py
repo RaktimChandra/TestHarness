@@ -42,6 +42,17 @@ class Report(unittest.TestCase):
         self.assertEqual(dict(p[("firefox", "cancel-dialog")]),
                          {at: [2, 0], moved: [1, 1], "not logged": [1, 0]})
 
+    def test_environments_count_runs_with_a_failure(self):
+        a = run(1, 0, 0)
+        a["environment"] = {"image": "ubuntu24 20261012", "browser": "Mozilla Firefox 144.0"}
+        b = run(2, 876, 777, failed=True)
+        b["environment"] = {"image": "ubuntu24 20261019", "browser": "Mozilla Firefox 144.0"}
+        c = run(3, 0, 0)
+        e = vsr.environments([a, b, c])
+        self.assertEqual(e[("firefox", "browser: Mozilla Firefox 144.0; image: ubuntu24 20261012")], [1, 0])
+        self.assertEqual(e[("firefox", "browser: Mozilla Firefox 144.0; image: ubuntu24 20261019")], [1, 1])
+        self.assertEqual(e[("firefox", "not recorded")], [1, 0])
+
 
 if __name__ == "__main__":
     unittest.main()

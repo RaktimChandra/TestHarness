@@ -3,7 +3,8 @@
 per browser and check, how many runs matched, how many failed, and the largest differing and
 anti-aliased pixel counts seen; then, per check, each distinct place the element was drawn
 (sub-pixel position and viewport) with how many runs drew it there and how many of those failed,
-because a sub-pixel move is a cause the images alone do not show.
+because a sub-pixel move is a cause the images alone do not show; and the runner environments
+(image, CPU, browser and font versions) with their failure counts.
 
 usage: tools/visual_stability_report.py <dir>
 """
@@ -36,6 +37,18 @@ def summarise(results):
             row["max_aa"] = max(row["max_aa"], c["anti_aliased"])
             row["runs_with_aa"] += c["anti_aliased"] > 0
     return rows, suites
+
+
+def environments(results):
+    """(browser, environment line) -> [runs, runs with a visual failure]."""
+    out = defaultdict(lambda: [0, 0])
+    for r in results:
+        env = r.get("environment") or {}
+        line = "; ".join(f"{k}: {v}" for k, v in sorted(env.items())) or "not recorded"
+        cell = out[(r["browser"], line)]
+        cell[0] += 1
+        cell[1] += bool(r.get("visual_failures"))
+    return out
 
 
 def positions(results):
@@ -75,6 +88,11 @@ def main():
     for (b, check), cells in sorted(positions(results).items()):
         for g, (n, f) in sorted(cells.items()):
             print(f"| {b} | {check} | {g} | {n} | {f} |")
+    print("\n## Runner environments\n")
+    print("| browser | environment | runs | runs with a visual failure |")
+    print("|---|---|---:|---:|")
+    for (b, env), (n, f) in sorted(environments(results).items()):
+        print(f"| {b} | {env} | {n} | {f} |")
     return 0
 
 
