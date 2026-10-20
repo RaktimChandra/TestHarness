@@ -1,0 +1,418 @@
+{
+  "flow": "authenticated",
+  "label": "39419512861-r3",
+  "duration_s": 60,
+  "started": "2026-10-20T12:06:04+0000",
+  "sut_cpus": 2.0,
+  "sut_memory_bytes": 1073741824,
+  "host_cpus": 4,
+  "rules": {
+    "p95_ms": 800,
+    "max_error_pct": 1.0,
+    "min_achieved_ratio": 0.95
+  },
+  "levels": [
+    {
+      "offered_flows_per_s": 10.0,
+      "maven_exit": 0,
+      "wall_s": 76.1,
+      "requests": 2400,
+      "failed": 0,
+      "error_pct": 0.0,
+      "p50_ms": 3.0,
+      "p95_ms": 6.0,
+      "p99_ms": 10.0,
+      "max_ms": 38.0,
+      "rps": 40.0,
+      "by_request": {
+        "list slots": {
+          "total": 600,
+          "ok": 600,
+          "ko": 0
+        },
+        "book": {
+          "total": 600,
+          "ok": 600,
+          "ko": 0
+        },
+        "read booking": {
+          "total": 600,
+          "ok": 600,
+          "ko": 0
+        },
+        "cancel": {
+          "total": 600,
+          "ok": 600,
+          "ko": 0
+        }
+      },
+      "completed_flows_per_s": 10.0,
+      "achieved_ratio": 1.0,
+      "sut_cpu_pct_mean": 31.1,
+      "sut_cpu_pct_max": 104.8,
+      "keeps_up": true
+    },
+    {
+      "offered_flows_per_s": 20.0,
+      "maven_exit": 0,
+      "wall_s": 75.4,
+      "requests": 4800,
+      "failed": 0,
+      "error_pct": 0.0,
+      "p50_ms": 2.0,
+      "p95_ms": 4.0,
+      "p99_ms": 5.0,
+      "max_ms": 23.0,
+      "rps": 80.0,
+      "by_request": {
+        "list slots": {
+          "total": 1200,
+          "ok": 1200,
+          "ko": 0
+        },
+        "book": {
+          "total": 1200,
+          "ok": 1200,
+          "ko": 0
+        },
+        "read booking": {
+          "total": 1200,
+          "ok": 1200,
+          "ko": 0
+        },
+        "cancel": {
+          "total": 1200,
+          "ok": 1200,
+          "ko": 0
+        }
+      },
+      "completed_flows_per_s": 20.0,
+      "achieved_ratio": 1.0,
+      "sut_cpu_pct_mean": 28.7,
+      "sut_cpu_pct_max": 85.1,
+      "keeps_up": true
+    },
+    {
+      "offered_flows_per_s": 40.0,
+      "maven_exit": 0,
+      "wall_s": 75.7,
+      "requests": 9600,
+      "failed": 0,
+      "error_pct": 0.0,
+      "p50_ms": 2.0,
+      "p95_ms": 4.0,
+      "p99_ms": 5.0,
+      "max_ms": 20.0,
+      "rps": 160.0,
+      "by_request": {
+        "list slots": {
+          "total": 2400,
+          "ok": 2400,
+          "ko": 0
+        },
+        "book": {
+          "total": 2400,
+          "ok": 2400,
+          "ko": 0
+        },
+        "read booking": {
+          "total": 2400,
+          "ok": 2400,
+          "ko": 0
+        },
+        "cancel": {
+          "total": 2400,
+          "ok": 2400,
+          "ko": 0
+        }
+      },
+      "completed_flows_per_s": 40.0,
+      "achieved_ratio": 1.0,
+      "sut_cpu_pct_mean": 27.0,
+      "sut_cpu_pct_max": 91.2,
+      "keeps_up": true
+    },
+    {
+      "offered_flows_per_s": 60.0,
+      "maven_exit": 0,
+      "wall_s": 75.9,
+      "requests": 14400,
+      "failed": 0,
+      "error_pct": 0.0,
+      "p50_ms": 2.0,
+      "p95_ms": 4.0,
+      "p99_ms": 5.0,
+      "max_ms": 27.0,
+      "rps": 240.0,
+      "by_request": {
+        "list slots": {
+          "total": 3600,
+          "ok": 3600,
+          "ko": 0
+        },
+        "book": {
+          "total": 3600,
+          "ok": 3600,
+          "ko": 0
+        },
+        "read booking": {
+          "total": 3600,
+          "ok": 3600,
+          "ko": 0
+        },
+        "cancel": {
+          "total": 3600,
+          "ok": 3600,
+          "ko": 0
+        }
+      },
+      "completed_flows_per_s": 60.0,
+      "achieved_ratio": 1.0,
+      "sut_cpu_pct_mean": 30.9,
+      "sut_cpu_pct_max": 87.0,
+      "keeps_up": true
+    },
+    {
+      "offered_flows_per_s": 80.0,
+      "maven_exit": 0,
+      "wall_s": 75.7,
+      "requests": 19200,
+      "failed": 0,
+      "error_pct": 0.0,
+      "p50_ms": 2.0,
+      "p95_ms": 6.0,
+      "p99_ms": 25.0,
+      "max_ms": 238.0,
+      "rps": 320.0,
+      "by_request": {
+        "list slots": {
+          "total": 4800,
+          "ok": 4800,
+          "ko": 0
+        },
+        "book": {
+          "total": 4800,
+          "ok": 4800,
+          "ko": 0
+        },
+        "read booking": {
+          "total": 4800,
+          "ok": 4800,
+          "ko": 0
+        },
+        "cancel": {
+          "total": 4800,
+          "ok": 4800,
+          "ko": 0
+        }
+      },
+      "completed_flows_per_s": 80.0,
+      "achieved_ratio": 1.0,
+      "sut_cpu_pct_mean": 36.6,
+      "sut_cpu_pct_max": 87.3,
+      "keeps_up": true
+    },
+    {
+      "offered_flows_per_s": 100.0,
+      "maven_exit": 0,
+      "wall_s": 76.3,
+      "requests": 24000,
+      "failed": 0,
+      "error_pct": 0.0,
+      "p50_ms": 2.0,
+      "p95_ms": 4.0,
+      "p99_ms": 8.0,
+      "max_ms": 132.0,
+      "rps": 400.0,
+      "by_request": {
+        "list slots": {
+          "total": 6000,
+          "ok": 6000,
+          "ko": 0
+        },
+        "book": {
+          "total": 6000,
+          "ok": 6000,
+          "ko": 0
+        },
+        "read booking": {
+          "total": 6000,
+          "ok": 6000,
+          "ko": 0
+        },
+        "cancel": {
+          "total": 6000,
+          "ok": 6000,
+          "ko": 0
+        }
+      },
+      "completed_flows_per_s": 100.0,
+      "achieved_ratio": 1.0,
+      "sut_cpu_pct_mean": 43.7,
+      "sut_cpu_pct_max": 87.9,
+      "keeps_up": true
+    },
+    {
+      "offered_flows_per_s": 120.0,
+      "maven_exit": 0,
+      "wall_s": 76.1,
+      "requests": 28800,
+      "failed": 0,
+      "error_pct": 0.0,
+      "p50_ms": 2.0,
+      "p95_ms": 4.0,
+      "p99_ms": 9.0,
+      "max_ms": 117.0,
+      "rps": 480.0,
+      "by_request": {
+        "list slots": {
+          "total": 7200,
+          "ok": 7200,
+          "ko": 0
+        },
+        "book": {
+          "total": 7200,
+          "ok": 7200,
+          "ko": 0
+        },
+        "read booking": {
+          "total": 7200,
+          "ok": 7200,
+          "ko": 0
+        },
+        "cancel": {
+          "total": 7200,
+          "ok": 7200,
+          "ko": 0
+        }
+      },
+      "completed_flows_per_s": 120.0,
+      "achieved_ratio": 1.0,
+      "sut_cpu_pct_mean": 49.2,
+      "sut_cpu_pct_max": 89.7,
+      "keeps_up": true
+    },
+    {
+      "offered_flows_per_s": 160.0,
+      "maven_exit": 0,
+      "wall_s": 76.4,
+      "requests": 38400,
+      "failed": 0,
+      "error_pct": 0.0,
+      "p50_ms": 2.0,
+      "p95_ms": 16.0,
+      "p99_ms": 280.0,
+      "max_ms": 952.0,
+      "rps": 640.0,
+      "by_request": {
+        "list slots": {
+          "total": 9600,
+          "ok": 9600,
+          "ko": 0
+        },
+        "book": {
+          "total": 9600,
+          "ok": 9600,
+          "ko": 0
+        },
+        "read booking": {
+          "total": 9600,
+          "ok": 9600,
+          "ko": 0
+        },
+        "cancel": {
+          "total": 9600,
+          "ok": 9600,
+          "ko": 0
+        }
+      },
+      "completed_flows_per_s": 160.0,
+      "achieved_ratio": 1.0,
+      "sut_cpu_pct_mean": 60.3,
+      "sut_cpu_pct_max": 86.0,
+      "keeps_up": true
+    },
+    {
+      "offered_flows_per_s": 200.0,
+      "maven_exit": 0,
+      "wall_s": 76.5,
+      "requests": 48000,
+      "failed": 0,
+      "error_pct": 0.0,
+      "p50_ms": 2.0,
+      "p95_ms": 13.0,
+      "p99_ms": 47.0,
+      "max_ms": 186.0,
+      "rps": 800.0,
+      "by_request": {
+        "list slots": {
+          "total": 12000,
+          "ok": 12000,
+          "ko": 0
+        },
+        "book": {
+          "total": 12000,
+          "ok": 12000,
+          "ko": 0
+        },
+        "read booking": {
+          "total": 12000,
+          "ok": 12000,
+          "ko": 0
+        },
+        "cancel": {
+          "total": 12000,
+          "ok": 12000,
+          "ko": 0
+        }
+      },
+      "completed_flows_per_s": 200.0,
+      "achieved_ratio": 1.0,
+      "sut_cpu_pct_mean": 71.2,
+      "sut_cpu_pct_max": 94.8,
+      "keeps_up": true
+    },
+    {
+      "offered_flows_per_s": 240.0,
+      "maven_exit": 0,
+      "wall_s": 195.9,
+      "requests": 43528,
+      "failed": 12850,
+      "error_pct": 29.521,
+      "p50_ms": 3054.0,
+      "p95_ms": 60000.0,
+      "p99_ms": 60001.0,
+      "max_ms": 60011.0,
+      "rps": 241.82,
+      "by_request": {
+        "list slots": {
+          "total": 14400,
+          "ok": 10045,
+          "ko": 4355
+        },
+        "book": {
+          "total": 14398,
+          "ok": 7365,
+          "ko": 7033
+        },
+        "read booking": {
+          "total": 7365,
+          "ok": 6893,
+          "ko": 472
+        },
+        "cancel": {
+          "total": 7365,
+          "ok": 6375,
+          "ko": 990
+        }
+      },
+      "completed_flows_per_s": 106.25,
+      "achieved_ratio": 0.443,
+      "sut_cpu_pct_mean": 96.9,
+      "sut_cpu_pct_max": 138.1,
+      "keeps_up": false
+    }
+  ],
+  "capacity_flows_per_s": 200.0,
+  "finished": "2026-10-20T12:20:44+0000"
+}
