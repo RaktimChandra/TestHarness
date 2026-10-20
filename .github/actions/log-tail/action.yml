@@ -18,8 +18,9 @@ runs:
         [ -f "$f" ] || { echo "no log at $f"; exit 0; }
         # Maven error lines first (they name the failing test and assertion), then other
         # failure markers, then the plain tail. Repeated warnings must not crowd them out.
-        body=$( { grep -E '^\[ERROR\]|BUILD FAILURE' "$f" | grep -v '^\[ERROR\] *$' | head -40; \
-                  echo '--- other failure markers ---'; grep -E 'FAILED|Tests run:.*Fail|^Caused by' "$f" | sort | uniq -c | sort -rn | head -15; \
+        # awk rather than head: under pipefail a writer cut off by head fails with SIGPIPE.
+        body=$( { grep -E '^\[ERROR\]|BUILD FAILURE' "$f" | grep -v '^\[ERROR\] *$' | awk 'NR <= 40'; \
+                  echo '--- other failure markers ---'; grep -E 'FAILED|Tests run:.*Fail|^Caused by' "$f" | sort | uniq -c | sort -rn | awk 'NR <= 15'; \
                   echo '--- tail ---'; tail -n ${{ inputs.lines }} "$f"; } \
           | sed -e 's/%/%25/g' -e 's/\r//g' | awk 'BEGIN{ORS="%0A"} {print}' | cut -c1-60000)
         echo "::error title=log tail ($f)::${body}"

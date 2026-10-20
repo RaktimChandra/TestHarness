@@ -302,7 +302,7 @@ jobs:
           ./mvnw -B -ntp -f .teamcity/pom.xml teamcity-configs:generate 2>&1 | tee -a "$RUNNER_TEMP/teamcity.log"
           echo "### TeamCity DSL" >> "$GITHUB_STEP_SUMMARY"
           echo "Generated $(find .teamcity/target/generated-configs -type f | wc -l) files; build types:" >> "$GITHUB_STEP_SUMMARY"
-          find .teamcity/target/generated-configs -name '*.kts' -o -name '*.xml' | sed 's/^/- /' | head -40 >> "$GITHUB_STEP_SUMMARY"
+          find .teamcity/target/generated-configs -name '*.kts' -o -name '*.xml' | sed 's/^/- /' | awk 'NR <= 40' >> "$GITHUB_STEP_SUMMARY"
       - uses: ./.github/actions/log-tail
         if: failure()
         with:
