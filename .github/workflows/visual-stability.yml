@@ -86,6 +86,9 @@ jobs:
                  "retaken": [{"check": c, "captures": int(n)} for c, n in retaken],
                  "suite": dict(zip(["tests", "failures", "errors", "skipped"], map(int, tests[-1]))) if tests else None,
                  "environment": dict(l.rstrip("\n").split("=", 1) for l in open(sys.argv[3]) if "=" in l)}
+          # the version the tests ran (a pinned one may differ from the runner's own browser)
+          used = sorted(set(re.findall(r"Started [a-z]+ ([0-9][0-9.]*) \(", log)))
+          out["environment"]["browser used"] = ", ".join(used) or "?"
           json.dump(out, open(sys.argv[2], "w"), indent=2)
           print(json.dumps(out))
           PY
