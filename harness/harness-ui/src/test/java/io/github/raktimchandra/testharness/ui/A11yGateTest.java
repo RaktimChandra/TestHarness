@@ -52,7 +52,7 @@ class A11yGateTest {
         A11yReport more = new A11yReport("login", "chrome", "u", List.of(
                 new Violation("color-contrast", "serious", "Contrast", "u", 2, List.of("#a", "#new"))));
         assertThat(gate.known(more)).isEmpty();
-        assertThat(gate.breaches(more)).containsExactly("1 serious (max 0): color-contrast (2 elements: #a #new)");
+        assertThat(gate.breaches(more)).containsExactly("1 serious (max 0): color-contrast (2 elements: #new #a)");
     }
 
     @Test
@@ -94,6 +94,12 @@ class A11yGateTest {
                 "Contrast", "u", 1, List.of(".panel > .code.muted"))));
         assertThat(gate.breaches(onTheHull)).isEmpty();
         assertThat(gate.breaches(elsewhere)).hasSize(1);
+        A11yReport mixed = new A11yReport("p", "chrome", "u", List.of(new Violation("color-contrast", "serious",
+                "Contrast", "u", 3, List.of(".a > .hull-label > .code.muted", ".b > .hull-label > .code.muted",
+                        "#new-one"))));
+        assertThat(gate.breaches(mixed)).containsExactly(
+                "1 serious (max 0): color-contrast (3 elements: #new-one .a > .hull-label > .code.muted "
+                        + ".b > .hull-label > .code.muted)");
     }
 
     private static Properties props(String k, String v) {

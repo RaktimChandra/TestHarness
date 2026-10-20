@@ -552,7 +552,7 @@ jobs:
         run: |
           msg="No early subset - documentation only, or a change the map cannot scope (the full suites run anyway)."
           echo "$msg" >> "$GITHUB_STEP_SUMMARY"
-          echo "::notice title=tia::$msg $(tail -1 "$RUNNER_TEMP/select.txt" 2>/dev/null)"
+          echo "::notice title=tia::$msg $(grep -m1 -i 'run all' "$RUNNER_TEMP/select.txt" 2>/dev/null)"
       - name: Test summary
         if: always() && steps.select.outputs.count != '' && steps.select.outputs.count != '0' && steps.select.outputs.runall == '0'
         run: python3 .github/scripts/test_summary.py "impacted" "suites/*-suite/**/TEST-*.xml"

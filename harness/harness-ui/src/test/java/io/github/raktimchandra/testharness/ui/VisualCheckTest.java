@@ -73,7 +73,9 @@ class VisualCheckTest {
         assertThatThrownBy(() -> new VisualCheck(driver, settings(false, true)).matches("form",
                 element(png(Color.WHITE, true))))
                 .isInstanceOf(AssertionError.class)
-                .hasMessageContaining("Visual mismatch 'form': 12.500% of pixels differ");
+                .hasMessageContaining("Visual mismatch 'form': 12.500% of pixels differ")
+                // the black 10x10 box sits in the top-left quarter of the 40x20 capture
+                .hasMessageContaining("in a 40x20 capture, changed area x=0..9 y=0..9, per quarter TL/TR/BL/BR 100/0/0/0");
         assertThat(dir.resolve("out/diff/chrome-test/form-diff.png")).exists();
         assertThat(dir.resolve("out/diff/chrome-test/form-actual.png")).exists();
     }

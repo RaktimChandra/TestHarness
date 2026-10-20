@@ -136,7 +136,7 @@ public record A11yGate(int maxCritical, int maxSerious, int maxModerate, int max
     /** Human-readable breaches; empty when the report is within the thresholds. */
     public List<String> breaches(A11yReport report) {
         report = new A11yReport(report.page(), report.browser(), report.url(),
-                report.violations().stream().filter(v -> !isKnown(v)).toList());
+                report.violations().stream().filter(v -> !isKnown(v)).map(this::unlistedFirst).toList());
         Map<String, Integer> counts = report.countsByImpact();
         List<String> out = new ArrayList<>();
         check(out, "critical", counts.get("critical"), maxCritical, report);
@@ -144,6 +144,17 @@ public record A11yGate(int maxCritical, int maxSerious, int maxModerate, int max
         check(out, "moderate", counts.get("moderate"), maxModerate, report);
         check(out, "minor", counts.get("minor"), maxMinor, report);
         return out;
+    }
+
+    /** The elements no known issue covers come first, so a failure message names them. */
+    private A11yReport.Violation unlistedFirst(A11yReport.Violation v) {
+        if (knownIssues.isEmpty() || v.targets() == null) {
+            return v;
+        }
+        List<String> sorted = new ArrayList<>(v.targets());
+        sorted.sort(java.util.Comparator.comparing(
+                (String t) -> knownIssues.stream().anyMatch(k -> matches(k, v.rule(), t))));
+        return new A11yReport.Violation(v.rule(), v.impact(), v.help(), v.helpUrl(), v.nodes(), sorted);
     }
 
     private static void check(List<String> out, String impact, int count, int max, A11yReport report) {
