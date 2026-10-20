@@ -631,6 +631,7 @@ pixel-identical (at most five). It targets the one intermittent visual failure s
 `cancel-dialog`, RESULTS §40), whose cause has not been observed directly; each UI job reports
 which checks needed retaking, so the explanation can be confirmed or rejected by data.
 *Rejected:* raising the Firefox threshold, which would hide real changes of the same size.
+*Outcome:* no capture needed retaking in 30 suites; the failure had another cause (D69).
 
 ### D65 — Anti-aliased edge pixels are not counted as differences — Built
 `ImageDiff` now applies pixelmatch's anti-aliasing detector (Vysniauskas 2009): a differing
@@ -639,6 +640,8 @@ brighter neighbour that each belong to a flat area. Discounted pixels are report
 (orange in the diff, a count in the report), so they stay visible. This replaces D26's
 "no anti-aliasing detection" simplification after Firefox in CI drew the same heading with its
 glyphs half a pixel apart from run to run (RESULTS §40). *Rejected again:* a higher threshold.
+*Outcome:* that reading of the failure was wrong — it was a browser version (D69) — but the
+detector stays: it discounts real edge noise and still fails moved edges.
 
 ### D66 — One repeat for a browser-plumbing timeout during navigation, and only that — Built
 `Navigation.open` repeats a navigation once when ChromeDriver or EdgeDriver reports `Timed out
@@ -646,6 +649,57 @@ receiving message from renderer` — a renderer process that stopped answering t
 seen twice in one Edge run on the Windows runner (2026-10-20). It is logged and added to the
 report; a second failure, or any other timeout, fails the test. Assertions are still never
 retried (D36): a slow page is a finding, a deaf renderer is not.
+
+## Phase 7 — the open items
+
+### D67 — The SUT's integration tests run on any PostgreSQL, one database per test class — Built
+`TestDatabase` gives each integration test class (`GateApiIntegrationTest`, `PactProviderTest`)
+its own database: a Testcontainers `postgres:16-alpine` by default, or, with
+`-Dgate.it.jdbc-url=jdbc:postgresql://host:5432/gate_it_{db}`, an existing server where
+`{db}` becomes the class's name (`api`, `pact`). The password comes only from
+`GATE_IT_DB_PASSWORD`. That lets the Windows runner, which cannot run Linux containers, run
+the 26 tests against its installed PostgreSQL. *Rejected:* `%s` as the placeholder —
+`cmd.exe` expands `%…%` in arguments.
+
+### D68 — The drafter is given the suite's step definitions — Built
+`th ai gherkin` now sends the 28 Cucumber expressions the BDD suite runs (with a note per
+parameter type), read from `step-definitions.txt`, and the system prompt tells the model to copy
+one word for word whenever it fits. `DraftStepCoverageTest` fails when the catalogue no longer
+matches the glue (`-Dai.step-catalogue.update=true` rewrites it), so the prompt cannot drift
+from the code. `--no-step-definitions` sends only the phrases of existing features, the old
+prompt, which the evaluation compares against (`ai-eval.yml`, variants `catalogue` and
+`phrases`; RESULTS §47).
+
+### D69 — Browser versions are pinned where the visual baselines were rendered — Built
+`ui.version.<browser>` asks Selenium Manager for a version: the installed browser if it is that
+version, a download if not. The CI profile pins Chrome, Firefox and Edge on the Linux runners,
+and the Linux baselines were rendered with exactly those. A runner image update moved Firefox
+from 157 to 158, which lays the gate UI out 1/60 px differently; every Firefox run on the new
+image failed `cancel-dialog` and every run on the old one passed (RESULTS §46). That was the
+cause of RESULTS §40, not the repaint D64 targeted nor the half-pixel drift D65 targeted (both
+stay: they cost little and remove real noise). The pin is not applied with a Grid (the node
+image fixes the version) or with an explicit binary. Windows keeps the runner's own browsers,
+which its baselines were rendered with. *Rejected:* a looser Firefox threshold (a one-pixel
+heading shift is 0.24–1.3 %, the size of a real change); two accepted baselines per check
+(two images to review for every change, and it hides which browser a run used).
+
+### D70 — Captures are isolated from the page around the element — Built
+While a check captures, every element except the target, its descendants and its ancestors is
+hidden with `visibility` (nothing moves) and restored afterwards. A modal dialog at a fractional
+position has rounded corners and edge rows that are partly a translucent backdrop over the
+page, and the page depends on the scroll position and on what other tests created. Locally the
+same dialog differed in 0 to 95 raw pixels across ten scroll positions in Firefox, and in none
+with the page hidden; `RealBrowserTest` has a fixture that fails without isolation in Chrome
+and Firefox at zero tolerance. Every log line and mismatch message also states where the
+element was drawn to the sub-pixel and in what viewport, because a sub-pixel move is
+invisible in the images — that number is what found D69.
+
+### D71 — The pointer is parked with two moves — Built
+WebDriver sends no pointer event for a move to where its input state says the pointer already
+is, and geckodriver does not update that state on `WebElement.click()`. A single move to
+(0, 0) after a click therefore left Firefox's `:hover` on the clicked element. The pointer now
+moves to (1, 1) and then (0, 0). The framework's browser tests ran only in Chrome, so nothing
+caught it; they now run in Firefox and Edge too (`ci.yml`, build job).
 
 ---
 
@@ -676,9 +730,11 @@ sandbox). Lifecycle plugins (clean, resources, install, …) are pinned because 
 - Performance numbers come from a shared runner and are for regression detection (D29).
 - Test impact analysis attributes SUT start-up code to the first test that boots it, and has no
   per-test JavaScript coverage (D39).
-- The AI drafter has been measured against small open models served by Ollama (D57), not
-  against a hosted frontier model, and the score is step reuse, not whether a draft tests the
-  right behaviour.
+- The AI drafter has been measured against open models up to 14B served by Ollama (D57, D68),
+  not against a hosted frontier model (the workflow supports one; it needs a paid key), and the
+  score is step reuse, not whether a draft tests the right behaviour.
+- Windows runs the runner's own Chrome and Edge (D69): a Windows image update can need new
+  Windows baselines. Docker-based tests (Testcontainers, Compose, Grid) run on Linux only.
 - The race-condition bug uses a configurable pause (`gate.race-window`, 150 ms) to make the
   race reproducible on any machine; without it the race is real but intermittent.
 - Coverage numbers in RESULTS.md are per-module unit/integration coverage; per-test coverage
