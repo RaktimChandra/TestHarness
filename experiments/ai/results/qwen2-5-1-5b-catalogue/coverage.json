@@ -1,0 +1,132 @@
+{
+  "stepDefinitions" : 28,
+  "files" : [ {
+    "file" : "01-book-a-slot-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 20,
+    "steps" : 60,
+    "matched" : 40,
+    "unmatched" : [ "the outcome is <outcome>" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "02-container-number-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 1,
+    "steps" : 4,
+    "matched" : 3,
+    "unmatched" : [ "the outcome should be \"REJECTED\"" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "02-container-number-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 1,
+    "steps" : 4,
+    "matched" : 3,
+    "unmatched" : [ "the gate does not wait for a non-existent container" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "03-one-open-booking-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 3,
+    "steps" : 9,
+    "matched" : 0,
+    "unmatched" : [ "a terminal planner is logged in", "there are gate slots available for containers", "the user attempts to book a slot" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "04-cancel-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 2,
+    "steps" : 10,
+    "matched" : 6,
+    "unmatched" : [ "the place goes to someone else when my plans change", "the slot has <place_left> place(s) left" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "04-cancel-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 1,
+    "steps" : 6,
+    "matched" : 3,
+    "unmatched" : [ "the booking is CANCELLED", "the place goes to someone else when my plans change", "within one hour of the slot's start, the booking cannot be cancelled" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "05-check-in-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 4,
+    "steps" : 16,
+    "matched" : 2,
+    "unmatched" : [ "I am a gate clerk", "the truck arrives on time", "I check the truck in", "the terminal knows the container has come through the gate", "the booking status is CHECKED_IN", "I check the truck in after the check-in window closes", "I try to check in myself" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "05-check-in-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 2,
+    "steps" : 6,
+    "matched" : 0,
+    "unmatched" : [ "a gate clerk is checking in a truck", "another driver tries to check the same truck in", "the outcome should be FORBIDDEN", "the outcome should be CHECKED_IN" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "06-privacy-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 1,
+    "steps" : 3,
+    "matched" : 2,
+    "unmatched" : [ "another driver asks for my booking by its reference they are told it does not exist (NOT_FOUND)" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "06-privacy-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 3,
+    "steps" : 9,
+    "matched" : 6,
+    "unmatched" : [ "the outcome is CANCELLED", "the outcome is REFUSED", "the outcome is NOT_FOUND" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "07-reschedule-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 39,
+    "steps" : 140,
+    "matched" : 125,
+    "unmatched" : [ "I am informed that my booking has been cancelled", "a gate slot starting in {int} minutes with room for {int} truck(s)" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "07-reschedule-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 3,
+    "steps" : 12,
+    "matched" : 6,
+    "unmatched" : [ "I try to reschedule my booking", "the outcome is <outcome>" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "08-sign-in-lock-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 1,
+    "steps" : 4,
+    "matched" : 0,
+    "unmatched" : [ "a user with a specific username", "they attempt to sign in five times within fifteen minutes", "their account should be locked for five minutes, and the message \"TOO_MANY_ATTEMPTS\" should appear on the screen", "other accounts should not be affected" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "08-sign-in-lock-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 1,
+    "steps" : 4,
+    "matched" : 0,
+    "unmatched" : [ "I am a security officer", "the account is not locked out", "five failed sign-ins occur within fifteen minutes for that username", "the account should be locked out with TOO_MANY_ATTEMPTS, and other accounts are unaffected" ],
+    "ambiguous" : 0
+  } ],
+  "steps" : 287,
+  "matched" : 196
+}

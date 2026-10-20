@@ -1,0 +1,277 @@
+{
+  "model": "qwen2.5:1.5b",
+  "variant": "catalogue",
+  "base_url": "http://localhost:11434/v1",
+  "protocol": "openai-compatible",
+  "temperature": 0.2,
+  "started": "2026-10-20T17:18:59+0000",
+  "drafts": [
+    {
+      "story": "01-book-a-slot",
+      "repeat": 1,
+      "seconds": 50.2,
+      "exit": 0,
+      "file": "01-book-a-slot-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 20,
+      "steps": 60,
+      "matched_steps": 40,
+      "unmatched": [
+        "the outcome is <outcome>"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "01-book-a-slot",
+      "repeat": 2,
+      "seconds": 900.9,
+      "exit": 2,
+      "error": "error: Cannot reach openai/qwen2.5:1.5b at http://localhost:11434/v1: request timed out"
+    },
+    {
+      "story": "02-container-number",
+      "repeat": 1,
+      "seconds": 29.6,
+      "exit": 0,
+      "file": "02-container-number-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 1,
+      "steps": 4,
+      "matched_steps": 3,
+      "unmatched": [
+        "the outcome should be \"REJECTED\""
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "02-container-number",
+      "repeat": 2,
+      "seconds": 10.2,
+      "exit": 0,
+      "file": "02-container-number-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 1,
+      "steps": 4,
+      "matched_steps": 3,
+      "unmatched": [
+        "the gate does not wait for a non-existent container"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "03-one-open-booking",
+      "repeat": 1,
+      "seconds": 31.6,
+      "exit": 0,
+      "file": "03-one-open-booking-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 3,
+      "steps": 9,
+      "matched_steps": 0,
+      "unmatched": [
+        "a terminal planner is logged in",
+        "there are gate slots available for containers",
+        "the user attempts to book a slot"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "03-one-open-booking",
+      "repeat": 2,
+      "seconds": 900.9,
+      "exit": 2,
+      "error": "error: Cannot reach openai/qwen2.5:1.5b at http://localhost:11434/v1: request timed out"
+    },
+    {
+      "story": "04-cancel",
+      "repeat": 1,
+      "seconds": 35.9,
+      "exit": 0,
+      "file": "04-cancel-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 2,
+      "steps": 10,
+      "matched_steps": 6,
+      "unmatched": [
+        "the place goes to someone else when my plans change",
+        "the slot has <place_left> place(s) left"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "04-cancel",
+      "repeat": 2,
+      "seconds": 10.2,
+      "exit": 0,
+      "file": "04-cancel-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 1,
+      "steps": 6,
+      "matched_steps": 3,
+      "unmatched": [
+        "the booking is CANCELLED",
+        "the place goes to someone else when my plans change",
+        "within one hour of the slot's start, the booking cannot be cancelled"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "05-check-in",
+      "repeat": 1,
+      "seconds": 38.4,
+      "exit": 0,
+      "file": "05-check-in-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 4,
+      "steps": 16,
+      "matched_steps": 2,
+      "unmatched": [
+        "I am a gate clerk",
+        "the truck arrives on time",
+        "I check the truck in",
+        "the terminal knows the container has come through the gate",
+        "the booking status is CHECKED_IN",
+        "I check the truck in after the check-in window closes",
+        "I try to check in myself"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "05-check-in",
+      "repeat": 2,
+      "seconds": 12.0,
+      "exit": 0,
+      "file": "05-check-in-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 2,
+      "steps": 6,
+      "matched_steps": 0,
+      "unmatched": [
+        "a gate clerk is checking in a truck",
+        "another driver tries to check the same truck in",
+        "the outcome should be FORBIDDEN",
+        "the outcome should be CHECKED_IN"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "06-privacy",
+      "repeat": 1,
+      "seconds": 27.3,
+      "exit": 0,
+      "file": "06-privacy-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 1,
+      "steps": 3,
+      "matched_steps": 2,
+      "unmatched": [
+        "another driver asks for my booking by its reference they are told it does not exist (NOT_FOUND)"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "06-privacy",
+      "repeat": 2,
+      "seconds": 12.0,
+      "exit": 0,
+      "file": "06-privacy-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 3,
+      "steps": 9,
+      "matched_steps": 6,
+      "unmatched": [
+        "the outcome is CANCELLED",
+        "the outcome is REFUSED",
+        "the outcome is NOT_FOUND"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "07-reschedule",
+      "repeat": 1,
+      "seconds": 207.4,
+      "exit": 0,
+      "file": "07-reschedule-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 39,
+      "steps": 140,
+      "matched_steps": 125,
+      "unmatched": [
+        "I am informed that my booking has been cancelled",
+        "a gate slot starting in {int} minutes with room for {int} truck(s)"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "07-reschedule",
+      "repeat": 2,
+      "seconds": 11.9,
+      "exit": 0,
+      "file": "07-reschedule-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 3,
+      "steps": 12,
+      "matched_steps": 6,
+      "unmatched": [
+        "I try to reschedule my booking",
+        "the outcome is <outcome>"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "08-sign-in-lock",
+      "repeat": 1,
+      "seconds": 27.1,
+      "exit": 0,
+      "file": "08-sign-in-lock-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 1,
+      "steps": 4,
+      "matched_steps": 0,
+      "unmatched": [
+        "a user with a specific username",
+        "they attempt to sign in five times within fifteen minutes",
+        "their account should be locked for five minutes, and the message \"TOO_MANY_ATTEMPTS\" should appear on the screen",
+        "other accounts should not be affected"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "08-sign-in-lock",
+      "repeat": 2,
+      "seconds": 11.9,
+      "exit": 0,
+      "file": "08-sign-in-lock-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 1,
+      "steps": 4,
+      "matched_steps": 0,
+      "unmatched": [
+        "I am a security officer",
+        "the account is not locked out",
+        "five failed sign-ins occur within fifteen minutes for that username",
+        "the account should be locked out with TOO_MANY_ATTEMPTS, and other accounts are unaffected"
+      ],
+      "ambiguous": 0
+    }
+  ],
+  "summary": {
+    "stories": 8,
+    "attempts": 16,
+    "drafts_written": 14,
+    "valid_gherkin": 14,
+    "valid_gherkin_pct": 87.5,
+    "scenarios_per_valid_draft": 5.86,
+    "steps": 287,
+    "matched_steps": 196,
+    "step_reuse_pct": 68.3,
+    "drafts_fully_runnable": 0,
+    "median_seconds": 28.450000000000003,
+    "step_definitions": 28
+  },
+  "explain": {
+    "seeded_bug": "OFF_BY_ONE_CAPACITY",
+    "output": "3 failure(s) {ASSERTION=3}; summary: /home/runner/work/TestHarness/TestHarness/target/ai-drafts/failure-summary.md (includes an AI draft)"
+  },
+  "finished": "2026-10-20T17:59:44+0000"
+}
