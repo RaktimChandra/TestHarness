@@ -62,6 +62,9 @@ jobs:
       HARNESS_ENV: ci
       GATE_SEED_PASSWORD: baseline-${{ github.run_id }}
       HARNESS_DB_PASSWORD: gate
+      # as in windows.yml: the runner's own Chrome and Edge, not the Linux pins
+      HARNESS_UI_VERSION_CHROME: ''
+      HARNESS_UI_VERSION_EDGE: ''
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v6

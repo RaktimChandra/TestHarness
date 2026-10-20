@@ -29,6 +29,10 @@ env:
   HARNESS_DB_PASSWORD: gate
   HARNESS_HISTORY_DB_PASSWORD: gate
   GATE_IT_DB_PASSWORD: gate
+  # The browser pins in harness-ci.yml are for the Linux runners; here the runner's own Chrome
+  # and Edge are used, and the Windows baselines were rendered with them.
+  HARNESS_UI_VERSION_CHROME: ''
+  HARNESS_UI_VERSION_EDGE: ''
 
 jobs:
   windows:
