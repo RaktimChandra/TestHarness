@@ -2,7 +2,7 @@
 # "visual-baselines/<run id>". A person reviews the images and merges them into main: that
 # merge is the approval step.
 #   linux:   chrome-ci, firefox-ci, edge-ci   (what ci.yml compares against)
-#   windows: chrome-windows, edge-windows     (what windows.yml compares against)
+#   windows: chrome-windows-ci, edge-windows-ci (what windows.yml compares against)
 name: visual-baselines
 
 on:
@@ -84,12 +84,12 @@ jobs:
         run: |
           foreach ($b in 'chrome','edge') {
             .\mvnw.cmd -B -ntp verify -pl suites/ui-suite "-Dtest=VisualRegressionTest" "-Dsurefire.failIfNoSpecifiedTests=false" `
-              "-Dharness.ui.browser=$b" "-Dharness.visual.platform=$b-windows" "-Dharness.visual.mode=update" `
+              "-Dharness.ui.browser=$b" "-Dharness.visual.platform=$b-windows-ci" "-Dharness.visual.mode=update" `
               "-Dharness.visual.baseline-dir=$env:GITHUB_WORKSPACE\suites\ui-suite\src\test\resources\visual-baselines" `
               "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_ui"
             if ($LASTEXITCODE -ne 0) { exit 1 }
           }
-          Get-ChildItem -Recurse suites\ui-suite\src\test\resources\visual-baselines\*-windows | Select-Object FullName
+          Get-ChildItem -Recurse suites\ui-suite\src\test\resources\visual-baselines\*-windows-ci | Select-Object FullName
       - name: Push for review
         run: |
           git config user.name "github-actions[bot]"

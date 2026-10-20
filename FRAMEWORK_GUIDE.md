@@ -62,7 +62,7 @@ Choose the environment with `-Dharness.env=docker` or `HARNESS_ENV=docker`.
 | `ui.session-attempts` | `2` | tries to start a browser; retried only on `SessionNotCreatedException` |
 | `ui.binary.<browser>` / `ui.driver-path.<browser>` | empty | custom browser/driver executables |
 | `sut.browser-base-url` | `sut.base-url` | where *browsers* open the app (Grid: `http://gate:8080`) |
-| `visual.platform` | `<browser>-<os>` | baseline set to compare with (CI: `chrome-ci`, `firefox-ci`, `edge-ci`) |
+| `visual.platform` | `<browser>-<os>` | baseline set to compare with (CI: `chrome-ci`, `firefox-ci`, `edge-ci` on Linux; `chrome-windows-ci`, `edge-windows-ci` on Windows) |
 | `visual.mode` | `compare` | `update` writes the current rendering as the baseline |
 | `visual.max-mismatch` / `visual.pixel-tolerance` | `0.002` / `0.1` | allowed share of differing pixels / per-pixel YIQ tolerance |
 | `visual.require-baseline` | `true` in `ci`, else `false` | a missing baseline fails instead of skipping |

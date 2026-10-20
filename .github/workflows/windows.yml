@@ -4,9 +4,10 @@
 # Difference from a developer's Windows machine, and why: hosted Windows runners cannot run
 # Linux containers, so Testcontainers' PostgreSQL is replaced by the PostgreSQL installed on
 # the runner (-Dharness.db.url, the same switch the Compose setup uses; for the SUT's own
-# integration tests -Dgate.it.jdbc-url, one fresh database per test class). There are no
-# Windows visual baselines (baselines are per platform and rendered by visual-baselines.yml on
-# Linux), so the visual checks write Windows candidates and skip instead of failing.
+# integration tests -Dgate.it.jdbc-url, one fresh database per test class). The visual checks
+# compare against chrome-windows-ci and edge-windows-ci, rendered on this runner image by
+# visual-baselines.yml (platform: windows) and reviewed before they were committed; a missing
+# baseline fails here, as on Linux.
 name: windows
 
 on:
@@ -68,11 +69,11 @@ jobs:
       - name: 'WINDOWS.md step 4: UI suite in Chrome'
         run: >
           .\mvnw.cmd -B -ntp verify -pl suites/ui-suite "-Dharness.ui.browser=chrome"
-          "-Dharness.visual.platform=chrome-windows" "-Dharness.visual.require-baseline=false" "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_ui" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
+          "-Dharness.visual.platform=chrome-windows-ci" "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_ui" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
       - name: 'WINDOWS.md step 4: UI suite in Edge'
         run: >
           .\mvnw.cmd -B -ntp verify -pl suites/ui-suite "-Dharness.ui.browser=edge"
-          "-Dharness.visual.platform=edge-windows" "-Dharness.visual.require-baseline=false" "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_ui" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
+          "-Dharness.visual.platform=edge-windows-ci" "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_ui" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
       - name: 'WINDOWS.md step 4: BDD suite'
         run: >
           .\mvnw.cmd -B -ntp verify -pl suites/bdd-suite

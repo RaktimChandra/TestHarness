@@ -170,9 +170,11 @@ browser. To build everything *except* the load test, add `"-DskipPerf"` to any c
 ## 8. Accessibility and visual results — Terminal A
 
 After a UI run, axe-core results are in `suites\ui-suite\target\a11y\*.json` and in the
-Allure report. Visual checks compare against the CI baselines; on your machine they write
-*candidates* to `suites\ui-suite\target\visual\new\` and are reported as skipped — that
-is expected. To check your own machine's rendering is stable, create local baselines once:
+Allure report. The committed baselines are rendered on CI runners (`chrome-windows-ci` and
+`edge-windows-ci` on the Windows runner, `*-ci` on Linux); your machine is its own platform
+(`chrome-windows`), so on it the visual checks write *candidates* to
+`suites\ui-suite\target\visual\new\` and are reported as skipped — that is expected, because
+fonts, ClearType and scaling differ between machines. To check your own machine's rendering is stable, create local baselines once:
 
 ```powershell
 .\mvnw.cmd verify -pl suites/ui-suite -am "-Dtest=VisualRegressionTest" "-Dsurefire.failIfNoSpecifiedTests=false" "-Dharness.visual.mode=update"

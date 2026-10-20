@@ -256,7 +256,7 @@ framework unchanged.
   if more than `visual.max-mismatch` (0.2 %) of compared pixels differ. Child elements whose
   content legitimately changes (dates, generated lanes, references, usernames) are passed
   as ignore-regions. On failure the report carries baseline, actual and a red diff image.
-- **Baselines** are per *platform* (`chrome-ci`, `firefox-ci`, `edge-ci`): font rendering
+- **Baselines** are per *platform* (`chrome-ci`, `firefox-ci`, `edge-ci`, and `chrome-windows-ci`, `edge-windows-ci` on the Windows runner): font rendering
   differs between browsers and operating systems, so one baseline per browser would
   either fail on every other machine or need a tolerance loose enough to miss real
   changes. `visual-baselines.yml` renders candidates on the CI image and pushes them to a
