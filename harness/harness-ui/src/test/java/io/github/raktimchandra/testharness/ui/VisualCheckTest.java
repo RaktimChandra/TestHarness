@@ -114,6 +114,24 @@ class VisualCheckTest {
     }
 
     @Test
+    void aMismatchSaysWhereTheElementWasDrawnAndThePageIsHiddenOnlyDuringTheCapture() throws Exception {
+        WebDriver js = mock(WebDriver.class, org.mockito.Mockito.withSettings()
+                .extraInterfaces(org.openqa.selenium.JavascriptExecutor.class));
+        var exec = (org.openqa.selenium.JavascriptExecutor) js;
+        when(exec.executeScript(org.mockito.ArgumentMatchers.contains("getBoundingClientRect"),
+                org.mockito.ArgumentMatchers.any())).thenReturn("drawn at x=420 y=316.8 size 440x200.38 in viewport 1280x814");
+        new VisualCheck(js, settings(true, false)).matches("where", element(png(Color.WHITE, false)));
+        WebElement changed = element(png(Color.WHITE, true));
+        assertThatThrownBy(() -> new VisualCheck(js, settings(false, true)).matches("where", changed))
+                .hasMessageContaining("; drawn at x=420 y=316.8 size 440x200.38 in viewport 1280x814; diff at");
+        var order = org.mockito.Mockito.inOrder(exec, changed);
+        order.verify(exec).executeScript(org.mockito.ArgumentMatchers.contains("__harnessIsolated = hidden"),
+                org.mockito.ArgumentMatchers.eq(changed));
+        order.verify(changed).getScreenshotAs(OutputType.BYTES);
+        order.verify(exec).executeScript(org.mockito.ArgumentMatchers.contains("__harnessIsolated = []"));
+    }
+
+    @Test
     void missingBaselineSkipsLocallyAndFailsWhenRequired() throws Exception {
         WebElement e = element(png(Color.WHITE, false));
         assertThatThrownBy(() -> new VisualCheck(driver, settings(false, false)).matches("new-page", e))

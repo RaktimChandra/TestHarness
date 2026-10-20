@@ -26,8 +26,8 @@ From real runs on 2026-10-14 to 2026-10-20 — method, machine and raw numbers f
 
 | | |
 |---|---|
-| Tests in one `verify` | **534 JVM tests + 32 Vitest + 1 Gatling simulation**, 0 failed (5 visual checks skip outside CI by design); dashboard: 9 more Vitest |
-| Wall-clock, clean build + everything (2 vCPU sandbox) | **6 min 32 s** |
+| Tests in one `verify` | **540 JVM tests + 32 Vitest + 1 Gatling simulation**, 0 failed (5 visual checks skip outside CI by design, 1 report needs `-Dai.drafts`); dashboard: 9 more Vitest |
+| Wall-clock, clean build + everything (2 vCPU sandbox) | **6 min 36 s** |
 | Fault seeding: 6 bugs × 8 suite types (CI), **run three times** | **6/6 caught** by at least one suite in every run · API 6/6/6 · BDD 5/5/5 · contract, UI 2/2/2 · security 2/1/1 · Gatling 0/1/1 · the race bug caught by **one test of 151** · 46 of 48 cells gave the same verdict all three times |
 | Mutation score, domain rules (PIT, STRONGER) | **95.1 % → 100 %** (143 mutants) after turning the 7 survivors into tests |
 | Test impact analysis, per-test JaCoCo, three recordings | **18/18** selected runs still caught their bug; wall-clock saved **3.8–33.2 %** (and why so little) |
@@ -35,13 +35,14 @@ From real runs on 2026-10-14 to 2026-10-20 — method, machine and raw numbers f
 | A second, unrelated system (PortSync: Kafka + Spring + React) | **54 tests, 0 failures** in CI with the framework unchanged, including a consumer contract and SLA scenarios; found **two real WCAG contrast defects in PortSync** (4.21:1 and 3.03:1), now fixed there |
 | Dependency vulnerabilities (OSV-Scanner over a Maven-resolved SBOM) | **41 advisories in 18 transitive packages** on the first scan → 0 untriaged after version floors; 3 Spring 6.2 advisories ignored with code-checked reasons and an expiry date |
 | OWASP ZAP baseline of the running SUT | **8 alert types** on the first scan → 6 header findings fixed in the app, 3 informational rules triaged; now a gate |
-| Windows (`windows-2025`, the Windows guide's own commands) | **500 tests, 0 failed** with `mvnw.cmd` / `th.cmd`, UI in Chrome and Edge; found 4 problems Linux CI could not |
+| Windows (`windows-2025`, the Windows guide's own commands) | **560 tests, 0 failed, 1 skipped** with `mvnw.cmd` / `th.cmd`: the SUT's integration tests on the runner's PostgreSQL, the whole BDD suite, the UI suite in Chrome and Edge with visual checks against Windows baselines; found 4 problems Linux CI could not |
 | TeamCity 2025.07, real server + agent | the server imports and compiles `settings.kts` and runs the chain: **every build green** (build 350, API 112, BDD 24, UI 15 + 14, Gatling, PIT) |
 | CI pipeline (`main`, run 39425545521) | **quality gate green in 13 min 18 s**, 22 jobs: UI sharded 3 browsers × 2 by recorded duration, quarantine non-blocking (its flaky test failed, as designed), then history and the dashboard published in 3 min 36 s more; the same chain on CIForge in 5 min 25 s |
 | Capacity on 2 CPUs / 1 GiB (three runners per flow) | **25 booking flows/s** with sign-in on every flow (CPU-bound), **200** with a reused token (then the 20-connection pool runs out) |
-| AI drafter on real open models (8 stories × 2, Ollama in CI) | qwen2.5 7B: **100 % valid Gherkin, 68.5 % of drafted steps run on existing step definitions** (69.9 % in a second run); 1.5B / 3B: 43 % / 36 %; one draft per 7B run needed no new glue |
+| AI drafter on real open models (8 stories × 2, four models, Ollama in CI) | with the suite's step definitions in the prompt, qwen2.5 7B: **100 % valid Gherkin, 77.7 % of drafted steps run on existing step definitions** (57.9 % without them, same run); every model gained 15–41 points; 14B no better than 7B at twice the time |
 | Self-healing locators | **1 heal in 26 UI tests** — the demo that renames a `data-testid` — reported with the exact fix, never silent |
-| Cross-browser | UI suite passes in **Chrome 154, Firefox 157 and Edge 154** in CI, both directly and on **Selenium Grid** |
+| Cross-browser | UI suite passes in **Chrome 155, Firefox 158 and Edge 155** in CI (versions pinned, so a runner image update cannot change the rendering), and on **Selenium Grid** (node images `4.51.0-20261010`) |
+| Visual checks, 30 fresh runners × 3 browsers | an intermittent Firefox failure traced to a **runner image rolling Firefox 157 → 158** (every run on the new image failed, every run on the old one passed); with pinned browsers: **30 of 30 suites, 0 differing pixels** |
 | Accessibility (axe-core, WCAG 2.0/2.1 A+AA) | **0 violations** on 9 page states × 3 browsers |
 | Contract (Pact) | **9/9** interactions from the UI's real client verified against the real API |
 | Booking flow under load (60 users, CI runner) | **p95 73 ms · p99 78 ms · 0 errors** (gates: 800 / 1500 ms / 1 %) |
@@ -74,8 +75,9 @@ From real runs on 2026-10-14 to 2026-10-20 — method, machine and raw numbers f
   API client; the contract is committed and CI fails if it drifts. Provider verification
   found a real timestamp-format bug.
 - **Visual checks that don't cry wolf.** Perceptual diff, per-platform baselines rendered in
-  CI and approved by merging a branch, and page stabilisation — the two flaky causes found
-  (focus rings, neighbouring data) were diagnosed and fixed, not hidden behind a tolerance.
+  CI and approved by merging a branch, pinned browser versions, and page stabilisation — every
+  flaky cause found (focus rings, neighbouring data, a pointer left hovering, a browser update
+  on the runner image) was diagnosed with data and fixed, not hidden behind a tolerance.
 - **Accessibility on every state.** axe-core scans dialogs, errors and panels, not just
   landing pages, and the build fails on critical or serious violations.
 - **Defect detection measured per suite.** Each seeded bug is switched on in CI and every
@@ -290,6 +292,7 @@ Interview preparation for this project: [INTERVIEW.md](INTERVIEW.md).
 | 4 — React quality dashboard, CLI, "new test in 5 minutes" guide, PortSync adapter | **done** |
 | 5 — full CI/CD with quality gates, TeamCity Kotlin DSL, CIForge pipeline | **done** |
 | 6 — closing the gaps: duration shards, published history and dashboard, TIA on PRs, sign-in throttling, OSV + ZAP, Windows, TeamCity and CIForge executed, AI eval on real models, capacity, repeated experiments | **done** (1.1.0) |
+| 7 — the open items: the Firefox visual failure found and fixed, Windows runs everything but Docker, AI drafter given the step definitions and measured against four models, CIForge's Docker runner test | **done** (1.2.0) |
 
 Changes per phase: [CHANGELOG.md](CHANGELOG.md).
 

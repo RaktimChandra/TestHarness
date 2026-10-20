@@ -1,0 +1,30 @@
+# {time} matches (?:[01]\d|2[0-3]):[0-5]\d
+# {int}, {string}, {word}: Cucumber's built-in parameters; "(s)" is optional text
+I am a driver
+I book that slot for a valid container
+I book that slot for container {string}
+I cancel my booking
+I have booked that slot for a valid container
+I try to check myself in
+a clerk checks the truck in
+a clerk finds the booking on the gate screen and checks it in
+a driver books that slot on the booking screen
+a driver has booked that slot
+a gate slot starting in {int} minutes with room for {int} truck(s)
+a gate slot tomorrow at {time} with room for {int} truck(s)
+another driver books a different slot for the same container
+another driver looks up my booking
+my booking is {string}
+the booking is confirmed with a reference
+the booking is refused because {string}
+the booking is {string}
+the booking screen lists it as booked at {string}
+the change is refused because {string}
+the check-in is refused because {string}
+the gate screen shows the booking as checked in
+the outcome is confirmed
+the outcome is refused because {string}
+the slot has {int} place(s) left
+their booking is refused because {string}
+they are told it does not exist
+{int} other drivers have already booked that slot

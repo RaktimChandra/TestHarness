@@ -199,7 +199,11 @@ class CliCommandsTest {
                 "Feature: a\n  Scenario: s\n    Given I am a driver\n");
         com.sun.net.httpserver.HttpServer server = com.sun.net.httpserver.HttpServer.create(
                 new java.net.InetSocketAddress("127.0.0.1", 0), 0);
+        Files.writeString(repo.resolve("suites/bdd-suite/src/test/resources/step-definitions.txt"),
+                "# {time} matches HH:mm\nI am a driver\nI book that slot for container {string}\n");
+        List<String> prompts = new java.util.concurrent.CopyOnWriteArrayList<>();
         server.createContext("/v1/chat/completions", ex -> {
+            prompts.add(new String(ex.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
             byte[] body = ("{\"choices\":[{\"message\":{\"role\":\"assistant\",\"content\":"
                     + "\"```gherkin\\n@draft\\nFeature: f\\n  Scenario: s\\n    Given I am a driver\\n```\"}}]}")
                     .getBytes(StandardCharsets.UTF_8);
@@ -220,7 +224,13 @@ class CliCommandsTest {
                 "gherkin", "--story-file", story.toString()});
             Out o = run(rest);
             assertThat(o.code()).as(o.err()).isZero();
-            assertThat(o.out()).contains("DRAFT written to", "(1 scenarios, valid Gherkin)");
+            assertThat(o.out()).contains("Offered the model 2 step definitions", "DRAFT written to",
+                    "(1 scenarios, valid Gherkin)");
+            assertThat(prompts.get(prompts.size() - 1)).contains("I book that slot for container {string}");
+            Out phrasesOnly = run("ai", "gherkin", "--no-step-definitions", "--story-file", story.toString());
+            assertThat(phrasesOnly.code()).as(phrasesOnly.err()).isZero();
+            assertThat(phrasesOnly.out()).contains("Offered the model the phrases of existing features.");
+            assertThat(prompts.get(prompts.size() - 1)).doesNotContain("Step definitions");
         } finally {
             server.stop(0);
         }

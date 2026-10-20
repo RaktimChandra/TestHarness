@@ -28,8 +28,12 @@ public final class GherkinDrafter {
             You write Cucumber Gherkin for an existing test suite. Rules:
             - Output one Feature in a single ```gherkin code block and nothing else.
             - Tag the feature @draft.
-            - Reuse the existing step phrases listed below verbatim whenever one fits; write a new
-              step only when none fits, and keep new steps in the same style.
+            - Reuse the existing steps listed below whenever one fits; write a new step only when
+              none fits, and keep new steps in the same style. When step definitions are listed,
+              they are the exact Cucumber expressions the suite runs: copy one word for word and
+              write a concrete value where it has a parameter such as {int}, {string} or {time}
+              ({string} values in double quotes); "(s)" marks optional text, write it either way
+              but not literally.
             - Cover the happy path, the boundaries and the error cases the story implies; use a
               Scenario Outline with Examples for value tables.
             - Do not invent business rules the story does not state; if something is unclear, add a
@@ -45,9 +49,20 @@ public final class GherkinDrafter {
     }
 
     public Draft draft(String userStory, List<Path> existingFeatures) {
+        return draft(userStory, existingFeatures, List.of());
+    }
+
+    /**
+     * @param stepDefinitions the suite's step definitions as Cucumber expressions (one per entry;
+     *                        lines starting with {@code #} are notes, e.g. on parameter types);
+     *                        empty to offer the model only the phrases of existing features
+     */
+    public Draft draft(String userStory, List<Path> existingFeatures, List<String> stepDefinitions) {
         Set<String> steps = existingSteps(existingFeatures);
-        String user = "User story:\n" + userStory.strip() + "\n\nExisting step phrases:\n"
-                + String.join("\n", steps);
+        String user = "User story:\n" + userStory.strip()
+                + (stepDefinitions.isEmpty() ? ""
+                        : "\n\nStep definitions (Cucumber expressions the suite runs):\n" + String.join("\n", stepDefinitions))
+                + "\n\nExisting step phrases:\n" + String.join("\n", steps);
         String feature = Drafts.codeBlock(llm.complete(SYSTEM, user, List.of()));
         Optional<String> error = parseError(feature);
         int scenarios = error.isPresent() ? 0 : countScenarios(feature);

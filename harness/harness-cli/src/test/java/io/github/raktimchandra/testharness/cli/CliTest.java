@@ -33,6 +33,16 @@ class CliTest {
     }
 
     @Test
+    void theVersionComesFromTheJarManifestNotAConstant() {
+        assertThat(HarnessCli.Version.of("1.2.0")).isEqualTo("1.2.0");
+        // run from target/classes (as here) there is no manifest, and it says so
+        assertThat(HarnessCli.Version.of(null)).isEqualTo("(development build, not from a jar)");
+        Out o = run("--version");
+        assertThat(o.code()).isZero();
+        assertThat(o.out()).startsWith("TestHarness ").doesNotContain("1.0.0");
+    }
+
+    @Test
     void helpListsEveryCommand() {
         Out o = run("--help");
         assertThat(o.code()).isZero();

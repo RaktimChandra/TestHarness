@@ -61,8 +61,9 @@ Choose the environment with `-Dharness.env=docker` or `HARNESS_ENV=docker`.
 | `ui.grid-url` | empty | a Selenium Grid instead of local browsers |
 | `ui.session-attempts` | `2` | tries to start a browser; retried only on `SessionNotCreatedException` |
 | `ui.binary.<browser>` / `ui.driver-path.<browser>` | empty | custom browser/driver executables |
+| `ui.version.<browser>` | empty (`ci`: pinned on Linux) | browser version for a local browser; Selenium Manager downloads it if the installed one differs. Not used with a Grid or a custom binary |
 | `sut.browser-base-url` | `sut.base-url` | where *browsers* open the app (Grid: `http://gate:8080`) |
-| `visual.platform` | `<browser>-<os>` | baseline set to compare with (CI: `chrome-ci`, `firefox-ci`, `edge-ci`) |
+| `visual.platform` | `<browser>-<os>` | baseline set to compare with (CI: `chrome-ci`, `firefox-ci`, `edge-ci` on Linux; `chrome-windows-ci`, `edge-windows-ci` on Windows) |
 | `visual.mode` | `compare` | `update` writes the current rendering as the baseline |
 | `visual.max-mismatch` / `visual.pixel-tolerance` | `0.002` / `0.1` | allowed share of differing pixels / per-pixel YIQ tolerance |
 | `visual.require-baseline` | `true` in `ci`, else `false` | a missing baseline fails instead of skipping |
@@ -227,8 +228,16 @@ void login_error(WebDriver driver, Waits waits) {
 
 - Screenshot **one component**, not the page; mask anything that changes between runs.
 - Keep the layout around it deterministic (e.g. give the test its own date if a list
-  above it shows other tests' data) — the diff has no anti-aliasing detection.
-- The page is stabilised for you before capture (focus blurred, carets/animations off).
+  above it shows other tests' data) — anti-aliased edge pixels are discounted, but content
+  that moves is a difference.
+- The page is stabilised for you before capture: focus blurred, carets and animations off,
+  the pointer parked in the corner, and everything outside the element hidden while it is
+  captured (so a dialog's translucent backdrop does not show the page behind it).
+- Every check logs where the element was drawn, to the sub-pixel, and the viewport; when a
+  check fails only on some machines, compare those first — a sub-pixel move changes every
+  anti-aliased edge and cannot be seen in the images.
+- Baselines are only valid for the browser version they were rendered with; CI pins the
+  versions (`ui.version.*` in `harness-ci.yml`). Bump a pin together with new baselines.
 - New or changed baseline: run the **visual-baselines** workflow (Actions → visual-baselines
   → Run workflow, on your branch), review the PNGs on the `visual-baselines/<run>` branch it
   pushes, and merge it. Locally: `-Dharness.visual.mode=update` writes your machine's
@@ -418,7 +427,11 @@ export HARNESS_AI_API_KEY=...                 # never in a file
 (`-D` options can also go in `harness.yml` under `ai:`; for Ollama use `ai.provider=openai`,
 `ai.base-url=http://localhost:11434/v1`, no key.) The draft is written to
 `target/ai-drafts/<story>.feature` with a banner and `@draft`; it is parsed, but never run or
-committed. `./th ai explain` writes `target/ai-drafts/failure-summary.md`; with a model it adds a
+committed. The prompt includes the BDD suite's step definitions
+(`suites/bdd-suite/src/test/resources/step-definitions.txt`) so the model can reuse them word for
+word; `--no-step-definitions` sends only the phrases of existing features. When you change the
+glue, `DraftStepCoverageTest` fails until the file is regenerated:
+`./mvnw verify -pl suites/bdd-suite -Dtest=DraftStepCoverageTest -Dai.step-catalogue.update=true`. `./th ai explain` writes `target/ai-drafts/failure-summary.md`; with a model it adds a
 section marked as an unverified draft.
 
 ## Test data

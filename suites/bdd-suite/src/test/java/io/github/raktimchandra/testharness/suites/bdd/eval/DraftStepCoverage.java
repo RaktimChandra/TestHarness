@@ -50,6 +50,8 @@ public final class DraftStepCoverage {
     static final List<Class<?>> GLUE = List.of(BookingSteps.class, ScreenSteps.class);
 
     private final List<Expression> expressions = new ArrayList<>();
+    private final List<String> sources = new ArrayList<>();
+    private final List<String> parameterNotes = new ArrayList<>();
 
     public DraftStepCoverage() {
         ParameterTypeRegistry registry = new ParameterTypeRegistry(Locale.ENGLISH);
@@ -58,6 +60,7 @@ public final class DraftStepCoverage {
             if (pt != null) {
                 String name = pt.name().isEmpty() ? m.getName() : pt.name();
                 registry.defineParameterType(new ParameterType<>(name, pt.value(), String.class, (String s) -> s));
+                parameterNotes.add("# {" + name + "} matches " + pt.value());
             }
         }
         ExpressionFactory factory = new ExpressionFactory(registry);
@@ -67,6 +70,7 @@ public final class DraftStepCoverage {
                 for (Class<? extends Annotation> type : List.of(Given.class, When.class, Then.class, And.class, But.class)) {
                     for (Annotation a : m.getAnnotationsByType(type)) {
                         expressions.add(factory.createExpression(stepText(a)));
+                        sources.add(stepText(a));
                     }
                 }
             }
@@ -75,6 +79,18 @@ public final class DraftStepCoverage {
 
     public int stepDefinitions() {
         return expressions.size();
+    }
+
+    /**
+     * The step catalogue the AI drafter is given: notes on the custom parameter types, then
+     * every step definition's Cucumber expression, sorted (stable, so the committed file can be
+     * checked for freshness).
+     */
+    public List<String> catalogue() {
+        List<String> out = new ArrayList<>(parameterNotes.stream().sorted().toList());
+        out.add("# {int}, {string}, {word}: Cucumber's built-in parameters; \"(s)\" is optional text");
+        out.addAll(sources.stream().distinct().sorted().toList());
+        return out;
     }
 
     private static String stepText(Annotation a) {

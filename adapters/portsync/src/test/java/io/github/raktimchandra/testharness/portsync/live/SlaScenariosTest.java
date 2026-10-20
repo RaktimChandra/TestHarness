@@ -111,24 +111,49 @@ class SlaScenariosTest extends LiveTest {
         SimulationStatus paused = simulator.pause();
         try {
             assertThat(paused.paused()).isTrue();
-            // wait until the core has consumed everything the simulator published
-            List<Long> processed = new ArrayList<>();
-            await(Duration.ofSeconds(60)).until("the core to stop processing events", () -> {
-                processed.add(core.overview().eventsProcessed());
-                int n = processed.size();
-                return n >= 3 && processed.get(n - 1).equals(processed.get(n - 3));
-            }, b -> b);
-            Map<String, Integer> simulated = new TreeMap<>();
-            simulator.status().terminal().yardOccupancy().forEach((b, n) -> {
-                if (n > 0) {
-                    simulated.put(b, n);
-                }
-            });
-            Map<String, Integer> recorded = new TreeMap<>();
-            core.blocks().stream().filter(b -> b.used() > 0).forEach(b -> recorded.put(b.block(), b.used()));
-            assertThat(recorded).as("core yard (blocks API) vs simulator yard").isEqualTo(simulated);
+            // Pausing stops the simulator's clock, but a tick already under way still finishes:
+            // its yard can change once more after pause() returns, and the events it published
+            // are still on their way to the core. So both yards are read on every poll, and they
+            // must agree on two consecutive polls with the core idle in between. Comparing with
+            // one snapshot taken right after the pause failed twice with the core one container
+            // ahead of that snapshot (runs 39464783586 and 39478295663) — a stale snapshot, not a
+            // disagreement. A real disagreement still fails, with both yards in the message.
+            List<Yards> seen = new ArrayList<>();
+            await(Duration.ofSeconds(90)).until("the core's yard to match the paused simulator's on two polls in a row",
+                    () -> {
+                        Yards now = new Yards(yard(simulator.status().terminal().yardOccupancy()), coreYard(),
+                                core.overview().eventsProcessed());
+                        seen.add(now);
+                        return now;
+                    }, now -> now.agree() && seen.size() >= 2 && seen.get(seen.size() - 2).equals(now));
+            Map<String, Integer> simulated = yard(simulator.status().terminal().yardOccupancy());
+            assertThat(coreYard()).as("core yard (blocks API) vs simulator yard, once both are idle")
+                    .isEqualTo(simulated);
         } finally {
             simulator.resume();
+        }
+    }
+
+    private static Map<String, Integer> yard(Map<String, Integer> occupancy) {
+        Map<String, Integer> out = new TreeMap<>();
+        occupancy.forEach((b, n) -> {
+            if (n > 0) {
+                out.put(b, n);
+            }
+        });
+        return out;
+    }
+
+    private Map<String, Integer> coreYard() {
+        Map<String, Integer> recorded = new TreeMap<>();
+        core.blocks().stream().filter(b -> b.used() > 0).forEach(b -> recorded.put(b.block(), b.used()));
+        return recorded;
+    }
+
+    /** One poll: both yards and how many events the core had processed. */
+    private record Yards(Map<String, Integer> simulator, Map<String, Integer> core, long processed) {
+        boolean agree() {
+            return simulator.equals(core);
         }
     }
 }

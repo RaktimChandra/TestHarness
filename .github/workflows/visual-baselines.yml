@@ -1,16 +1,25 @@
-# Generates candidate visual baselines on the CI runner image (the platform CI compares
-# against) and pushes them to the branch "visual-baselines/<run id>". A person reviews the
-# images and merges them into main: that merge is the approval step.
+# Generates candidate visual baselines on a CI runner image and pushes them to the branch
+# "visual-baselines/<run id>". A person reviews the images and merges them into main: that
+# merge is the approval step.
+#   linux:   chrome-ci, firefox-ci, edge-ci   (what ci.yml compares against)
+#   windows: chrome-windows-ci, edge-windows-ci (what windows.yml compares against)
 name: visual-baselines
 
 on:
   workflow_dispatch:
+    inputs:
+      platform:
+        description: Runner image to render on
+        type: choice
+        options: [linux, windows]
+        default: linux
 
 permissions:
   contents: write
 
 jobs:
   baselines:
+    if: inputs.platform != 'windows'
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
@@ -40,4 +49,55 @@ jobs:
           git checkout -b "visual-baselines/${{ github.run_id }}"
           git add suites/ui-suite/src/test/resources/visual-baselines
           git commit -m "test(visual): candidate baselines from CI run ${{ github.run_id }}"
+          git push origin "visual-baselines/${{ github.run_id }}"
+
+  windows:
+    if: inputs.platform == 'windows'
+    runs-on: windows-2025
+    timeout-minutes: 40
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      HARNESS_ENV: ci
+      GATE_SEED_PASSWORD: baseline-${{ github.run_id }}
+      HARNESS_DB_PASSWORD: gate
+      # as in windows.yml: the runner's own Chrome and Edge, not the Linux pins
+      HARNESS_UI_VERSION_CHROME: ''
+      HARNESS_UI_VERSION_EDGE: ''
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: PostgreSQL (installed on the runner)
+        run: |
+          $svc = Get-Service -Name 'postgresql*' | Select-Object -First 1
+          Set-Service -Name $svc.Name -StartupType Manual
+          Start-Service -Name $svc.Name
+          $env:PGPASSWORD = 'root'
+          $psql = Join-Path $env:PGBIN 'psql.exe'
+          & $psql -U postgres -h localhost -c "CREATE ROLE gate LOGIN PASSWORD 'gate' CREATEDB"
+          & $psql -U postgres -h localhost -c "CREATE DATABASE gate_ui OWNER gate"
+      - name: Build upstream modules
+        run: .\mvnw.cmd -B -ntp install -DskipTests -pl suites/ui-suite -am
+      - name: Render baselines in Chrome and Edge
+        run: |
+          foreach ($b in 'chrome','edge') {
+            .\mvnw.cmd -B -ntp verify -pl suites/ui-suite "-Dtest=VisualRegressionTest" "-Dsurefire.failIfNoSpecifiedTests=false" `
+              "-Dharness.ui.browser=$b" "-Dharness.visual.platform=$b-windows-ci" "-Dharness.visual.mode=update" `
+              "-Dharness.visual.baseline-dir=$env:GITHUB_WORKSPACE\suites\ui-suite\src\test\resources\visual-baselines" `
+              "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_ui"
+            if ($LASTEXITCODE -ne 0) { exit 1 }
+          }
+          Get-ChildItem -Recurse suites\ui-suite\src\test\resources\visual-baselines\*-windows-ci | Select-Object FullName
+      - name: Push for review
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "visual-baselines/${{ github.run_id }}"
+          git add suites/ui-suite/src/test/resources/visual-baselines
+          git commit -m "test(visual): candidate Windows baselines from CI run ${{ github.run_id }}"
           git push origin "visual-baselines/${{ github.run_id }}"

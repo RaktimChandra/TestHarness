@@ -170,9 +170,11 @@ browser. To build everything *except* the load test, add `"-DskipPerf"` to any c
 ## 8. Accessibility and visual results — Terminal A
 
 After a UI run, axe-core results are in `suites\ui-suite\target\a11y\*.json` and in the
-Allure report. Visual checks compare against the CI baselines; on your machine they write
-*candidates* to `suites\ui-suite\target\visual\new\` and are reported as skipped — that
-is expected. To check your own machine's rendering is stable, create local baselines once:
+Allure report. The committed baselines are rendered on CI runners (`chrome-windows-ci` and
+`edge-windows-ci` on the Windows runner, `*-ci` on Linux); your machine is its own platform
+(`chrome-windows`), so on it the visual checks write *candidates* to
+`suites\ui-suite\target\visual\new\` and are reported as skipped — that is expected, because
+fonts, ClearType and scaling differ between machines. To check your own machine's rendering is stable, create local baselines once:
 
 ```powershell
 .\mvnw.cmd verify -pl suites/ui-suite -am "-Dtest=VisualRegressionTest" "-Dsurefire.failIfNoSpecifiedTests=false" "-Dharness.visual.mode=update"
@@ -318,6 +320,7 @@ The last lines list every build with its result; logs and artifacts are under
 | Symptom | Fix |
 |---|---|
 | `Could not find a valid Docker environment` | Docker Desktop is not running, or WSL2 integration is off (Settings → Resources → WSL integration). |
+| No Docker at all (e.g. a locked-down machine) | Use a local PostgreSQL instead of Testcontainers: create a `gate` role and databases, set `$env:HARNESS_DB_PASSWORD` and `$env:GATE_IT_DB_PASSWORD`, then add `"-Dharness.db.url=jdbc:postgresql://localhost:5432/<db>"` for the suites and `"-Dgate.it.jdbc-url=jdbc:postgresql://localhost:5432/gate_it_{db}"` for `sut/gate-api` (databases `gate_it_api` and `gate_it_pact`). This is exactly what `.github/workflows/windows.yml` does on GitHub's Windows runners. |
 | `client version ... is too old` from Docker | Update Docker Desktop. (Testcontainers 1.21.4, used here, was verified against Docker Engine 29.8.) |
 | UI tests fail to start a browser | Install/update Chrome; Selenium Manager downloads the matching driver automatically. |
 | Port 8080 or 5432 busy (Compose) | Stop the other program, or change the left-hand port in `docker-compose.yml`. |

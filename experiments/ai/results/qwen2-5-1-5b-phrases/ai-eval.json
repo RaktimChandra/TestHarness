@@ -1,0 +1,256 @@
+{
+  "model": "qwen2.5:1.5b",
+  "variant": "phrases",
+  "base_url": "http://localhost:11434/v1",
+  "protocol": "openai-compatible",
+  "temperature": 0.2,
+  "started": "2026-10-20T17:18:47+0000",
+  "drafts": [
+    {
+      "story": "01-book-a-slot",
+      "repeat": 1,
+      "seconds": 901.5,
+      "exit": 2,
+      "error": "error: Cannot reach openai/qwen2.5:1.5b at http://localhost:11434/v1: request timed out"
+    },
+    {
+      "story": "01-book-a-slot",
+      "repeat": 2,
+      "seconds": 901.0,
+      "exit": 2,
+      "error": "error: Cannot reach openai/qwen2.5:1.5b at http://localhost:11434/v1: request timed out"
+    },
+    {
+      "story": "02-container-number",
+      "repeat": 1,
+      "seconds": 26.3,
+      "exit": 0,
+      "file": "02-container-number-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 1,
+      "steps": 4,
+      "matched_steps": 0,
+      "unmatched": [
+        "a gate slot tomorrow at 10:00 at +2 hours",
+        "the slot has room for 2 trucks",
+        "I am a driver and book that slot for a valid container \"ABCDEFGH\"",
+        "the booking is refused with \"INVALID_CONTAINER_NUMBER\""
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "02-container-number",
+      "repeat": 2,
+      "seconds": 9.4,
+      "exit": 0,
+      "file": "02-container-number-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 1,
+      "steps": 4,
+      "matched_steps": 3,
+      "unmatched": [
+        "a gate slot tomorrow at 10:00 with room for 2"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "03-one-open-booking",
+      "repeat": 1,
+      "seconds": 24.0,
+      "exit": 0,
+      "file": "03-one-open-booking-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 2,
+      "steps": 13,
+      "matched_steps": 8,
+      "unmatched": [
+        "I am a terminal planner",
+        "the slot has room left",
+        "my booking is \"CANCELLED\" and the slot has room left",
+        "the outcome is <outcome>"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "03-one-open-booking",
+      "repeat": 2,
+      "seconds": 57.1,
+      "exit": 0,
+      "file": "03-one-open-booking-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 11,
+      "steps": 44,
+      "matched_steps": 1,
+      "unmatched": [
+        "I am a terminal planner",
+        "there is a gate slot tomorrow at 10:00 with room for 2 trucks with room for 2 trucks",
+        "I book that slot for a valid container \"<container>\"",
+        "the booking should be confirmed with reference \"BOOKED_CONTAINER_123456789\"",
+        "the slot should have 1 place left",
+        "there is a gate slot <slot> with room for 2 trucks",
+        "the booking should be refused because \"DUPLICATE_ACTIVE_BOOKING\"",
+        "I have booked that slot for a valid container \"<container>\"",
+        "the booking should be \"CANCELLED\"",
+        "the slot should have 2 places left",
+        "there is a gate slot <slot> with room for 1 truck",
+        "another driver books that slot for the same container \"<container>\"",
+        "their booking should be refused because \"DUPLICATE_ACTIVE_BOOKING\"",
+        "I check myself in at that slot",
+        "the check-in should be refused because \"FORBIDDEN\"",
+        "a clerk checks the driver's booking on the gate screen",
+        "the gate screen should show the booking as checked in",
+        "another driver books that slot on the booking screen",
+        "their booking should be refused because \"CHANGE_CUTOFF_PASSED\"",
+        "another driver books that slot on the booking screen at an earlier time than my check-in",
+        "their booking should be refused because \"CHECKIN_TOO_EARLY\"",
+        "their booking should be refused because \"FORBIDDEN\""
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "04-cancel",
+      "repeat": 1,
+      "seconds": 19.9,
+      "exit": 0,
+      "file": "04-cancel-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 2,
+      "steps": 8,
+      "matched_steps": 5,
+      "unmatched": [
+        "I am a truck driver",
+        "I book that slot for a valid container \"A Container\"",
+        "the booking is not cancelled"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "04-cancel",
+      "repeat": 2,
+      "seconds": 6.2,
+      "exit": 0,
+      "file": "04-cancel-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 1,
+      "steps": 5,
+      "matched_steps": 4,
+      "unmatched": [
+        "I book a gate slot for a valid container"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "05-check-in",
+      "repeat": 1,
+      "seconds": 54.8,
+      "exit": 0,
+      "file": "05-check-in-r1.feature",
+      "valid_gherkin": false,
+      "scenarios": 0,
+      "steps": 0,
+      "matched_steps": 0,
+      "unmatched": [],
+      "ambiguous": 0
+    },
+    {
+      "story": "05-check-in",
+      "repeat": 2,
+      "seconds": 19.7,
+      "exit": 0,
+      "file": "05-check-in-r2.feature",
+      "valid_gherkin": false,
+      "scenarios": 0,
+      "steps": 0,
+      "matched_steps": 0,
+      "unmatched": [],
+      "ambiguous": 0
+    },
+    {
+      "story": "06-privacy",
+      "repeat": 1,
+      "seconds": 17.0,
+      "exit": 0,
+      "file": "06-privacy-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 2,
+      "steps": 6,
+      "matched_steps": 2,
+      "unmatched": [
+        "another driver asks for my booking by its reference",
+        "they are told it does not exist (NOT_FOUND)"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "06-privacy",
+      "repeat": 2,
+      "seconds": 7.2,
+      "exit": 0,
+      "file": "06-privacy-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 2,
+      "steps": 4,
+      "matched_steps": 0,
+      "unmatched": [
+        "another driver is looking up my bookings",
+        "they are told that my booking does not exist (NOT_FOUND)"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "07-reschedule",
+      "repeat": 1,
+      "seconds": 901.0,
+      "exit": 2,
+      "error": "error: Cannot reach openai/qwen2.5:1.5b at http://localhost:11434/v1: request timed out"
+    },
+    {
+      "story": "07-reschedule",
+      "repeat": 2,
+      "seconds": 27.6,
+      "exit": 0,
+      "file": "07-reschedule-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 1,
+      "steps": 8,
+      "matched_steps": 3,
+      "unmatched": [
+        "a gate slot 10:00 tomorrow with room for 2",
+        "I am a driver and book that slot for a valid container \"valid_container\"",
+        "the booking is confirmed with reference \"confirmation_ref\"",
+        "the slot has <remaining_places> place left",
+        "the outcome is \"CANCELLED\""
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "08-sign-in-lock",
+      "repeat": 1,
+      "seconds": 901.0,
+      "exit": 2,
+      "error": "error: Cannot reach openai/qwen2.5:1.5b at http://localhost:11434/v1: request timed out"
+    },
+    {
+      "story": "08-sign-in-lock",
+      "repeat": 2,
+      "seconds": 901.0,
+      "exit": 2,
+      "error": "error: Cannot reach openai/qwen2.5:1.5b at http://localhost:11434/v1: request timed out"
+    }
+  ],
+  "summary": {
+    "stories": 8,
+    "attempts": 16,
+    "drafts_written": 11,
+    "valid_gherkin": 9,
+    "valid_gherkin_pct": 56.2,
+    "scenarios_per_valid_draft": 2.56,
+    "steps": 96,
+    "matched_steps": 26,
+    "step_reuse_pct": 27.1,
+    "drafts_fully_runnable": 0,
+    "median_seconds": 26.950000000000003,
+    "step_definitions": 28
+  },
+  "finished": "2026-10-20T18:38:32+0000"
+}

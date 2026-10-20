@@ -1,0 +1,49 @@
+{
+  "browser": "firefox",
+  "rep": 1,
+  "checks": {
+    "login-form-error": {
+      "differing": 0,
+      "compared": 87318,
+      "ratio_pct": 0.0,
+      "anti_aliased": 0,
+      "geometry": "drawn at x=494 y=255.38 size 378x278 in viewport 1366x814 scrollY=0 dpr=1"
+    },
+    "cancel-dialog": {
+      "differing": 0,
+      "compared": 67408,
+      "ratio_pct": 0.0,
+      "anti_aliased": 0,
+      "geometry": "drawn at x=457 y=316.8 size 440x200.38 in viewport 1366x814 scrollY=3211 dpr=1"
+    },
+    "booking-form-invalid": {
+      "differing": 0,
+      "compared": 242466,
+      "ratio_pct": 0.0,
+      "anti_aliased": 0,
+      "geometry": "drawn at x=194 y=398.57 size 966x277 in viewport 1366x814 scrollY=0 dpr=1"
+    },
+    "clerk-search-form": {
+      "differing": 0,
+      "compared": 74428,
+      "ratio_pct": 0.0,
+      "anti_aliased": 0,
+      "geometry": "drawn at x=200 y=208.17 size 966x86.8 in viewport 1366x814 scrollY=0 dpr=1"
+    },
+    "login-form": {
+      "differing": 0,
+      "compared": 82026,
+      "ratio_pct": 0.0,
+      "anti_aliased": 0,
+      "geometry": "drawn at x=494 y=255.38 size 378x217.2 in viewport 1366x814 scrollY=0 dpr=1"
+    }
+  },
+  "visual_failures": [],
+  "retaken": [],
+  "suite": {
+    "tests": 29,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  }
+}

@@ -1,0 +1,227 @@
+{
+  "model": "llama3.2:3b",
+  "variant": "catalogue",
+  "base_url": "http://localhost:11434/v1",
+  "protocol": "openai-compatible",
+  "temperature": 0.2,
+  "started": "2026-10-20T17:19:10+0000",
+  "drafts": [
+    {
+      "story": "01-book-a-slot",
+      "repeat": 1,
+      "seconds": 115.8,
+      "exit": 0,
+      "file": "01-book-a-slot-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 6,
+      "steps": 23,
+      "matched_steps": 7,
+      "unmatched": [
+        "the gate slot starts in {int} minutes with room for {int} truck(s)",
+        "I am a driver and book that slot for a valid container",
+        "there are {int} other drivers have already booked that slot",
+        "I am a driver and book that slot for container \"<container>\"",
+        "another driver has booked that slot for the same container",
+        "it is {time}",
+        "I am a driver and try to check myself in",
+        "I am a driver and cancel my booking"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "01-book-a-slot",
+      "repeat": 2,
+      "seconds": 900.9,
+      "exit": 2,
+      "error": "error: Cannot reach openai/llama3.2:3b at http://localhost:11434/v1: request timed out"
+    },
+    {
+      "story": "02-container-number",
+      "repeat": 1,
+      "seconds": 900.9,
+      "exit": 2,
+      "error": "error: Cannot reach openai/llama3.2:3b at http://localhost:11434/v1: request timed out"
+    },
+    {
+      "story": "02-container-number",
+      "repeat": 2,
+      "seconds": 900.9,
+      "exit": 2,
+      "error": "error: Cannot reach openai/llama3.2:3b at http://localhost:11434/v1: request timed out"
+    },
+    {
+      "story": "03-one-open-booking",
+      "repeat": 1,
+      "seconds": 209.0,
+      "exit": 0,
+      "file": "03-one-open-booking-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 18,
+      "steps": 67,
+      "matched_steps": 46,
+      "unmatched": [
+        "a gate slot starting in {int} minutes with room for {int} truck(s)",
+        "{int} other drivers have already booked that slot",
+        "I try to change my booking",
+        "a gate slot tomorrow at {time} with room for {int} truck(s)",
+        "I check my booking on the screen",
+        "another driver cancels their booking",
+        "I check my booking on the gate screen",
+        "another driver books that slot"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "03-one-open-booking",
+      "repeat": 2,
+      "seconds": 900.9,
+      "exit": 2,
+      "error": "error: Cannot reach openai/llama3.2:3b at http://localhost:11434/v1: request timed out"
+    },
+    {
+      "story": "04-cancel",
+      "repeat": 1,
+      "seconds": 901.0,
+      "exit": 2,
+      "error": "error: Cannot reach openai/llama3.2:3b at http://localhost:11434/v1: request timed out"
+    },
+    {
+      "story": "04-cancel",
+      "repeat": 2,
+      "seconds": 901.0,
+      "exit": 2,
+      "error": "error: Cannot reach openai/llama3.2:3b at http://localhost:11434/v1: request timed out"
+    },
+    {
+      "story": "05-check-in",
+      "repeat": 1,
+      "seconds": 212.1,
+      "exit": 0,
+      "file": "05-check-in-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 15,
+      "steps": 67,
+      "matched_steps": 42,
+      "unmatched": [
+        "a gate slot starting in {int} minutes with room for {int} truck(s)",
+        "another driver books that same slot",
+        "{int} other drivers have already booked that slot",
+        "the outcome is \"CANCELLED\"",
+        "the outcome is \"{string}\""
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "05-check-in",
+      "repeat": 2,
+      "seconds": 233.1,
+      "exit": 0,
+      "file": "05-check-in-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 22,
+      "steps": 88,
+      "matched_steps": 47,
+      "unmatched": [
+        "a gate slot starting in {int} minutes with room for {int} truck(s)",
+        "I book that slot on the booking screen",
+        "I have booked that slot for container \"{string}\"",
+        "the check-in opens two hours before the slot starts",
+        "I am not a clerk",
+        "another driver has booked that slot",
+        "another driver has booked that slot for the same container",
+        "{int} other drivers have already booked that slot",
+        "I have cancelled my booking",
+        "I try to change my booking",
+        "the booking screen lists it as refused at \"{string}\"",
+        "the gate screen shows the booking as refused",
+        "a gate slot tomorrow at {time} with room for {int} truck(s)"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "06-privacy",
+      "repeat": 1,
+      "seconds": 900.9,
+      "exit": 2,
+      "error": "error: Cannot reach openai/llama3.2:3b at http://localhost:11434/v1: request timed out"
+    },
+    {
+      "story": "06-privacy",
+      "repeat": 2,
+      "seconds": 177.0,
+      "exit": 0,
+      "file": "06-privacy-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 12,
+      "steps": 57,
+      "matched_steps": 42,
+      "unmatched": [
+        "the gate slot tomorrow at {time} with room for {int} truck(s)",
+        "a gate slot tomorrow at {time} with room for {int} truck(s)",
+        "I book that slot on the booking screen",
+        "the booking is checked in",
+        "a gate slot starting in {int} minutes with room for {int} truck(s)",
+        "another driver has already booked that slot"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "07-reschedule",
+      "repeat": 1,
+      "seconds": 901.0,
+      "exit": 2,
+      "error": "error: Cannot reach openai/llama3.2:3b at http://localhost:11434/v1: request timed out"
+    },
+    {
+      "story": "07-reschedule",
+      "repeat": 2,
+      "seconds": 901.1,
+      "exit": 2,
+      "error": "error: Cannot reach openai/llama3.2:3b at http://localhost:11434/v1: request timed out"
+    },
+    {
+      "story": "08-sign-in-lock",
+      "repeat": 1,
+      "seconds": 91.0,
+      "exit": 0,
+      "file": "08-sign-in-lock-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 3,
+      "steps": 9,
+      "matched_steps": 3,
+      "unmatched": [
+        "the system time is {time}",
+        "I try to sign in with username \"username\" and password \"password\"",
+        "I try to sign in with username \"username\" and password \"wrong_password\"",
+        "I try to sign in with username \"username\" and password \"{password}\""
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "08-sign-in-lock",
+      "repeat": 2,
+      "seconds": 900.9,
+      "exit": 2,
+      "error": "error: Cannot reach openai/llama3.2:3b at http://localhost:11434/v1: request timed out"
+    }
+  ],
+  "summary": {
+    "stories": 8,
+    "attempts": 16,
+    "drafts_written": 6,
+    "valid_gherkin": 6,
+    "valid_gherkin_pct": 37.5,
+    "scenarios_per_valid_draft": 12.67,
+    "steps": 311,
+    "matched_steps": 187,
+    "step_reuse_pct": 60.1,
+    "drafts_fully_runnable": 0,
+    "median_seconds": 900.9,
+    "step_definitions": 28
+  },
+  "explain": {
+    "seeded_bug": "OFF_BY_ONE_CAPACITY",
+    "output": "3 failure(s) {ASSERTION=3}; summary: /home/runner/work/TestHarness/TestHarness/target/ai-drafts/failure-summary.md (includes an AI draft)"
+  },
+  "finished": "2026-10-20T20:09:32+0000"
+}

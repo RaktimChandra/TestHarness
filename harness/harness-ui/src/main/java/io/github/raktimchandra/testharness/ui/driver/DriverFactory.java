@@ -16,6 +16,7 @@ import org.openqa.selenium.edge.EdgeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.firefox.GeckoDriverService;
+import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import java.io.File;
 
@@ -69,6 +70,11 @@ public final class DriverFactory {
         };
         // WebDriver BiDi gives cross-browser console and JS-error capture.
         caps.setCapability("webSocketUrl", true);
+        // A pinned version makes rendering change only when the pin does: a runner image update
+        // from Firefox 157 to 158 moved one heading of the gate UI by a pixel (RESULTS §40).
+        if (s.gridUrl().isEmpty() && s.binary().isEmpty()) {
+            s.version().ifPresent(v -> caps.setCapability(CapabilityType.BROWSER_VERSION, v));
+        }
         return caps;
     }
 

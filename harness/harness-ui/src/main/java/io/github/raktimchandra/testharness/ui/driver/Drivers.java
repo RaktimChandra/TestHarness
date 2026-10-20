@@ -46,9 +46,19 @@ public final class Drivers {
         Session s = new Session(driver, BrowserConsole.attach(driver), settings);
         SESSION.set(s);
         TestLog.put("browser", settings.browser().id());
-        log.info("Started {} ({}headless{}) in {} ms", settings.browser().id(), settings.headless() ? "" : "not ",
-                settings.gridUrl().map(g -> ", grid " + g).orElse(""), (System.nanoTime() - t0) / 1_000_000);
+        log.info("Started {} {} ({}headless{}) in {} ms", settings.browser().id(), version(driver),
+                settings.headless() ? "" : "not ", settings.gridUrl().map(g -> ", grid " + g).orElse(""),
+                (System.nanoTime() - t0) / 1_000_000);
         return s;
+    }
+
+    /** The version the browser reports, which is what a rendering depends on. */
+    static String version(WebDriver driver) {
+        if (driver instanceof org.openqa.selenium.HasCapabilities c) {
+            String v = c.getCapabilities().getBrowserVersion();
+            return v == null || v.isBlank() ? "(version unknown)" : v;
+        }
+        return "(version unknown)";
     }
 
     private static WebDriver create(UiSettings settings) {

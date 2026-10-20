@@ -9,13 +9,17 @@ import java.util.Optional;
  *
  * @param binary  optional browser executable (otherwise the installed browser is used)
  * @param driver  optional driver executable (otherwise Selenium Manager resolves one)
+ * @param version optional browser version for a local browser ({@code ui.version.<browser>}):
+ *                Selenium Manager uses the installed browser when it is that version and
+ *                downloads that version otherwise. Ignored with an explicit binary or a Grid,
+ *                whose node images fix the version.
  * @param sessionAttempts how many times to try starting a browser session (1–{@value
  *                        io.github.raktimchandra.testharness.core.retry.Retry#MAX_ATTEMPTS_CAP})
  */
 public record UiSettings(Browser browser, boolean headless, int width, int height, Duration explicitWait,
                          Duration pollInterval, Duration pageLoadTimeout, Optional<String> gridUrl,
-                         Optional<String> binary, Optional<String> driver, boolean noSandbox,
-                         int sessionAttempts) {
+                         Optional<String> binary, Optional<String> driver, Optional<String> version,
+                         boolean noSandbox, int sessionAttempts) {
 
     public static UiSettings from(HarnessConfig c) {
         Browser browser = Browser.parse(c.string("ui.browser", "chrome"));
@@ -32,6 +36,7 @@ public record UiSettings(Browser browser, boolean headless, int width, int heigh
                 c.find("ui.grid-url"),
                 c.find("ui.binary." + browser.id()),
                 c.find("ui.driver-path." + browser.id()),
+                c.find("ui.version." + browser.id()),
                 c.bool("ui.no-sandbox", false),
                 c.integer("ui.session-attempts", 2));
     }

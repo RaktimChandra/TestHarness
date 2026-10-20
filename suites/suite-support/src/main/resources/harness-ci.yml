@@ -2,3 +2,11 @@
 ui:
   headless: true
   no-sandbox: true
+  # Browser versions the CI visual baselines were rendered with (D69). Selenium Manager uses the
+  # runner's browser when it is this version and downloads this version when it is not, so a
+  # runner image update cannot change the rendering. Bump a pin together with new baselines
+  # (visual-baselines.yml). Not applied with a Grid (its node images fix the version).
+  version:
+    chrome: "155.0.8059.84"
+    firefox: "158.0"
+    edge: "155.0.4283.62"

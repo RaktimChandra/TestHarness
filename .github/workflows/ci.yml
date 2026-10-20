@@ -36,6 +36,22 @@ jobs:
         run: |
           set -o pipefail
           $MVN install -pl '!suites/api-suite,!suites/ui-suite,!suites/bdd-suite,!suites/perf-suite' 2>&1 | tee "$RUNNER_TEMP/build.log"
+      - name: Framework browser tests in Firefox and Edge
+        run: |
+          # The build above runs them in Chrome. Browser-specific behaviour of the framework (how
+          # a capture is stabilised, how the pointer is parked) is tested in the other two too:
+          # in Firefox, parking the pointer with a single move left :hover on the clicked input.
+          set -o pipefail
+          r=harness/harness-ui/target/surefire-reports/TEST-io.github.raktimchandra.testharness.ui.RealBrowserTest.xml
+          mv "$r" "${r%.xml}-chrome.xml"   # each run rewrites the report; keep one per browser
+          for b in firefox edge; do
+            # no-sandbox as in the suites' CI profile, which is not on harness-ui's classpath:
+            # without it Edge exits at start on the runner ("Chrome instance exited").
+            $MVN surefire:test -pl harness/harness-ui -Dtest='RealBrowserTest' -Dharness.ui.browser=$b \
+              -Dharness.ui.no-sandbox=true 2>&1 \
+              | tee -a "$RUNNER_TEMP/build.log"
+            mv "$r" "${r%.xml}-$b.xml"
+          done
       - name: Consumer contract is up to date
         run: |
           # gate-ui's Pact tests regenerate contracts/pacts during the build; gate-api has just
@@ -286,7 +302,7 @@ jobs:
           ./mvnw -B -ntp -f .teamcity/pom.xml teamcity-configs:generate 2>&1 | tee -a "$RUNNER_TEMP/teamcity.log"
           echo "### TeamCity DSL" >> "$GITHUB_STEP_SUMMARY"
           echo "Generated $(find .teamcity/target/generated-configs -type f | wc -l) files; build types:" >> "$GITHUB_STEP_SUMMARY"
-          find .teamcity/target/generated-configs -name '*.kts' -o -name '*.xml' | sed 's/^/- /' | head -40 >> "$GITHUB_STEP_SUMMARY"
+          find .teamcity/target/generated-configs -name '*.kts' -o -name '*.xml' | sed 's/^/- /' | awk 'NR <= 40' >> "$GITHUB_STEP_SUMMARY"
       - uses: ./.github/actions/log-tail
         if: failure()
         with:

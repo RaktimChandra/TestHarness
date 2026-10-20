@@ -3,10 +3,11 @@
 #
 # Difference from a developer's Windows machine, and why: hosted Windows runners cannot run
 # Linux containers, so Testcontainers' PostgreSQL is replaced by the PostgreSQL installed on
-# the runner (-Dharness.db.url, the same switch the Compose setup uses), and the SUT's own
-# Testcontainers integration tests (gate-api) run in the Linux build job only. There are no
-# Windows visual baselines (baselines are per platform and rendered by visual-baselines.yml on
-# Linux), so the visual checks write Windows candidates and skip instead of failing.
+# the runner (-Dharness.db.url, the same switch the Compose setup uses; for the SUT's own
+# integration tests -Dgate.it.jdbc-url, one fresh database per test class). The visual checks
+# compare against chrome-windows-ci and edge-windows-ci, rendered on this runner image by
+# visual-baselines.yml (platform: windows) and reviewed before they were committed; a missing
+# baseline fails here, as on Linux.
 name: windows
 
 on:
@@ -27,6 +28,11 @@ env:
   GATE_SEED_PASSWORD: win-${{ github.run_id }}
   HARNESS_DB_PASSWORD: gate
   HARNESS_HISTORY_DB_PASSWORD: gate
+  GATE_IT_DB_PASSWORD: gate
+  # The browser pins in harness-ci.yml are for the Linux runners; here the runner's own Chrome
+  # and Edge are used, and the Windows baselines were rendered with them.
+  HARNESS_UI_VERSION_CHROME: ''
+  HARNESS_UI_VERSION_EDGE: ''
 
 jobs:
   windows:
@@ -51,30 +57,32 @@ jobs:
           $env:PGPASSWORD = 'root'
           $psql = Join-Path $env:PGBIN 'psql.exe'
           & $psql -U postgres -h localhost -c "CREATE ROLE gate LOGIN PASSWORD 'gate' CREATEDB"
-          foreach ($db in 'gate_data','gate_insights','gate_api','gate_ui','gate_bdd','gate_perf') {
+          foreach ($db in 'gate_data','gate_insights','gate_api','gate_ui','gate_bdd','gate_perf','gate_it_api','gate_it_pact') {
             & $psql -U postgres -h localhost -c "CREATE DATABASE $db OWNER gate"
           }
           & $psql -U postgres -h localhost -tAc "select version()"
       - name: 'WINDOWS.md step 10: install once'
         run: .\mvnw.cmd -B -ntp install -DskipTests 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
-      - name: Framework tests (real Chrome on Windows)
+      - name: Framework and SUT tests (real Chrome on Windows; the SUT's integration tests on the runner's PostgreSQL)
         run: >
           .\mvnw.cmd -B -ntp verify
-          -pl harness/harness-core,harness/harness-reporting,harness/harness-data,harness/harness-api,harness/harness-ui,harness/harness-bdd,harness/harness-insights,harness/harness-cli,sut/gate-domain
-          "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_data" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
+          -pl harness/harness-core,harness/harness-reporting,harness/harness-data,harness/harness-api,harness/harness-ui,harness/harness-bdd,harness/harness-insights,harness/harness-cli,sut/gate-domain,sut/gate-api
+          "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_data" "-Dgate.it.jdbc-url=jdbc:postgresql://localhost:5432/gate_it_{db}" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
       - name: 'WINDOWS.md step 4: API suite'
         run: .\mvnw.cmd -B -ntp verify -pl suites/api-suite "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_api" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
       - name: 'WINDOWS.md step 4: UI suite in Chrome'
         run: >
           .\mvnw.cmd -B -ntp verify -pl suites/ui-suite "-Dharness.ui.browser=chrome"
-          "-Dharness.visual.platform=chrome-windows" "-Dharness.visual.require-baseline=false" "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_ui" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
+          "-Dharness.visual.platform=chrome-windows-ci" "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_ui" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
+      - name: Keep the Chrome run's reports (the Edge run rewrites the same files)
+        run: Rename-Item suites\ui-suite\target\surefire-reports surefire-reports-chrome
       - name: 'WINDOWS.md step 4: UI suite in Edge'
         run: >
           .\mvnw.cmd -B -ntp verify -pl suites/ui-suite "-Dharness.ui.browser=edge"
-          "-Dharness.visual.platform=edge-windows" "-Dharness.visual.require-baseline=false" "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_ui" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
-      - name: 'WINDOWS.md step 4: BDD suite, @smoke'
+          "-Dharness.visual.platform=edge-windows-ci" "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_ui" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
+      - name: 'WINDOWS.md step 4: BDD suite'
         run: >
-          .\mvnw.cmd -B -ntp verify -pl suites/bdd-suite "-Dcucumber.filter.tags=@smoke"
+          .\mvnw.cmd -B -ntp verify -pl suites/bdd-suite
           "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_bdd" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
       - name: 'WINDOWS.md step 7: Gatling smoke'
         run: .\mvnw.cmd -B -ntp verify -pl suites/perf-suite "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_perf" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
@@ -93,7 +101,7 @@ jobs:
         run: .\mvnw.cmd -B -ntp -N -Preport verify 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
       - name: Test summary
         if: always()
-        run: python .github/scripts/test_summary.py "windows" "**/target/surefire-reports/TEST-*.xml"
+        run: python .github/scripts/test_summary.py "windows" "**/target/surefire-reports/TEST-*.xml" "**/target/surefire-reports-chrome/TEST-*.xml"
       - uses: ./.github/actions/log-tail
         if: failure()
         with:
