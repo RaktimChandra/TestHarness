@@ -7,28 +7,39 @@ security and performance tests run against it in one command, and a fault-seedin
 experiment measures which suite catches which defect.
 
 Java 21 · Selenium 4 + Grid · REST Assured · Cucumber 7 · JUnit 5 (parallel) · AssertJ ·
-Testcontainers · Allure · axe-core · Pact · Gatling · Spring Boot 3 · PostgreSQL · React ·
-GitHub Actions
+Testcontainers · Allure · axe-core · Pact · Gatling · OSV-Scanner · OWASP ZAP · Spring Boot 3 ·
+PostgreSQL · React · GitHub Actions · TeamCity
 
 [![ci](https://github.com/RaktimChandra/TestHarness/actions/workflows/ci.yml/badge.svg)](https://github.com/RaktimChandra/TestHarness/actions/workflows/ci.yml)
+[![security](https://github.com/RaktimChandra/TestHarness/actions/workflows/security.yml/badge.svg)](https://github.com/RaktimChandra/TestHarness/actions/workflows/security.yml)
+[![windows](https://github.com/RaktimChandra/TestHarness/actions/workflows/windows.yml/badge.svg)](https://github.com/RaktimChandra/TestHarness/actions/workflows/windows.yml)
+
+**Live quality dashboard:** [raktimchandra.github.io/TestHarness](https://raktimchandra.github.io/TestHarness/)
+— rebuilt from the recorded CI history after every pipeline on `main`.
 
 ---
 
 ## Results (measured)
 
-From real runs on 2026-10-14 to 2026-10-16 — method, machine and raw numbers for every row are in
+From real runs on 2026-10-14 to 2026-10-20 — method, machine and raw numbers for every row are in
 [RESULTS.md](RESULTS.md). Nothing in this table is estimated.
 
 | | |
 |---|---|
-| Tests in one `verify` | **485 JVM tests + 40 Vitest + 1 Gatling simulation**, 0 failed (5 visual checks skip outside CI by design) |
-| Wall-clock, clean build + everything (2 vCPU sandbox) | **5 min 54 s** |
-| Fault seeding: 6 bugs × 8 suite types (CI) | **6/6 caught** by at least one suite · API 100 % · BDD 83 % · contract, security, UI 33 % each · the race bug caught by **one test of 151** |
+| Tests in one `verify` | **526 JVM tests + 32 Vitest + 1 Gatling simulation**, 0 failed (5 visual checks skip outside CI by design); dashboard: 9 more Vitest |
+| Wall-clock, clean build + everything (2 vCPU sandbox) | **6 min 32 s** |
+| Fault seeding: 6 bugs × 8 suite types (CI), **run three times** | **6/6 caught** by at least one suite in every run · API 6/6/6 · BDD 5/5/5 · contract, UI 2/2/2 · security 2/1/1 · Gatling 0/1/1 · the race bug caught by **one test of 151** · 46 of 48 cells gave the same verdict all three times |
 | Mutation score, domain rules (PIT, STRONGER) | **95.1 % → 100 %** (143 mutants) after turning the 7 survivors into tests |
-| Test impact analysis, per-test JaCoCo | **6/6 seeded bugs still caught** by the selected subset; wall-clock saved **3.8–21.6 %** (and why so little) |
-| Flaky-test detection (20 runs, one commit, CI) | deliberately flaky test scored **0.368** and was auto-quarantined; its stable control scored 0 |
-| A second, unrelated system (PortSync: Kafka + Spring + React) | **42 tests, 0 failures, 0 axe violations** in CI with the framework unchanged; three ISO 6346 implementations agree on every number tried |
-| CI pipeline | **18 jobs green in 14 min 40 s**: UI sharded 3 browsers × 2 (15 + 14 tests each), quarantine non-blocking, one quality gate; the same chain on CIForge in 8 min 11 s |
+| Test impact analysis, per-test JaCoCo, three recordings | **18/18** selected runs still caught their bug; wall-clock saved **3.8–33.2 %** (and why so little) |
+| Flaky-test detection (20 runs on one commit, three times, CI) | deliberately flaky test scored **0.368 / 0.474 / 0.421** and was quarantined every time; its stable control scored 0 every time |
+| A second, unrelated system (PortSync: Kafka + Spring + React) | **54 tests, 0 failures** in CI with the framework unchanged, including a consumer contract and SLA scenarios; found **two real WCAG contrast defects in PortSync** (4.21:1 and 3.03:1) |
+| Dependency vulnerabilities (OSV-Scanner over a Maven-resolved SBOM) | **41 advisories in 18 transitive packages** on the first scan → 0 untriaged after version floors; 3 Spring 6.2 advisories ignored with code-checked reasons and an expiry date |
+| OWASP ZAP baseline of the running SUT | **8 alert types** on the first scan → 6 header findings fixed in the app, 3 informational rules triaged; now a gate |
+| Windows (`windows-2025`, the Windows guide's own commands) | **492 tests, 0 failed** with `mvnw.cmd` / `th.cmd`, UI in Chrome and Edge; found 4 problems Linux CI could not |
+| TeamCity 2025.07, real server + agent | the server imports and compiles `settings.kts` and runs the chain: **every build green** (build 350, API 112, BDD 24, UI 15 + 14, Gatling, PIT) |
+| CI pipeline (`main`, run 39425545521) | **quality gate green in 13 min 18 s**, 22 jobs: UI sharded 3 browsers × 2 by recorded duration, quarantine non-blocking (its flaky test failed, as designed), then history and the dashboard published in 3 min 36 s more; the same chain on CIForge in 5 min 25 s |
+| Capacity on 2 CPUs / 1 GiB (three runners per flow) | **25 booking flows/s** with sign-in on every flow (CPU-bound), **200** with a reused token (then the 20-connection pool runs out) |
+| AI drafter on real open models (8 stories × 2, Ollama in CI) | qwen2.5 7B: **94 % valid Gherkin, 70 % of drafted steps run on existing step definitions**; 1.5B / 3B: 43 % / 36 %; 1 of 40 valid drafts needed no new glue |
 | Self-healing locators | **1 heal in 26 UI tests** — the demo that renames a `data-testid` — reported with the exact fix, never silent |
 | Cross-browser | UI suite passes in **Chrome 154, Firefox 157 and Edge 154** in CI, both directly and on **Selenium Grid** |
 | Accessibility (axe-core, WCAG 2.0/2.1 A+AA) | **0 violations** on 9 page states × 3 browsers |
@@ -235,21 +246,26 @@ flowchart LR
   B --> CS["Compose smoke"] & G["Selenium Grid"] & P["Gatling"] & M["PIT ≥ 95 %"]
   B --> D["dashboard build check"] & TC["TeamCity DSL compiles"]
   B -.-> Q["quarantined tests<br/>(non-blocking)"]
+  B -.-> IMP["PR: impacted tests first<br/>(TIA map from main)"]
   API & BDD & UI & CS & G & P & M & D & TC --> QG{{"quality gate<br/>the one required check"}}
   Q -. reported only .-> QG
   API & BDD & UI & Q --> R["Allure report"]
+  QG --> PUB["main: publish<br/>ci-history + gh-pages"]
+  PUB -. durations, TIA map .-> UI
 ```
+
+Alongside it: `security.yml` (OSV-Scanner over an SBOM + OWASP ZAP baseline), `windows.yml`,
+`portsync.yml`, `teamcity.yml` (a real TeamCity server and agent), `ciforge.yml` (CIForge
+inside Actions), and the experiments `fault-seeding.yml`, `flaky-demo.yml`, `capacity.yml`,
+`ai-eval.yml`. Releases are cut by `release.yml`.
 
 The same pipeline exists three times, each labelled with how far it was proven:
 
 | | File | Status |
 |---|---|---|
-| GitHub Actions | `.github/workflows/ci.yml` | runs on every push and PR — 18 jobs, 14 min 40 s, green (RESULTS §27) |
-| CIForge (my TeamCity-style orchestrator) | `.ciforge.yml` | **executed**: 9 builds, 8 min 11 s, green (RESULTS §28) |
-| TeamCity Kotlin DSL | `.teamcity/settings.kts` | compiled and generated in CI against a real TeamCity server's DSL; **not run on an agent** (RESULTS §29) |
-
-Further workflows: `fault-seeding.yml` (the experiment), `flaky-demo.yml`, `portsync.yml`
-(the adapter against PortSync), `visual-baselines.yml`.
+| GitHub Actions | `.github/workflows/ci.yml` | runs on every push and PR; on `main` it also records history and publishes the site (RESULTS §31, §39) |
+| CIForge (my TeamCity-style orchestrator) | `.ciforge.yml` | **executed** in the sandbox (8 min 11 s) and inside GitHub Actions (5 min 25 s), 9 of 9 builds green (RESULTS §28, §41) |
+| TeamCity | `.teamcity/settings.kts` | **executed**: a TeamCity 2025.07 server imports and compiles the Kotlin settings and runs the chain on an agent, every build green (RESULTS §37) |
 
 Interview preparation for this project: [INTERVIEW.md](INTERVIEW.md).
 
@@ -261,7 +277,8 @@ Interview preparation for this project: [INTERVIEW.md](INTERVIEW.md).
 | 2 — Selenium Grid in Compose, visual regression, axe-core a11y, Pact, Gatling, security smoke | **done** |
 | 3 — fault-seeding experiment, flaky-test intelligence, honest self-healing locators, test impact analysis, PIT, AI-assisted test design | **done** |
 | 4 — React quality dashboard, CLI, "new test in 5 minutes" guide, PortSync adapter | **done** |
-| 5 — full CI/CD with quality gates, TeamCity Kotlin DSL, CIForge pipeline | **done** (this release) |
+| 5 — full CI/CD with quality gates, TeamCity Kotlin DSL, CIForge pipeline | **done** |
+| 6 — closing the gaps: duration shards, published history and dashboard, TIA on PRs, sign-in throttling, OSV + ZAP, Windows, TeamCity and CIForge executed, AI eval on real models, capacity, repeated experiments | **done** (1.1.0) |
 
 Changes per phase: [CHANGELOG.md](CHANGELOG.md).
 
