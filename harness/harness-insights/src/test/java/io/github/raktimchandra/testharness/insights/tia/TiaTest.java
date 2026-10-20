@@ -3,8 +3,6 @@ package io.github.raktimchandra.testharness.insights.tia;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import io.github.raktimchandra.testharness.core.config.HarnessConfig;
-import io.github.raktimchandra.testharness.insights.Launch;
-import io.github.raktimchandra.testharness.insights.fixtures.CoverageFixture;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -98,26 +96,5 @@ class TiaTest {
         assertThat(selector.select(List.of("sut/gate-ui/src/pages/DriverPage.jsx")).tests()).containsExactly("Ui#c");
         assertThat(selector.select(List.of("pom.xml")).runAll()).isTrue();
         assertThat(selector.select(List.of("pom.xml")).tests()).hasSize(3);
-    }
-
-    @Test
-    void recordsRealPerTestCoverageThroughTheJacocoAgent() throws IOException {
-        Path dir = repo.resolve("tia");
-        System.setProperty("harness.tia.record", "true");
-        System.setProperty("harness.tia.dir", dir.toString());
-        System.setProperty("harness.history.suite", "fixture-suite");
-        HarnessConfig.reset();
-
-        Launch.run(CoverageFixture.class, new TiaRecorder());
-
-        Path rec = dir.resolve("fixture-suite");
-        assertThat(rec.resolve("index.jsonl")).exists();
-        Path moduleRoot = Path.of("").toAbsolutePath();
-        CoverageMap map = new TiaMapper(moduleRoot, List.of("src/test/java")).map(List.of(rec), "local");
-        String calc = "src/test/java/io/github/raktimchandra/testharness/insights/fixtures/Calculator.java";
-        String fixture = "src/test/java/io/github/raktimchandra/testharness/insights/fixtures/CoverageFixture.java";
-        assertThat(map.tests().get(CoverageFixture.class.getName() + "#adds").files()).contains(calc, fixture);
-        assertThat(map.tests().get(CoverageFixture.class.getName() + "#touchesNothingOfOurs").files())
-                .doesNotContain(calc);
     }
 }

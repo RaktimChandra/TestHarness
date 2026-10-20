@@ -18,6 +18,8 @@ params:
   mvn: ./mvnw -B -ntp
   # Extra -D settings for every suite run (e.g. a local browser binary on a CI agent).
   suite.args: ""
+  # The quality gate runs in a container (CIForge's Docker runner): it needs only Python.
+  gate.image: python:3.12-slim
 max_parallel: 2
 triggers:
   - type: vcs
@@ -120,6 +122,7 @@ builds:
   quality-gate:
     name: Quality gate
     depends_on: [api, bdd, ui-1, ui-2, mutation, perf]
+    runner: {type: docker, image: "%gate.image%", shell: sh}
     artifacts_from:
       - {build: api, paths: ["reports/**", "history/**"], into: "in/api"}
       - {build: bdd, paths: ["reports/**", "history/**"], into: "in/bdd"}

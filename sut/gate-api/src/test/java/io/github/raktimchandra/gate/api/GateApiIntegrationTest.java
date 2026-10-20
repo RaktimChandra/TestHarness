@@ -73,6 +73,27 @@ class GateApiIntegrationTest {
     }
 
     @Test
+    void repeatedFailedSignInsLockTheAccountWith429AndRetryAfter() throws Exception {
+        String user = newUser("DRIVER");
+        for (int i = 0; i < 5; i++) {
+            assertThat(http.postForEntity("/api/auth/login", Map.of("username", user, "password", "guess-" + i),
+                    JsonNode.class).getStatusCode()).isEqualTo(HttpStatus.UNAUTHORIZED);
+        }
+        // Even the right password is refused while locked, so the lock cannot confirm a guess.
+        // Sent with the JDK client: TestRestTemplate's Apache HttpClient 5 honours Retry-After on a
+        // 429 by sleeping and retrying (found by this test: it waited the full 300 s lock out).
+        java.net.http.HttpResponse<String> locked = rawPost("/api/auth/login",
+                "{\"username\":\"" + user + "\",\"password\":\"" + PASSWORD + "\"}");
+        assertThat(locked.statusCode()).isEqualTo(429);
+        assertThat(locked.headers().firstValue("Content-Type")).hasValue(MediaType.APPLICATION_PROBLEM_JSON_VALUE);
+        assertThat(locked.body()).contains("\"code\":\"TOO_MANY_ATTEMPTS\"");
+        assertThat(Long.parseLong(locked.headers().firstValue(HttpHeaders.RETRY_AFTER).orElseThrow()))
+                .isBetween(290L, 300L);
+        // Other accounts are unaffected.
+        assertThat(login(newUser("DRIVER")).get("token").asText()).isNotBlank();
+    }
+
+    @Test
     void apiRequiresATokenButHealthAndUiDoNot() {
         assertThat(http.getForEntity("/api/slots?date=2026-01-01", JsonNode.class).getStatusCode())
                 .isEqualTo(HttpStatus.UNAUTHORIZED);
@@ -200,6 +221,15 @@ class GateApiIntegrationTest {
 
     private String token(String username) {
         return login(username).get("token").asText();
+    }
+
+    private java.net.http.HttpResponse<String> rawPost(String path, String json) throws Exception {
+        try (java.net.http.HttpClient client = java.net.http.HttpClient.newHttpClient()) {
+            return client.send(java.net.http.HttpRequest.newBuilder(java.net.URI.create(http.getRootUri() + path))
+                    .header("Content-Type", "application/json")
+                    .POST(java.net.http.HttpRequest.BodyPublishers.ofString(json)).build(),
+                    java.net.http.HttpResponse.BodyHandlers.ofString());
+        }
     }
 
     private ResponseEntity<JsonNode> exchange(HttpMethod method, String path, String token, Object body) {

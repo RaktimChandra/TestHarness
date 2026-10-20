@@ -33,7 +33,8 @@ class AuthApiTest extends ApiTest {
 
     @Test
     void wrong_password_and_unknown_user_get_the_same_401() {
-        Response wrongPassword = api.login("driver1", "not-the-password");
+        // A fresh account: failed sign-ins count towards a lock, so tests never spend a shared one's.
+        Response wrongPassword = api.login(fx.newDriver().username(), "not-the-password");
         Response unknownUser = api.login("nobody-" + System.nanoTime(), "whatever");
         assertThatResponse(wrongPassword).hasStatus(401).hasProblemCode("UNAUTHENTICATED");
         assertThatResponse(unknownUser).hasStatus(401).hasProblemCode("UNAUTHENTICATED");

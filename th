@@ -3,7 +3,7 @@
 # Builds the CLI on first use (or when the jar is missing), then runs it.
 set -e
 ROOT=$(cd "$(dirname "$0")" && pwd)
-JAR="$ROOT/harness/harness-cli/target/harness-cli-1.0.0-SNAPSHOT.jar"
+JAR="$ROOT/harness/harness-cli/target/harness-cli-1.1.0.jar"
 if [ ! -f "$JAR" ]; then
   echo "Building the harness CLI (first run)..." >&2
   "$ROOT/mvnw" -q -B install -DskipTests -pl harness/harness-cli -am >&2

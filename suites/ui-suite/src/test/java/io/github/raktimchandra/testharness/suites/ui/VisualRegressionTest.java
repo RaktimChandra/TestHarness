@@ -50,7 +50,8 @@ class VisualRegressionTest extends UiTest {
     @Test
     void login_error(WebDriver driver, Waits waits) {
         var login = pages().login().open();
-        login.enter("driver1", "wrong-password").submit();
+        // A fresh account: failed sign-ins count towards a lock, so tests never spend a shared one's.
+        login.enter(fx.newDriver().username(), "wrong-password").submit();
         login.error();
         visual(driver).matches("login-form-error", waits.visible(testId("login-form")),
                 testId("login-username"));

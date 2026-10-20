@@ -521,6 +521,97 @@ it — no TeamCity agent has executed these builds.
 
 ---
 
+## Phase 6 — closing the gaps
+
+### D50 — Shards balanced by recorded duration, computed independently by every shard — Built
+D46's hash split is stable but blind to test length. `ShardPlan` assigns tests longest first to
+the currently lightest shard (LPT), with ties broken by key and shard index, so every shard
+derives the *same* plan from the same durations file and no coordinator is needed. Durations
+are the mean per-run total of a test key, where a run is a run id in one environment (CI jobs
+for different browsers can share a run id). Tests missing from the file (new ones) fall back to
+the hash, so a stale file never loses or duplicates a test. The file comes from main's history
+(D51); a pull request uses whatever main last recorded. *Rejected:* a dynamic work queue —
+it balances perfectly but needs a broker, and breaks "one test, one shard" for history.
+
+### D51 — CI history lives on a branch, the dashboard on gh-pages — Built
+After every pipeline on main, a `publish` job appends the run's JSON Lines history (all jobs,
+per job directory) to the `ci-history` branch, keeps a sliding window of 120 runs, and derives
+`shard-durations.json`, the flakiness leaderboard and a quarantine *proposal* (quarantine.json
+itself stays a reviewed file, D37). It then builds the dashboard from that window, adds the
+Allure report and the blog, and force-pushes the site to `gh-pages`. *Why a branch:* no
+external storage, no secrets, every change is a reviewable commit, and the data outlives
+artifact retention. *Limit:* GitHub Pages must be switched on once in the repository settings
+(source: `gh-pages`); a workflow token cannot do that.
+
+### D52 — Test impact analysis on pull requests, recorded on main — Built
+`tia-map` records per-test coverage on every push to main and stores the map in `ci-history`;
+the `impacted` job on a pull request selects with `th tia select --base origin/<base>` and runs
+that subset first. It is feedback, not a gate: the full suites still run (D39's measured
+savings were 4–22 %, too little to skip anything on merge).
+
+### D53 — Sign-in throttling in the SUT, tested from three sides — Built
+Five failures per username or 100 per client address within 15 minutes lock that key for
+5 minutes (429 `TOO_MANY_ATTEMPTS`, `Retry-After`). The lock is checked *before* the password
+so a correct guess during a lock reveals nothing, and unknown usernames lock like real ones.
+It uses the wall clock, not the test-shiftable clock. *Trade-off accepted:* anyone can keep a
+known username locked; per-user locks always allow that, so the lock is short. The tests found
+that Apache HttpClient 5 (used by TestRestTemplate) honours `Retry-After` on 429 by sleeping
+and retrying — a client-side behaviour worth knowing when testing rate limits.
+
+### D54 — Dependency scanning from a Maven-resolved SBOM, with version floors — Built
+OSV-Scanner's own pom resolution could not resolve this reactor (5 packages per module), so
+Maven resolves the graph into a CycloneDX SBOM and OSV-Scanner reads that plus the npm
+lockfiles. The first full scan found 41 advisories in 18 transitive packages; the root pom now
+declares "security floors" ahead of the Spring Boot BOM, and the scan fails on anything new.
+Advisories with no open-source fix on the Spring Boot 3 line are ignored only with a written,
+code-checked reason and an expiry date (osv-scanner.toml).
+
+### D55 — ZAP baseline as a gate, findings fixed rather than ignored — Built
+The first scan raised eight alert types; the six about headers (CSP directives without a
+fallback, inline styles, Permissions-Policy, COOP/COEP/CORP) were fixed in the SUT. Only
+informational rules are triaged in `.zap/rules.tsv`, each with its reason. ZAP runs from its
+image directly so its WARN/FAIL lines reach the job log.
+
+### D56 — A Windows job that runs the Windows guide — Built
+`windows.yml` executes the commands of docs/WINDOWS.md with `mvnw.cmd` and `th.cmd` in
+PowerShell, with the UI suite in Chrome and Edge. Hosted Windows runners cannot run Linux
+containers, so the runner's PostgreSQL stands in for Testcontainers through
+`-Dharness.db.url` — the same switch the Compose setup uses. It found two real problems:
+`install -DskipTests` still ran Gatling, and a framework test assumed a container.
+
+### D57 — The AI drafter is measured against real models, by step reuse — Built
+`ai-eval.yml` serves open models with Ollama on the runner and drafts a feature for each user
+story in `experiments/ai/stories`. Drafts are scored by `DraftStepCoverage`, which matches every
+drafted step against the BDD suite's real step definitions the way Cucumber does (a dry run
+was rejected: it skips every step after the first undefined one). The score that matters is
+step reuse — how much of a draft runs without new glue — not how plausible it reads.
+
+### D58 — Capacity is measured on fixed resources, separately with and without sign-in — Built
+`tools/capacity.py` steps an open arrival rate against the SUT in Compose limited to 2 CPUs and
+1 GiB, so the result means "on 2 CPUs" rather than "on whichever runner". Two flows differ only
+by the password check on the request path, which isolates the cost of bcrypt. A level keeps up
+when errors < 1 %, p95 ≤ 800 ms and completed flows ≥ 95 % of offered.
+
+### D59 — A consumer contract with PortSync that needs no provider states — Built
+The adapter's real `CoreApi` (strict schemas on) generates the pact against Pact's mock server;
+it contains only interactions that hold on any running PortSync (overview shape, check-digit
+validation, error codes), so the live verification needs no state handlers in a repository we
+do not control. The SLA scenarios (gate surge, vessel surge, SSE, paused-yard agreement) run
+isolated because they change the whole terminal.
+
+### D60 — TeamCity runs the real settings, compiled by TeamCity — Built
+`teamcity.yml` starts a TeamCity 2025.07 server and an agent image (JDK 21, Docker, Chrome),
+creates the project over REST and enables versioned settings in Kotlin, so the *server*
+imports and compiles `.teamcity/settings.kts` from the branch — the same path a real
+installation takes. The seed password moved from a credentials token in the DSL to the agents'
+environment.
+
+### D61 — Releases are cut by a workflow — Built
+`release.yml` refuses to run off main, re-use a tag or release without a CHANGELOG section; it
+publishes the source archive, the SBOM and, given a pipeline run, its Allure report and site.
+
+---
+
 ## Build and tooling
 
 ### D22 — Version lines follow the brief, at their latest patch — Built
