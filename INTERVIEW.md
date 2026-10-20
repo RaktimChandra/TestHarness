@@ -112,33 +112,52 @@ It would be if it were silent. Here a heal is labelled "healed" in Allure with t
 `ui.healing=fail` turns any heal into a failure in CI. In the full UI suite there is one heal:
 the demo that breaks a locator on purpose.
 
-**13. What does the AI feature do, and did you test it with a real model?**
+**13. Tell me about an intermittent failure you tracked down.**
+One Firefox visual check failed in some CI runs and passed in others; locally it never failed.
+I couldn't download the diff images, so I guessed in turn — a focus-ring race, a mask off by a
+pixel, a repaint, anti-aliasing drift — and fixed each, and it kept coming back. What worked was
+measuring instead of guessing: a workflow that runs the whole UI suite ten times per browser on
+fresh runners and records, per check, where the element was drawn to the sub-pixel and the
+runner's image, CPU and browser versions. Two runs answered it: GitHub was rolling out a new
+runner image with Firefox 158 instead of 157, which lays the page out 1/60 px differently and
+moves one heading by a pixel — every run on the new image failed, every run on the old one
+passed. The fix is pinning browser versions in CI and re-rendering the baselines; the next 30
+suites matched with 0 differing pixels. On the way I found two smaller real bugs, Firefox
+keeping `:hover` after a click and overlays picking up the page behind them. The lesson: my
+first four explanations were plausible and wrong, and I only knew because each fix was tested
+against new runs.
+
+**14. What does the AI feature do, and did you test it with a real model?**
 It drafts Gherkin from a user story and summarises failed runs, through any OpenAI-compatible
 or Anthropic endpoint. Drafts are parsed, banner-marked, tagged `@draft` and never written into
-the source tree. I measured it with three small open models served by Ollama in CI, on eight
-user stories, twice each — scored by how many drafted steps an existing step definition
-already runs, matched the way Cucumber matches. qwen2.5 7B: 100 % valid Gherkin and 68.5 % step
-reuse (69.9 % in a second run); the 1.5B and 3B models: 88 % and 69 % valid, 43 % and 36 %
-reuse. Only one 7B draft per run ran with no new glue code. And asked to explain the failures of a seeded capacity bug, the two
-smallest models mostly blamed the tests or the environment — so drafts and explanations are a
-starting point for a human, which is exactly how the tool labels them. I haven't measured a large hosted model.
+the source tree. I measured it with four open models served by Ollama in CI (1.5B to 14B), on
+eight user stories, twice each — scored by how many drafted steps an existing step definition
+already runs, matched the way Cucumber matches. The first measurement showed most misses were
+near-misses of real steps, so the drafter now gets the suite's 28 step definitions in its
+prompt. In one run comparing both prompts, that raised step reuse for every model — qwen2.5 7B
+from 57.9 % to 77.7 %, the 1.5B model from 27 % to 68 % — while 14B was no better than 7B and
+twice as slow, and the longer prompt made the 3B model time out on ten drafts. Still at most
+two drafts per model run with no new glue code, and asked to explain a seeded capacity bug, the
+two smallest models blamed the tests; 7B and 14B got it right. So drafts and explanations are a
+starting point for a human, which is how the tool labels them. I haven't measured a large
+hosted model — the workflow supports one, but it needs a paid API key.
 
 ### CI/CD and cloud
 
-**14. Walk me through the pipeline.**
+**15. Walk me through the pipeline.**
 Build once with framework and SUT tests; then API, BDD and UI suites in parallel — UI across
 Chrome, Firefox and Edge, two shards each — plus Compose smoke, Selenium Grid, Gatling and PIT.
 Quarantined tests run in a non-blocking job. One quality-gate job is the required check: green
 only if every blocking job succeeded, and "skipped" counts as not passed.
 
-**15. How does sharding work?**
+**16. How does sharding work?**
 Longest test first onto the currently lightest shard (LPT), using mean durations that the
 `publish` job records on the `ci-history` branch after every run on main. Every shard computes
 the same plan from the same file, so there's no coordinator. A test without a recorded
 duration — a new one — falls back to a stable CRC32 hash, so a stale file can never lose or
 duplicate a test. Before any history exists, it's all hash; RESULTS shows the before and after.
 
-**16. You wrote a TeamCity config — did you run it?**
+**17. You wrote a TeamCity config — did you run it?**
 Yes. A workflow starts a TeamCity 2025.07 server and an agent image I built (JDK 21, Docker,
 Chrome), turns on versioned settings in Kotlin over REST, and the server itself imports and
 compiles `settings.kts` and runs the chain: build 350 tests, API 112, BDD 24, UI in two shards,
@@ -146,25 +165,25 @@ Gatling, PIT — all green. The first two runs failed only on visual checks: the
 fonts differently from the runner that made the baselines, so baselines are now per agent
 platform. That's the kind of thing you only learn by running it.
 
-**17. What is CIForge?**
+**18. What is CIForge?**
 A small TeamCity-style CI orchestrator I wrote in Python (FastAPI, SQLite): build chains with
 snapshot dependencies, artifact dependencies, VCS webhooks with HMAC, schedules, local and
 Docker runners. TestHarness's own pipeline file runs on it; the run is recorded in RESULTS.md.
 It is a learning project, not a TeamCity replacement.
 
-**18. What did Selenium Grid teach you?**
+**19. What did Selenium Grid teach you?**
 That more workers isn't faster on one machine: 1 → 4 workers cut the test span 13–23 %, but 8
 was slower than 4 on a 4-vCPU runner because browsers are CPU-bound. And networking: browsers in
 containers can't reach `localhost`, and nodes must advertise a URL the client can reach or
 WebDriver BiDi breaks.
 
-**19. How do you handle secrets?**
+**20. How do you handle secrets?**
 Only from environment variables. In CI there is no fallback — the first pipeline run failed
 precisely because a secret was missing, which is the behaviour I wanted.
 
 ### Results, honesty and judgement
 
-**20. What bugs did the framework find that you didn't plant?**
+**21. What bugs did the framework find that you didn't plant?**
 Eight while building Phases 1–2 (in RESULTS.md with the run that found each): e.g. Pact
 provider verification found inconsistent timestamp precision; security tests found URLs that
 bypassed the error contract. Later the dashboard exposed a coverage-measurement bug in my own
@@ -172,33 +191,37 @@ framework: one test was resetting the JaCoCo agent and erasing other tests' cove
 Phase 6: 41 known vulnerabilities in transitive dependencies, six missing security headers
 (ZAP), two contrast defects in PortSync — and several bugs in my own tooling that only real
 runs exposed: a Gatling parser that read "1,500" as zero, a scanner that stored axe's target
-list as a string so known issues never matched, and re-runs that doubled history.
+list as a string so known issues never matched, and re-runs that doubled history. In Phase 7:
+a race in PortSync's simulator — a pause could be acknowledged while a tick was still changing
+the yard — caught by the test that compares the core's yard with the simulator's, and fixed in
+PortSync with a unit test; and a framework bug — Firefox kept `:hover` after a click — that
+showed only when the framework's own browser tests ran in Firefox for the first time.
 
-**21. What can't the framework tell you?**
+**22. What can't the framework tell you?**
 Whether the visual baselines are right in the first place (a human approves them), and
 anything about systems it hasn't been pointed at. The AI evaluation measures how much of a
 draft runs on existing steps, not whether it tests the right thing. Performance smoke numbers
 come from shared CI runners, so they catch regressions; the capacity experiment pins the SUT
 to 2 CPUs and 1 GiB so its numbers mean something, but only for that box.
 
-**22. What would you do differently?**
+**23. What would you do differently?**
 Start the measurement harness earlier — some Phase 1 tests would have been designed
 differently had I seen the detection matrix first. Repeat every experiment from the start: my
 first fault-seeding run said Gatling caught nothing, and the repeats showed that held for one
 run only. And record per-test durations from day one to balance shards.
 
-**23. How did you make sure the numbers are real?**
+**24. How did you make sure the numbers are real?**
 Every figure in RESULTS.md has the run ID or commit, the machine, and the method. Where
 something couldn't run (Edge, Docker Hub and Maven Central are blocked in my authoring
 sandbox), the file says so and points to the CI run instead.
 
-**24. How long does it take a new person to add a test?**
+**25. How long does it take a new person to add a test?**
 The guide's worked example is committed: two data rows (no code), two BDD example rows, one
 eight-line API test. Running the module took 54 s for the API suite and 39 s for BDD on a
 2-vCPU machine.
 
-**25. Why should we believe you understand this rather than generated it?**
+**26. Why should we believe you understand this rather than generated it?**
 Ask me to change something live: add a seeded bug and predict which suites catch it, explain
 why `RACE_ON_LAST_SLOT` only fails under concurrency, or walk through why the quarantine
 filter had to treat parameterised tests as containers. The design decisions and their
-alternatives are written down in DESIGN.md (D1–D66), including the ones that turned out wrong.
+alternatives are written down in DESIGN.md (D1–D71), including the ones that turned out wrong.
