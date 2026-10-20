@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.github.raktimchandra.testharness</groupId>
         <artifactId>testharness-parent</artifactId>
-        <version>1.1.0</version>
+        <version>1.2.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -53,6 +53,8 @@
                             <mainClass>io.github.raktimchandra.testharness.cli.HarnessCli</mainClass>
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
+                            <!-- Implementation-Version: what `th -V` prints -->
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
                         </manifest>
                     </archive>
                 </configuration>

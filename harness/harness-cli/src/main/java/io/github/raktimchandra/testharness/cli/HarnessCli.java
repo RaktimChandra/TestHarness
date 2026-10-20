@@ -7,11 +7,27 @@ import picocli.CommandLine.Command;
  * {@code harness} — one entry point for running and analysing the suites.
  * Run {@code ./harness --help} (or {@code harness.cmd --help} on Windows).
  */
-@Command(name = "harness", mixinStandardHelpOptions = true, version = "TestHarness 1.0.0",
+@Command(name = "harness", mixinStandardHelpOptions = true, versionProvider = HarnessCli.Version.class,
         description = "Run the TestHarness suites and analyse their results.",
         subcommands = {RunCommand.class, RerunFailedCommand.class, ReportCommand.class, HistoryCommand.class,
                 TiaCommand.class, AiCommand.class, DashboardCommand.class, CommandLine.HelpCommand.class})
 public final class HarnessCli {
+
+    /**
+     * The version from the jar's manifest, written by the build from the POM, so it cannot
+     * drift from the release (it said 1.0.0 through 1.1.0 while it was a constant here).
+     */
+    static final class Version implements CommandLine.IVersionProvider {
+        @Override
+        public String[] getVersion() {
+            return new String[] {"TestHarness " + of(HarnessCli.class.getPackage().getImplementationVersion())};
+        }
+
+        static String of(String implementationVersion) {
+            return implementationVersion == null || implementationVersion.isBlank()
+                    ? "(development build, not from a jar)" : implementationVersion;
+        }
+    }
 
     public static void main(String[] args) {
         System.exit(commandLine().execute(applySystemProperties(args)));
