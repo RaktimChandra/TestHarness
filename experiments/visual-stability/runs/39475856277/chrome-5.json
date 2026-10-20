@@ -1,0 +1,56 @@
+{
+  "browser": "chrome",
+  "rep": 5,
+  "checks": {
+    "login-form-error": {
+      "differing": 0,
+      "compared": 86940,
+      "ratio_pct": 0.0,
+      "anti_aliased": 0,
+      "geometry": "drawn at x=494 y=255.39 size 378x277.92 in viewport 1366x757 scrollY=0 dpr=1"
+    },
+    "cancel-dialog": {
+      "differing": 0,
+      "compared": 67408,
+      "ratio_pct": 0.0,
+      "anti_aliased": 0,
+      "geometry": "drawn at x=455.5 y=288.3 size 440x200.39 in viewport 1366x757 scrollY=98 dpr=1"
+    },
+    "booking-form-invalid": {
+      "differing": 0,
+      "compared": 244398,
+      "ratio_pct": 0.0,
+      "anti_aliased": 0,
+      "geometry": "drawn at x=192.5 y=400.56 size 966x278.94 in viewport 1366x757 scrollY=0 dpr=1"
+    },
+    "clerk-search-form": {
+      "differing": 0,
+      "compared": 76774,
+      "ratio_pct": 0.0,
+      "anti_aliased": 0,
+      "geometry": "drawn at x=200 y=208.19 size 966x88.78 in viewport 1366x757 scrollY=0 dpr=1"
+    },
+    "login-form": {
+      "differing": 0,
+      "compared": 82026,
+      "ratio_pct": 0.0,
+      "anti_aliased": 0,
+      "geometry": "drawn at x=494 y=255.39 size 378x217.16 in viewport 1366x757 scrollY=0 dpr=1"
+    }
+  },
+  "visual_failures": [],
+  "retaken": [],
+  "suite": {
+    "tests": 29,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "environment": {
+    "image": "ubuntu24 20261012.334.1",
+    "cpu": "AMD EPYC 9V74 80-Core Processor",
+    "browser": "Google Chrome 155.0.8059.39 ",
+    "font": "DejaVuSans.ttf: \"DejaVu Sans\" \"Book\" | DejaVuSans.ttf: \"DejaVu Sans\" \"Book\"",
+    "freetype": "2.13.2+dfsg-1ubuntu0.2 fontconfig=2.15.0-1.1ubuntu2"
+  }
+}
