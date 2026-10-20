@@ -1,1 +1,2 @@
-0 test(s) quarantined (min runs 5, min score 0.20)
+1 test(s) quarantined (min runs 5, min score 0.20)
+  0.500  io.github.raktimchandra.testharness.suites.ui.VisualRegressionTest#cancel_confirmation_dialog — 2 flips in 4 same-commit transitions; failures: {ASSERTION=1}
