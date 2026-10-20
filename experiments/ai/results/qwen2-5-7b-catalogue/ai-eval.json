@@ -1,0 +1,315 @@
+{
+  "model": "qwen2.5:7b",
+  "variant": "catalogue",
+  "base_url": "http://localhost:11434/v1",
+  "protocol": "openai-compatible",
+  "temperature": 0.2,
+  "started": "2026-10-20T17:19:06+0000",
+  "drafts": [
+    {
+      "story": "01-book-a-slot",
+      "repeat": 1,
+      "seconds": 253.0,
+      "exit": 0,
+      "file": "01-book-a-slot-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 11,
+      "steps": 51,
+      "matched_steps": 43,
+      "unmatched": [
+        "I book that slot for container \"\"C123456\"\"",
+        "the slot has 0 place(s) left",
+        "I book that slot for container \"\"D789012\"\"",
+        "the slot has 1 place(s) left",
+        "the outcome is \"CHECKED_IN\"",
+        "a gate slot tomorrow at \"10:00\" with room for 1 truck"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "01-book-a-slot",
+      "repeat": 2,
+      "seconds": 146.4,
+      "exit": 0,
+      "file": "01-book-a-slot-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 10,
+      "steps": 53,
+      "matched_steps": 40,
+      "unmatched": [
+        "I book that slot for container \"\"ABC123\"\"",
+        "the slot has 1 place(s) left",
+        "I book that slot for container \"\"DEF456\"\"",
+        "the slot has 0 place(s) left",
+        "the slot has <places_left> place(s) left"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "02-container-number",
+      "repeat": 1,
+      "seconds": 109.7,
+      "exit": 0,
+      "file": "02-container-number-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 3,
+      "steps": 6,
+      "matched_steps": 6,
+      "unmatched": [],
+      "ambiguous": 0
+    },
+    {
+      "story": "02-container-number",
+      "repeat": 2,
+      "seconds": 168.3,
+      "exit": 0,
+      "file": "02-container-number-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 17,
+      "steps": 64,
+      "matched_steps": 60,
+      "unmatched": [
+        "the outcome is \"CHECKED_IN\""
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "03-one-open-booking",
+      "repeat": 1,
+      "seconds": 151.9,
+      "exit": 0,
+      "file": "03-one-open-booking-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 5,
+      "steps": 19,
+      "matched_steps": 13,
+      "unmatched": [
+        "I book that slot for a valid container \"\"C12345\"\"",
+        "I have booked that slot for a valid container \"\"C12345\"\"",
+        "another driver books that slot for a valid container \"\"C12345\"\"",
+        "another driver books that slot for container \"\"C12345\"\""
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "03-one-open-booking",
+      "repeat": 2,
+      "seconds": 72.5,
+      "exit": 0,
+      "file": "03-one-open-booking-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 4,
+      "steps": 29,
+      "matched_steps": 22,
+      "unmatched": [
+        "I book that slot for a valid container \"C1\"",
+        "another driver books a different slot for the same container \"C1\""
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "04-cancel",
+      "repeat": 1,
+      "seconds": 169.2,
+      "exit": 0,
+      "file": "04-cancel-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 6,
+      "steps": 27,
+      "matched_steps": 22,
+      "unmatched": [
+        "I try to cancel my booking",
+        "I have booked that slot for container \"<container>\"",
+        "I try to book that slot for container \"<container>\""
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "04-cancel",
+      "repeat": 2,
+      "seconds": 82.9,
+      "exit": 0,
+      "file": "04-cancel-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 5,
+      "steps": 21,
+      "matched_steps": 15,
+      "unmatched": [
+        "my booking is refused because \"CHANGE_CUTOFF_PASSED\"",
+        "I book that slot for container \"GHI789\" and it starts in 30 minutes",
+        "I book that slot for container \"JKL012\" and it starts in 59 minutes",
+        "I book that slot for container \"MNO345\" and it starts tomorrow at 10:00 with room for 2 trucks"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "05-check-in",
+      "repeat": 1,
+      "seconds": 218.1,
+      "exit": 0,
+      "file": "05-check-in-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 7,
+      "steps": 38,
+      "matched_steps": 31,
+      "unmatched": [
+        "a gate slot starting in 30 minutes with room for 1 truck is available",
+        "a gate slot starting in 60 minutes with room for 1 truck is available",
+        "a gate slot starting in 5 minutes with room for 1 truck is available",
+        "another driver books that slot for the same container"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "05-check-in",
+      "repeat": 2,
+      "seconds": 83.4,
+      "exit": 0,
+      "file": "05-check-in-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 4,
+      "steps": 32,
+      "matched_steps": 31,
+      "unmatched": [
+        "I try to check myself in after 60 minutes"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "06-privacy",
+      "repeat": 1,
+      "seconds": 135.9,
+      "exit": 0,
+      "file": "06-privacy-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 3,
+      "steps": 15,
+      "matched_steps": 12,
+      "unmatched": [
+        "the booking is confirmed with a reference \"ABC123\"",
+        "the booking is confirmed with a reference \"DEF789\"",
+        "the booking is confirmed with a reference \"GHI345\""
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "06-privacy",
+      "repeat": 2,
+      "seconds": 17.7,
+      "exit": 0,
+      "file": "06-privacy-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 2,
+      "steps": 6,
+      "matched_steps": 4,
+      "unmatched": [
+        "I have booked that slot for a valid container with the reference \"\"B123456\"\"",
+        "I have booked that slot for a valid container with the reference \"\"C78901\"\""
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "07-reschedule",
+      "repeat": 1,
+      "seconds": 154.0,
+      "exit": 0,
+      "file": "07-reschedule-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 5,
+      "steps": 22,
+      "matched_steps": 16,
+      "unmatched": [
+        "I try to move my booking to another slot starting in 30 minutes with room for 1 truck",
+        "the change is confirmed and the outcome is \"RESCHEDULED\"",
+        "I try to move my booking to another slot starting in 30 minutes with room for 0 truck(s)",
+        "I try to move my booking to another slot starting in 30 minutes with room for 1 truck (s)",
+        "I try to move my booking to their slot",
+        "I try to move my booking to another slot starting in -30 minutes (s)"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "07-reschedule",
+      "repeat": 2,
+      "seconds": 73.3,
+      "exit": 0,
+      "file": "07-reschedule-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 4,
+      "steps": 25,
+      "matched_steps": 18,
+      "unmatched": [
+        "the booking is confirmed with a reference \"B123456\"",
+        "I try to reschedule to another gate slot tomorrow at 09:30 with room for 1 truck",
+        "I try to reschedule to another gate slot tomorrow at 10:00 with room for 2 trucks"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "08-sign-in-lock",
+      "repeat": 1,
+      "seconds": 173.0,
+      "exit": 0,
+      "file": "08-sign-in-lock-r1.feature",
+      "valid_gherkin": true,
+      "scenarios": 6,
+      "steps": 31,
+      "matched_steps": 16,
+      "unmatched": [
+        "I try to check myself in with wrong password (s) five times within fifteen minutes",
+        "another driver tries to book that slot for the same container",
+        "their booking is confirmed with a reference",
+        "I try to check myself in with correct password after five minutes",
+        "I try to check myself in with wrong password (s) four times within fifteen minutes",
+        "their booking is \"CHECKED_IN\"",
+        "I try to check myself in with wrong password (s) six times within fifteen minutes",
+        "I try to check myself in with wrong password (s) five times within ten minutes",
+        "I try to check myself in with correct password after twenty minutes"
+      ],
+      "ambiguous": 0
+    },
+    {
+      "story": "08-sign-in-lock",
+      "repeat": 2,
+      "seconds": 77.0,
+      "exit": 0,
+      "file": "08-sign-in-lock-r2.feature",
+      "valid_gherkin": true,
+      "scenarios": 5,
+      "steps": 28,
+      "matched_steps": 14,
+      "unmatched": [
+        "I try to check myself in {int} times with wrong password(s)",
+        "the slot has {int} place(s) left",
+        "I try to check myself in 6 times with wrong password(s)",
+        "the slot has 0 place(s) left",
+        "I wait for 5 minutes",
+        "the slot has 1 place(s) left",
+        "I try to check myself in 4 times with wrong password(s)",
+        "I wait for 15 minutes",
+        "I try to check myself in 5 times with wrong password(s)",
+        "their booking is confirmed with a reference"
+      ],
+      "ambiguous": 0
+    }
+  ],
+  "summary": {
+    "stories": 8,
+    "attempts": 16,
+    "drafts_written": 16,
+    "valid_gherkin": 16,
+    "valid_gherkin_pct": 100.0,
+    "scenarios_per_valid_draft": 6.06,
+    "steps": 467,
+    "matched_steps": 363,
+    "step_reuse_pct": 77.7,
+    "drafts_fully_runnable": 1,
+    "median_seconds": 141.15,
+    "step_definitions": 28
+  },
+  "explain": {
+    "seeded_bug": "OFF_BY_ONE_CAPACITY",
+    "output": "3 failure(s) {ASSERTION=3}; summary: /home/runner/work/TestHarness/TestHarness/target/ai-drafts/failure-summary.md (includes an AI draft)"
+  },
+  "finished": "2026-10-20T17:59:23+0000"
+}

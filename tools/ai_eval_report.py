@@ -25,7 +25,7 @@ def main():
         s = r["summary"]
         lines.append(f"| {r['model']} | {r.get('variant', 'phrases')} | {s['attempts']} | {s['valid_gherkin']} ({s['valid_gherkin_pct']} %) | "
                      f"{s['scenarios_per_valid_draft']} | {s['matched_steps']} / {s['steps']} ({s['step_reuse_pct']} %) | "
-                     f"{s['drafts_fully_runnable']} | {s['median_seconds']} |")
+                     f"{s['drafts_fully_runnable']} | {round(s['median_seconds'], 1)} |")
     lines += ["", "## Most common steps no definition matches", ""]
     for r in reports:
         counts = {}

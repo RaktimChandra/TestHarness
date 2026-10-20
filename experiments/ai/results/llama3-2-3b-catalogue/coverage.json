@@ -1,0 +1,60 @@
+{
+  "stepDefinitions" : 28,
+  "files" : [ {
+    "file" : "01-book-a-slot-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 6,
+    "steps" : 23,
+    "matched" : 7,
+    "unmatched" : [ "the gate slot starts in {int} minutes with room for {int} truck(s)", "I am a driver and book that slot for a valid container", "there are {int} other drivers have already booked that slot", "I am a driver and book that slot for container \"<container>\"", "another driver has booked that slot for the same container", "it is {time}", "I am a driver and try to check myself in", "I am a driver and cancel my booking" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "03-one-open-booking-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 18,
+    "steps" : 67,
+    "matched" : 46,
+    "unmatched" : [ "a gate slot starting in {int} minutes with room for {int} truck(s)", "{int} other drivers have already booked that slot", "I try to change my booking", "a gate slot tomorrow at {time} with room for {int} truck(s)", "I check my booking on the screen", "another driver cancels their booking", "I check my booking on the gate screen", "another driver books that slot" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "05-check-in-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 15,
+    "steps" : 67,
+    "matched" : 42,
+    "unmatched" : [ "a gate slot starting in {int} minutes with room for {int} truck(s)", "another driver books that same slot", "{int} other drivers have already booked that slot", "the outcome is \"CANCELLED\"", "the outcome is \"{string}\"" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "05-check-in-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 22,
+    "steps" : 88,
+    "matched" : 47,
+    "unmatched" : [ "a gate slot starting in {int} minutes with room for {int} truck(s)", "I book that slot on the booking screen", "I have booked that slot for container \"{string}\"", "the check-in opens two hours before the slot starts", "I am not a clerk", "another driver has booked that slot", "another driver has booked that slot for the same container", "{int} other drivers have already booked that slot", "I have cancelled my booking", "I try to change my booking", "the booking screen lists it as refused at \"{string}\"", "the gate screen shows the booking as refused", "a gate slot tomorrow at {time} with room for {int} truck(s)" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "06-privacy-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 12,
+    "steps" : 57,
+    "matched" : 42,
+    "unmatched" : [ "the gate slot tomorrow at {time} with room for {int} truck(s)", "a gate slot tomorrow at {time} with room for {int} truck(s)", "I book that slot on the booking screen", "the booking is checked in", "a gate slot starting in {int} minutes with room for {int} truck(s)", "another driver has already booked that slot" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "08-sign-in-lock-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 3,
+    "steps" : 9,
+    "matched" : 3,
+    "unmatched" : [ "the system time is {time}", "I try to sign in with username \"username\" and password \"password\"", "I try to sign in with username \"username\" and password \"wrong_password\"", "I try to sign in with username \"username\" and password \"{password}\"" ],
+    "ambiguous" : 0
+  } ],
+  "steps" : 311,
+  "matched" : 187
+}

@@ -1,0 +1,105 @@
+{
+  "stepDefinitions" : 28,
+  "files" : [ {
+    "file" : "02-container-number-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 1,
+    "steps" : 4,
+    "matched" : 0,
+    "unmatched" : [ "a gate slot tomorrow at 10:00 at +2 hours", "the slot has room for 2 trucks", "I am a driver and book that slot for a valid container \"ABCDEFGH\"", "the booking is refused with \"INVALID_CONTAINER_NUMBER\"" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "02-container-number-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 1,
+    "steps" : 4,
+    "matched" : 3,
+    "unmatched" : [ "a gate slot tomorrow at 10:00 with room for 2" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "03-one-open-booking-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 2,
+    "steps" : 13,
+    "matched" : 8,
+    "unmatched" : [ "I am a terminal planner", "the slot has room left", "my booking is \"CANCELLED\" and the slot has room left", "the outcome is <outcome>" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "03-one-open-booking-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 11,
+    "steps" : 44,
+    "matched" : 1,
+    "unmatched" : [ "I am a terminal planner", "there is a gate slot tomorrow at 10:00 with room for 2 trucks with room for 2 trucks", "I book that slot for a valid container \"<container>\"", "the booking should be confirmed with reference \"BOOKED_CONTAINER_123456789\"", "the slot should have 1 place left", "there is a gate slot <slot> with room for 2 trucks", "the booking should be refused because \"DUPLICATE_ACTIVE_BOOKING\"", "I have booked that slot for a valid container \"<container>\"", "the booking should be \"CANCELLED\"", "the slot should have 2 places left", "there is a gate slot <slot> with room for 1 truck", "another driver books that slot for the same container \"<container>\"", "their booking should be refused because \"DUPLICATE_ACTIVE_BOOKING\"", "I check myself in at that slot", "the check-in should be refused because \"FORBIDDEN\"", "a clerk checks the driver's booking on the gate screen", "the gate screen should show the booking as checked in", "another driver books that slot on the booking screen", "their booking should be refused because \"CHANGE_CUTOFF_PASSED\"", "another driver books that slot on the booking screen at an earlier time than my check-in", "their booking should be refused because \"CHECKIN_TOO_EARLY\"", "their booking should be refused because \"FORBIDDEN\"" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "04-cancel-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 2,
+    "steps" : 8,
+    "matched" : 5,
+    "unmatched" : [ "I am a truck driver", "I book that slot for a valid container \"A Container\"", "the booking is not cancelled" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "04-cancel-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 1,
+    "steps" : 5,
+    "matched" : 4,
+    "unmatched" : [ "I book a gate slot for a valid container" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "05-check-in-r1.feature",
+    "parses" : false,
+    "parseError" : "(24:3): expected: #EOF, #TableRow, #DocStringSeparator, #StepLine, #TagLine, #ExamplesLine, #ScenarioLine, #RuleLine, #Comment, #Empty, got 'Another driver books a different slot for the same container'",
+    "scenarios" : 0,
+    "steps" : 0,
+    "matched" : 0,
+    "unmatched" : [ ],
+    "ambiguous" : 0
+  }, {
+    "file" : "05-check-in-r2.feature",
+    "parses" : false,
+    "parseError" : "(30:1): inconsistent cell count within the table",
+    "scenarios" : 0,
+    "steps" : 0,
+    "matched" : 0,
+    "unmatched" : [ ],
+    "ambiguous" : 0
+  }, {
+    "file" : "06-privacy-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 2,
+    "steps" : 6,
+    "matched" : 2,
+    "unmatched" : [ "another driver asks for my booking by its reference", "they are told it does not exist (NOT_FOUND)" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "06-privacy-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 2,
+    "steps" : 4,
+    "matched" : 0,
+    "unmatched" : [ "another driver is looking up my bookings", "they are told that my booking does not exist (NOT_FOUND)" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "07-reschedule-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 1,
+    "steps" : 8,
+    "matched" : 3,
+    "unmatched" : [ "a gate slot 10:00 tomorrow with room for 2", "I am a driver and book that slot for a valid container \"valid_container\"", "the booking is confirmed with reference \"confirmation_ref\"", "the slot has <remaining_places> place left", "the outcome is \"CANCELLED\"" ],
+    "ambiguous" : 0
+  } ],
+  "steps" : 96,
+  "matched" : 26
+}

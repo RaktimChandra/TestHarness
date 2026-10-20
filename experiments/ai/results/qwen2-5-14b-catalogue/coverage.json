@@ -1,0 +1,150 @@
+{
+  "stepDefinitions" : 28,
+  "files" : [ {
+    "file" : "01-book-a-slot-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 9,
+    "steps" : 58,
+    "matched" : 36,
+    "unmatched" : [ "a gate slot tomorrow at 10:00 with room for 2 truck(s)", "I book that slot for container \"\"ABCD1234\"\"", "a gate slot tomorrow at 18:00 with room for 1 truck(s)", "I book that slot for container \"\"EFGH5678\"\"", "a gate slot tomorrow at 09:30 with room for 1 truck(s)", "I book that slot for container \"\"IJKL9012\"\"", "the outcome is \"confirmed\"" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "01-book-a-slot-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 12,
+    "steps" : 63,
+    "matched" : 30,
+    "unmatched" : [ "a gate slot tomorrow at 10:00 with room for 2 truck(s)", "I book that slot for container \"\"ABC123\"\"", "the outcome is confirmed with a reference", "a gate slot tomorrow at 18:00 with room for 1 truck(s)", "I book that slot for container \"\"DEF456\"\"", "a gate slot tomorrow at 09:30 with room for 1 truck(s)", "I book that slot for container \"\"GHI789\"\"", "the outcome is ", "the slot has 1 place(s) left", "the slot has 0 place(s) left" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "02-container-number-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 8,
+    "steps" : 32,
+    "matched" : 17,
+    "unmatched" : [ "I book that slot for container \"\"ABCDU1234567\"\"", "the outcome is \"INVALID_CONTAINER_NUMBER\"", "I book that slot for container \"\"ABCUJ123456X\"\"", "I book that slot for container \"\"ABCZ123456Y\"\"", "I book that slot for container \"\"ABCDU12345678\"\"", "I book that slot for container \"\"ABCUJ12345X7\"\"", "I book that slot for container \"\"ABCZ12345Y6\"\"", "I book that slot for container \"\"ABCDU1234567890\"\"", "the outcome is \"CONFIRMED\"" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "02-container-number-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 7,
+    "steps" : 31,
+    "matched" : 28,
+    "unmatched" : [ "another driver books a different slot for the same container \"ABCD123456789X\"", "another driver books a different slot for the same container \"A1BC123456789U\"", "another driver books a different slot for the same container \"1ABC123456789Z\"" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "03-one-open-booking-r1.feature",
+    "parses" : false,
+    "parseError" : "(29:5): expected: #EOF, #TableRow, #TagLine, #ExamplesLine, #ScenarioLine, #RuleLine, #Comment, #Empty, got 'When another driver books a different slot for the same container'",
+    "scenarios" : 0,
+    "steps" : 0,
+    "matched" : 0,
+    "unmatched" : [ ],
+    "ambiguous" : 0
+  }, {
+    "file" : "03-one-open-booking-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 3,
+    "steps" : 21,
+    "matched" : 16,
+    "unmatched" : [ "I book that slot for a valid container \"A123456\"", "the outcome is \"the booking is confirmed with a reference\"" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "04-cancel-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 6,
+    "steps" : 43,
+    "matched" : 42,
+    "unmatched" : [ "I try to cancel my booking" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "04-cancel-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 3,
+    "steps" : 20,
+    "matched" : 20,
+    "unmatched" : [ ],
+    "ambiguous" : 0
+  }, {
+    "file" : "05-check-in-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 6,
+    "steps" : 52,
+    "matched" : 48,
+    "unmatched" : [ "the check-in is refused because CHECKIN_TOO_EARLY", "the check-in is refused because FORBIDDEN", "another driver books that slot on the booking screen", "I try to book that slot for a valid container" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "05-check-in-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 12,
+    "steps" : 78,
+    "matched" : 60,
+    "unmatched" : [ "the check-in is not refused", "the check-in is refused because \"CHECKIN_TOO_EARLY\" if time is before start - 2 hours", "a clerk finds the booking on the gate screen and checks it in when time is after start - 2 hours", "I try to check myself in and it is refused because \"FORBIDDEN\"", "I cancel my booking and it becomes \"CANCELLED\"", "a clerk finds the booking on the gate screen and checks it in anyway" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "06-privacy-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 4,
+    "steps" : 28,
+    "matched" : 28,
+    "unmatched" : [ ],
+    "ambiguous" : 0
+  }, {
+    "file" : "06-privacy-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 5,
+    "steps" : 21,
+    "matched" : 19,
+    "unmatched" : [ "the outcome is refused", "their booking is refused" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "07-reschedule-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 5,
+    "steps" : 25,
+    "matched" : 18,
+    "unmatched" : [ "I reschedule my booking to \"a gate slot tomorrow at 10:30 with room for 2 trucks\"", "the outcome is \"CONFIRMED\"", "I reschedule my booking to \"a gate slot starting in 60 minutes with room for 1 truck\"", "I reschedule my booking to \"a gate slot tomorrow at 10:00 with room for 2 trucks\"", "I reschedule my booking to \"a gate slot starting in 30 minutes with room for 1 truck\"" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "07-reschedule-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 5,
+    "steps" : 20,
+    "matched" : 19,
+    "unmatched" : [ "the slot has 0 place(s) left" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "08-sign-in-lock-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 6,
+    "steps" : 20,
+    "matched" : 0,
+    "unmatched" : [ "a user has attempted to sign in with an incorrect password four times for the same username within fifteen minutes", "they attempt to sign in again with the correct password", "their sign-in is refused because \"TOO_MANY_ATTEMPTS\"", "they wait for five minutes and attempt to sign in again with the correct password", "their sign-in is successful", "another user tries to sign in with their correct credentials immediately after", "the other user's sign-in is successful", "they wait more than fifteen minutes and attempt to sign in again with the correct password", "a user has attempted to sign in with an incorrect password three times for the same username within fifteen minutes", "they attempt to sign in successfully once", "they attempt to sign in again with an incorrect password twice more within fifteen minutes" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "08-sign-in-lock-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 2,
+    "steps" : 7,
+    "matched" : 0,
+    "unmatched" : [ "a user has attempted to log in with the wrong password five times within fifteen minutes", "it is now five minutes past the last failed attempt time", "they attempt to log in again with the correct password", "the system allows their sign-in and logs them in successfully", "another user has never attempted to log in or has not reached too many attempts", "that other user attempts to log in with the correct password" ],
+    "ambiguous" : 0
+  } ],
+  "steps" : 519,
+  "matched" : 381
+}

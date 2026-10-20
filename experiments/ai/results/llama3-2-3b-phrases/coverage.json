@@ -1,0 +1,132 @@
+{
+  "stepDefinitions" : 28,
+  "files" : [ {
+    "file" : "01-book-a-slot-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 16,
+    "steps" : 63,
+    "matched" : 33,
+    "unmatched" : [ "the gate slot starts tomorrow at 10:00 with room for 1 trucks", "I book that slot for a valid container \"<container>\"", "the gate slot starts tomorrow at 10:00 with room for 2 trucks", "the gate slot starts tomorrow at 10:00 with room for 0 trucks", "another driver has booked that slot", "another driver has booked that slot for the same container", "the gate slot starts tomorrow at 10:00 with room for 1 truck", "I am a clerk", "I find the booking on the gate screen and check it in", "I book that slot on the booking screen", "the gate slot starts tomorrow at 09:30 with room for 1 truck", "I have booked that slot for a valid container \"<container>\"", "I look up the booking for driver \"<driver>\"", "I have not booked that slot for container \"<container>\"", "I look up the booking for driver \"container\"", "I look up the booking for driver \"<container>\"" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "01-book-a-slot-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 16,
+    "steps" : 63,
+    "matched" : 20,
+    "unmatched" : [ "there is a gate slot tomorrow at <time> with room for <trucks>", "I book that slot for a valid container \"<container>\"", "the booking is confirmed with a reference \"<reference>\"", "there are 0 places left in the gate slot tomorrow at <time> with room for <trucks>", "the booking is refused with \"SLOT_FULL\"", "another driver has booked that same gate slot tomorrow at <time> with room for <trucks>", "the booking is refused with \"DUPLICATE_ACTIVE_BOOKING\"", "the booking is refused with \"CHANGE_CUTOFF_PASSED\"", "the booking is refused with \"CHECKIN-too_EARLY\"", "the booking is refused with \"FORBIDDEN\"", "there are 1 place left in the gate slot tomorrow at <time> with room for <trucks>", "there are 1 place left in the gate slot starting in <time> with room for <trucks>", "the outcome is \"BOOKED\"", "another driver has booked that same gate slot starting in <time> with room for <trucks>", "another driver books a different slot for the same container \"<container>\"", "there are 0 bookings in the system", "I have booked that gate slot for a valid container \"<container>\"", "I have canceled that gate slot for a valid container \"<container>\"", "another driver tries to check themselves in", "the booking is refused with \"CANCELED\"", "there are 1 place left in the gate slot starting in ------------- with room for -------", "there are 1 place left in the gate slot starting in 10:00 with room for 2", "there are 1 place left in the gate slot starting in 09:30 with room for 1" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "02-container-number-r1.feature",
+    "parses" : false,
+    "parseError" : "(6:1): expected: #EOF, #Language, #TagLine, #FeatureLine, #Comment, #Empty, got '```gherkin'",
+    "scenarios" : 0,
+    "steps" : 0,
+    "matched" : 0,
+    "unmatched" : [ ],
+    "ambiguous" : 0
+  }, {
+    "file" : "02-container-number-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 23,
+    "steps" : 92,
+    "matched" : 75,
+    "unmatched" : [ "the outcome is \"INVALID_CONTAINER_NUMBER\"", "the outcome should be one of:", "another driver books that slot for the same container \"{container}\"", "another driver looks up my booking for container \"{container}\"", "I book that slot on the booking screen" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "03-one-open-booking-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 7,
+    "steps" : 30,
+    "matched" : 17,
+    "unmatched" : [ "I am a clerk", "there is a gate slot tomorrow at 10:00 with room for 1 truck", "the outcome is \"BOOKED\"", "another driver has booked a different slot for the same container", "I try to book that slot", "there is a gate slot starting in 30 minutes with room for 1 truck", "another driver has checked themselves in", "there is a gate slot tomorrow at 18:00 with room for 1 truck", "another driver books that slot on the booking screen", "I try to book another slot", "there is a gate slot tomorrow at 09:30 with room for 1 truck" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "03-one-open-booking-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 12,
+    "steps" : 44,
+    "matched" : 7,
+    "unmatched" : [ "I am a clerk", "I book a gate slot \"<slot>\" for container \"<container>\"", "the outcome is \"BOOKED\"", "there are two drivers booked to the same gate slot \"<slot>\" for container \"<container>\"", "another driver tries to book that slot again", "the booking is refused with reason \"DUPLICATE_ACTIVE_BOOKING\"", "I am a clerk and container \"<container>\" has a booking that is \"BOOKED\"", "I try to book a gate slot \"<slot>\" for container \"<container>\"", "I have booked a gate slot \"<slot>\" for container \"<container>\"", "I have cancelled my booking and container \"<container>\" has a booking that is \"BOOKED\"", "I try to check in to the same gate slot \"<slot>\"", "the outcome is \"FORBIDDEN\"", "another driver tries to check in to the same gate slot", "I try to book a gate slot \"<slot>\" with room for 1 truck", "I try to book a gate slot \"<slot>\" with room for 1 truck starting in \"<time>\"", "there are two drivers booked to the same gate slot \"-------------\" for container \"-----------\"", "I try to book a gate slot \"-------------\" with room for 1 truck starting in \"<time>\"", "there are two drivers booked to the same gate slot \"a gate slot tomorrow at 10:00 with room for 1 truck\" for container \"Container X\"", "I try to book a gate slot \"a gate slot tomorrow at 10:00 with room for 1 truck\" with room for 1 truck starting in \"<time>\"", "there are two drivers booked to the same gate slot \"a gate slot tomorrow at 18:00 with room for 2 trucks\" for container \"Container Y\"", "I try to book a gate slot \"a gate slot tomorrow at 18:00 with room for 2 trucks\" with room for 1 truck starting in \"<time>\"", "there are two drivers booked to the same gate slot \"a gate slot starting in 30 minutes with room for 1 truck\" for container \"Container Z\"", "I try to book a gate slot \"a gate slot starting in 30 minutes with room for 1 truck\" with room for 1 truck starting in \"<time>\"" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "04-cancel-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 7,
+    "steps" : 31,
+    "matched" : 9,
+    "unmatched" : [ "a gate slot tomorrow at <time> with room for <truck_capacity>", "the outcome is \"BOOKED\"", "a gate slot starting in <time> with room for <truck_capacity>", "another driver has booked that slot", "the outcome is \"CHANGE_REFUSED\"", "I try to cancel my booking", "the outcome is \"CANCELLED\"", "the slot has <remaining_places> places left" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "04-cancel-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 4,
+    "steps" : 17,
+    "matched" : 7,
+    "unmatched" : [ "a gate slot tomorrow at \"10:00\" with room for \"2\"", "the outcome is <outcome>", "a gate slot starting in \"30 minutes\" with room for \"1\"", "I book that slot", "the outcome is \"CHANGE_CUTOFF_PASSED\"", "another driver has booked that slot for the same container", "the slot has \"2\" places left", "I am a driver who has already booked that slot" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "05-check-in-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 8,
+    "steps" : 35,
+    "matched" : 25,
+    "unmatched" : [ "the outcome is CHECKED_IN", "I should see an error message", "another driver has booked that slot for a valid container", "a gate clerk checks the truck in", "another driver has booked that slot", "they try to make a change", "I am not a driver" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "06-privacy-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 13,
+    "steps" : 49,
+    "matched" : 12,
+    "unmatched" : [ "another driver looks up a booking with reference \"{reference}\"", "the booking is not found", "it should return NOT_FOUND", "the booking is found", "it should return the booking details", "I book that slot for a valid container \"{container}\"", "it should be booked", "it should return SLOT_FULL", "the outcome is refused", "it should return DUPLICATE_ACTIVE_BOOKING", "I have booked that slot for a valid container \"{container}\"", "it should be cancelled", "the booking has been cancelled", "it should return CANCELLED", "I am a driver who has booked that slot", "it should return CHANGE_CUTOFF_PASSED", "the gate slot starts 30 minutes ago", "it should be checked in", "it should return CHECKIN_TOO_EARLY", "I am not a driver", "it should return FORBIDDEN", "another driver books that same slot on the booking screen", "it should be listed as booked at \"{time}\"-{\"{time+1}\"}" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "06-privacy-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 11,
+    "steps" : 43,
+    "matched" : 21,
+    "unmatched" : [ "another driver looks up the booking with reference \"{reference}\"", "I should see that it does not exist", "I should see \"NOT_FOUND\"", "I should see that it exists", "I should see \"<expected_outcome>\"", "I should be refused because \"DUPLICATE_ACTIVE_BOOKING\"", "I should see \"DUPLICATE_ACTIVE_BOOKING\"", "I should be refused because \"CHANGE_CUTOFF_PASSED\"", "I should see \"CHANGE_CUTOFF_PASSED\"", "I should be refused because \"CHECKIN_TOO_EARLY\"", "I should see \"CHECKIN_TOO_EARLY\"", "another driver has booked that slot", "I should be refused because \"FORBIDDEN\"", "the gate screen shows no booking", "I should see \"CHECKED_IN\"", "another driver books that slot on the booking screen" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "07-reschedule-r1.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 9,
+    "steps" : 35,
+    "matched" : 9,
+    "unmatched" : [ "the gate slot tomorrow at 10:00 with room for 2 trucks", "I book that slot for a valid container \"<container>\"", "the outcome is \"BOOKED\"", "I try to book that slot for a valid container \"<container>\"", "the outcome is \"SLOT_FULL\"", "another driver has booked that slot", "the outcome is \"SAME_SLOT\"", "the outcome is \"CHANGE_CUTOFF_PASSED\"", "another driver has booked a different slot for the same container", "the outcome is \"DUPLICATE_ACTIVE_BOOKING\"", "I am not checked in and a clerk checks the truck in", "the outcome is \"CHECKIN_TOO_EARLY\"", "the outcome is \"FORBIDDEN\"", "the outcome is \"CHECKED_IN\"", "the gate slot tomorrow at 09:30 with room for 1 truck", "I book that slot on the booking screen" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "07-reschedule-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 19,
+    "steps" : 88,
+    "matched" : 45,
+    "unmatched" : [ "the gate slot tomorrow at 10:00 with room for 2 trucks", "I book that slot for a valid container \"<container>\"", "I try to move my booking to that slot", "the outcome is \"SLOT_FULL\"", "I have booked that slot for a valid container \"<container>\"", "I try to move my booking to that same slot", "the outcome is \"SAME_SLOT\"", "I try to move my booking to that same slot after the change cutoff passed", "the outcome is \"CHANGE_CUTOFF_PASSED\"", "I try to check in before that time", "I try to check in myself", "another clerk checks the truck in", "another driver has booked that same slot for the same container", "I try to book that slot again", "I try to book that slot", "I have cancelled my booking", "I try to move my booking to that same slot after cancelling it", "I try to move my booking to that same slot after cancelling it and the change cutoff passed", "I try to book that same slot again", "I try to book that slot again after cancelling it" ],
+    "ambiguous" : 0
+  }, {
+    "file" : "08-sign-in-lock-r2.feature",
+    "parses" : true,
+    "parseError" : null,
+    "scenarios" : 9,
+    "steps" : 35,
+    "matched" : 0,
+    "unmatched" : [ "the username \"<username>\" has failed to sign in {int} times within {time}", "I try to sign in with the correct password", "I should receive \"TOO_MANY_ATTEMPTS\" error", "the account is locked for {duration} minutes", "I try to sign in with the correct password after the lockout period ends", "I should be able to sign in successfully", "the account is not locked", "the username \"<username1>\" has failed to sign in {int} times within {time}", "the username \"<username2>\" has failed to sign in {int} times within {time}", "I try to sign in with the correct password as <username1>", "the username \"<username2>\" has failed to sign in {int} times within a different {time}", "I try to sign in with an incorrect password", "the username \"---\" has failed to sign in {int} times within {time}", "the username \"user1\" has failed to sign in {int} times within {time}", "the username \"user2\" has failed to sign in {int} times within {time}" ],
+    "ambiguous" : 0
+  } ],
+  "steps" : 625,
+  "matched" : 280
+}

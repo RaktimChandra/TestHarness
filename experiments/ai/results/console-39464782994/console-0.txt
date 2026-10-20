@@ -1,0 +1,30 @@
+qwen2.5:1.5b 01-book-a-slot r1: 20 scenarios, valid=True, 50.2 s
+qwen2.5:1.5b 01-book-a-slot r2: - scenarios, valid=None, 900.9 s
+qwen2.5:1.5b 02-container-number r1: 1 scenarios, valid=True, 29.6 s
+qwen2.5:1.5b 02-container-number r2: 1 scenarios, valid=True, 10.2 s
+qwen2.5:1.5b 03-one-open-booking r1: 3 scenarios, valid=True, 31.6 s
+qwen2.5:1.5b 03-one-open-booking r2: - scenarios, valid=None, 900.9 s
+qwen2.5:1.5b 04-cancel r1: 2 scenarios, valid=True, 35.9 s
+qwen2.5:1.5b 04-cancel r2: 1 scenarios, valid=True, 10.2 s
+qwen2.5:1.5b 05-check-in r1: 4 scenarios, valid=True, 38.4 s
+qwen2.5:1.5b 05-check-in r2: 2 scenarios, valid=True, 12.0 s
+qwen2.5:1.5b 06-privacy r1: 1 scenarios, valid=True, 27.3 s
+qwen2.5:1.5b 06-privacy r2: 3 scenarios, valid=True, 12.0 s
+qwen2.5:1.5b 07-reschedule r1: 39 scenarios, valid=True, 207.4 s
+qwen2.5:1.5b 07-reschedule r2: 3 scenarios, valid=True, 11.9 s
+qwen2.5:1.5b 08-sign-in-lock r1: 1 scenarios, valid=True, 27.1 s
+qwen2.5:1.5b 08-sign-in-lock r2: 1 scenarios, valid=True, 11.9 s
+{
+  "stories": 8,
+  "attempts": 16,
+  "drafts_written": 14,
+  "valid_gherkin": 14,
+  "valid_gherkin_pct": 87.5,
+  "scenarios_per_valid_draft": 5.86,
+  "steps": 287,
+  "matched_steps": 196,
+  "step_reuse_pct": 68.3,
+  "drafts_fully_runnable": 0,
+  "median_seconds": 28.450000000000003,
+  "step_definitions": 28
+}
