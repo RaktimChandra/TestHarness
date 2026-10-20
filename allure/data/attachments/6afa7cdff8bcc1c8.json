@@ -1,0 +1,6 @@
+{
+  "page" : "clerk",
+  "browser" : "edge",
+  "url" : "http://localhost:36947/clerk",
+  "violations" : [ ]
+}

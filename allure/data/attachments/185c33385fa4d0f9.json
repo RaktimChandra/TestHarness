@@ -1,0 +1,6 @@
+{
+  "page" : "clerk",
+  "browser" : "firefox",
+  "url" : "http://localhost:40925/clerk",
+  "violations" : [ ]
+}

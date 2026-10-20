@@ -1,0 +1,66 @@
+<div>Status code 200 </div>
+
+
+<h4>Body</h4>
+<div>
+    <pre class="preformated-text">
+{
+    &quot;active&quot;: [
+        &quot;OFF_BY_ONE_CAPACITY&quot;
+    ],
+    &quot;available&quot;: [
+        {
+            &quot;name&quot;: &quot;OFF_BY_ONE_CAPACITY&quot;,
+            &quot;description&quot;: &quot;Capacity check uses &lt;= instead of &lt;, so a slot accepts capacity + 1 bookings.&quot;,
+            &quot;location&quot;: &quot;domain: CapacityPolicy&quot;
+        },
+        {
+            &quot;name&quot;: &quot;CHECK_DIGIT_EDGE_CASE&quot;,
+            &quot;description&quot;: &quot;ISO 6346 check digit: a weighted-sum remainder of 10 must map to check digit 0; the buggy validator compares the raw remainder, rejecting valid numbers.&quot;,
+            &quot;location&quot;: &quot;domain: ContainerNumber&quot;
+        },
+        {
+            &quot;name&quot;: &quot;TIMEZONE_SLOT_TIMES&quot;,
+            &quot;description&quot;: &quot;Slot times are rendered by re-labelling the UTC wall-clock time with the terminal&#39;s offset instead of converting, shifting every slot by the zone offset.&quot;,
+            &quot;location&quot;: &quot;domain: SlotTimes&quot;
+        },
+        {
+            &quot;name&quot;: &quot;RACE_ON_LAST_SLOT&quot;,
+            &quot;description&quot;: &quot;The capacity check and the insert are not serialised (no row lock), so concurrent requests for the last place in a slot can all succeed.&quot;,
+            &quot;location&quot;: &quot;api: BookingService&quot;
+        },
+        {
+            &quot;name&quot;: &quot;MISSING_AUTHORISATION_CHECK&quot;,
+            &quot;description&quot;: &quot;Drivers can read, reschedule and cancel bookings that belong to other drivers (IDOR).&quot;,
+            &quot;location&quot;: &quot;domain: BookingAccessPolicy&quot;
+        },
+        {
+            &quot;name&quot;: &quot;API_SKIPS_CONTAINER_VALIDATION&quot;,
+            &quot;description&quot;: &quot;The UI validates the container number but the API accepts any 11-character value.&quot;,
+            &quot;location&quot;: &quot;api: BookingService&quot;
+        }
+    ]
+}    </pre>
+</div>
+
+<h4>Headers</h4>
+<div>
+        <div>Transfer-Encoding: chunked</div>
+        <div>Keep-Alive: timeout=60</div>
+        <div>X-Content-Type-Options: nosniff</div>
+        <div>Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=(), accelerometer=(), gyroscope=(), magnetometer=()</div>
+        <div>Connection: keep-alive</div>
+        <div>Pragma: no-cache</div>
+        <div>Cross-Origin-Opener-Policy: same-origin</div>
+        <div>Date: Tue, 20 Oct 2026 20:40:51 GMT</div>
+        <div>X-Frame-Options: DENY</div>
+        <div>Cache-Control: no-cache, no-store, max-age=0, must-revalidate</div>
+        <div>Content-Security-Policy: default-src &#39;self&#39;; script-src &#39;self&#39;; style-src &#39;self&#39;; img-src &#39;self&#39; data:; font-src &#39;self&#39;; connect-src &#39;self&#39;; object-src &#39;none&#39;; base-uri &#39;self&#39;; form-action &#39;self&#39;; frame-ancestors &#39;none&#39;</div>
+        <div>Expires: 0</div>
+        <div>Cross-Origin-Embedder-Policy: require-corp</div>
+        <div>Cross-Origin-Resource-Policy: same-origin</div>
+        <div>X-XSS-Protection: 0</div>
+        <div>Content-Type: application/json</div>
+</div>
+
+

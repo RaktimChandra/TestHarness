@@ -1,0 +1,245 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>I broke my own app six ways to see which tests would notice</title><style>
+:root{--bg:#fcfcfb;--fg:#1a1a19;--muted:#5c5c58;--line:#e4e4e0;--card:#ffffff;--accent:#2a78d6}
+@media (prefers-color-scheme:dark){:root{--bg:#1a1a19;--fg:#ededea;--muted:#a6a6a0;--line:#3a3a37;--card:#232322;--accent:#3987e5}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);
+font:16px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:40px 16px 64px}a{color:var(--accent)}
+h1{font-size:1.9rem;line-height:1.25;margin:0 0 8px}h2{margin-top:2em}.muted{color:var(--muted)}
+.cards{display:grid;gap:12px;margin:28px 0}.card{display:block;padding:16px 18px;border:1px solid var(--line);
+border-radius:10px;background:var(--card);text-decoration:none;color:inherit}.card:hover{border-color:var(--accent)}
+.card b{display:block;color:var(--accent)}table{border-collapse:collapse;width:100%;display:block;overflow-x:auto}
+th,td{border-bottom:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+code{font-size:.92em}pre{overflow-x:auto;padding:12px;border:1px solid var(--line);border-radius:8px}
+footer{margin-top:40px;font-size:.9rem;color:var(--muted)}
+</style></head><body><main><h1>I broke my own app six ways to see which tests would notice</h1>
+<p><em>Raktim Chandra, October 2026. Data: <a href="https://github.com/RaktimChandra/TestHarness/blob/main/experiments/fault-seeding/fault-seeding.md">experiments/fault-seeding</a>,
+CI run 38726144795; repeated in runs 38869649371 and 38875469031 (see "Update" at the end).</em></p>
+<p>Test suites are usually judged by how many tests they have or how much code they cover. Neither
+tells you whether they would catch the bug you are about to ship. So in
+<a href="https://github.com/RaktimChandra/TestHarness">TestHarness</a> I built the application under test
+myself — a container-terminal gate appointment system — and gave it six deliberate defects that
+can be switched on at runtime. Then I switched each one on, ran every suite type against it, and
+recorded who noticed.</p>
+<h2>The setup</h2>
+<p>The six bugs are the kind that reach production in booking systems:</p>
+<table>
+<thead>
+<tr>
+<th>Bug</th>
+<th>What goes wrong</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>OFF_BY_ONE_CAPACITY</code></td>
+<td>a slot accepts capacity + 1 trucks</td>
+</tr>
+<tr>
+<td><code>CHECK_DIGIT_EDGE_CASE</code></td>
+<td>valid container numbers whose check digit comes from remainder 10 are rejected</td>
+</tr>
+<tr>
+<td><code>TIMEZONE_SLOT_TIMES</code></td>
+<td>slot times are relabelled instead of converted</td>
+</tr>
+<tr>
+<td><code>RACE_ON_LAST_SLOT</code></td>
+<td>concurrent requests for the last place all succeed</td>
+</tr>
+<tr>
+<td><code>MISSING_AUTHORISATION_CHECK</code></td>
+<td>drivers can read and change other drivers' bookings</td>
+</tr>
+<tr>
+<td><code>API_SKIPS_CONTAINER_VALIDATION</code></td>
+<td>the UI validates container numbers, the API doesn't</td>
+</tr>
+</tbody>
+</table>
+<p>Eight suite types ran once with no bug and once per bug, in parallel CI jobs: the Pact provider
+verification (contract), the REST API suite, the security smoke tests, the Selenium UI journeys,
+the axe-core accessibility scans, the visual regression checks, the Cucumber BDD scenarios and a
+Gatling load test. A suite got credit for a bug only if it <strong>failed with the bug and passed
+without it</strong> — a flaky suite cannot take credit for noise. All eight were green on the baseline.</p>
+<h2>The result</h2>
+<table>
+<thead>
+<tr>
+<th>Seeded bug</th>
+<th>contract</th>
+<th>API</th>
+<th>security</th>
+<th>UI</th>
+<th>a11y</th>
+<th>visual</th>
+<th>BDD</th>
+<th>Gatling</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OFF_BY_ONE_CAPACITY</td>
+<td>✔ 1/9</td>
+<td>✔ 3/85</td>
+<td>–</td>
+<td>–</td>
+<td>–</td>
+<td>–</td>
+<td>✔ 1/15</td>
+<td>–</td>
+</tr>
+<tr>
+<td>CHECK_DIGIT_EDGE_CASE</td>
+<td>✔ 1/9</td>
+<td>✔ 4/85</td>
+<td>✔ 1/17</td>
+<td>✔ 1/17</td>
+<td>–</td>
+<td>–</td>
+<td>✔ 4/15</td>
+<td>–</td>
+</tr>
+<tr>
+<td>TIMEZONE_SLOT_TIMES</td>
+<td>–</td>
+<td>✔ 6/85</td>
+<td>–</td>
+<td>✔ 3/17</td>
+<td>–</td>
+<td>–</td>
+<td>✔ 1/15</td>
+<td>–</td>
+</tr>
+<tr>
+<td>RACE_ON_LAST_SLOT</td>
+<td>–</td>
+<td>✔ 1/85</td>
+<td>–</td>
+<td>–</td>
+<td>–</td>
+<td>–</td>
+<td>–</td>
+<td>–</td>
+</tr>
+<tr>
+<td>MISSING_AUTHORISATION_CHECK</td>
+<td>–</td>
+<td>✔ 3/85</td>
+<td>✔ 1/17</td>
+<td>–</td>
+<td>–</td>
+<td>–</td>
+<td>✔ 1/15</td>
+<td>–</td>
+</tr>
+<tr>
+<td>API_SKIPS_CONTAINER_VALIDATION</td>
+<td>–</td>
+<td>✔ 4/85</td>
+<td>–</td>
+<td>–</td>
+<td>–</td>
+<td>–</td>
+<td>✔ 2/15</td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>caught</strong></td>
+<td>2/6</td>
+<td><strong>6/6</strong></td>
+<td>2/6</td>
+<td>2/6</td>
+<td>0/6</td>
+<td>0/6</td>
+<td>5/6</td>
+<td>0/6</td>
+</tr>
+</tbody>
+</table>
+<p>"✔ 3/85" means 3 of the suite's 85 tests failed. Every bug was caught by at least one suite.</p>
+<h2>What I learned</h2>
+<p><strong>1. The API suite was the cheapest net by far.</strong> It caught all six bugs in about 36 seconds of
+CI time (including starting the app), against 50 seconds for 17 browser journeys that caught
+two. That is the test pyramid argument, measured instead of asserted.</p>
+<p><strong>2. The UI was blind to the bug the UI itself hides.</strong> With <code>API_SKIPS_CONTAINER_VALIDATION</code>
+on, the browser still rejects a bad container number before it is sent, so every UI journey
+passed while anyone calling the API directly could store garbage. My test strategy predicted
+this; it is still unsettling to watch a green UI suite sit on top of a broken API.</p>
+<p><strong>3. One test out of 151 catches the race.</strong> <code>RACE_ON_LAST_SLOT</code> was caught only by an API test
+that fires six bookings for the last place at the same instant and expects exactly one to win.
+UI and BDD tests act one user at a time, so they cannot see concurrency bugs, and the Gatling
+run booked slots with plenty of room. If that one test did not exist, the race would ship.</p>
+<p><strong>4. My strategy was wrong about contract tests.</strong> I expected Pact provider verification to
+catch the time-zone bug, because the contract includes slot times. It didn't: the consumer
+contract matches timestamps by <em>format</em> (<code>datetime</code> matcher), and a wrongly shifted time is
+still a well-formed time. Contract tests verify the shape both sides agree on, not the meaning
+of the values. Where the value itself is the contract — a slot time a driver will drive to —
+the contract needs an exact value under a fixed provider state, or another test has to own it.</p>
+<p><strong>5. Some catches were luck.</strong> Several <code>CHECK_DIGIT_EDGE_CASE</code> failures came from tests that
+were not about check digits at all: they generate random container numbers, and roughly one in
+eleven needs the remainder-10 rule. On another run those tests would pass. A detection matrix
+built from one run with random data overstates coverage. Next step: run each cell with several
+data seeds and count only failures that reproduce.</p>
+<p><strong>6. Zero catches is the right answer for some suites.</strong> Accessibility, visual and load tests
+caught none of these functional bugs, and should not have: none of the bugs changes markup,
+layout or latency. Their value shows up elsewhere: while the suites were being built, the contract tests found a
+real timestamp defect in the app, the security tests found another (rejected URLs bypassing
+the error contract), and the visual tests exposed two kinds of test instability.
+Judging every suite by one bug class would argue them away.</p>
+<h2>Caveats</h2>
+<ul>
+<li>I wrote the bugs <em>and</em> the tests. Even with the tests written first and the expectations
+  recorded in advance, that is a bias; independent bugs (or mutation testing, which the project
+  also runs on the domain rules — 143 mutants, all killed after one round of new tests) are a
+  fairer measure.</li>
+<li>Six bugs is a small sample, and every run was on a shared CI runner.</li>
+<li>The race bug is made reproducible by a deliberate pause inside the critical section; a real
+  race is usually rarer and harder to catch.</li>
+</ul>
+<p>The workflow, the per-bug results and every failing test with its message are in the
+repository, so the experiment can be re-run on any commit.</p>
+<h2>Update: the same experiment, three times</h2>
+<p>Point 5 said a matrix built from one run overstates coverage, so I ran the whole experiment
+twice more (<a href="https://github.com/RaktimChandra/TestHarness/blob/main/experiments/fault-seeding/repeats.md">repeats.md</a>). Bugs caught of six, per
+run:</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>contract</th>
+<th>API</th>
+<th>security</th>
+<th>UI</th>
+<th>a11y</th>
+<th>visual</th>
+<th>BDD</th>
+<th>Gatling</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>run 1 · 2 · 3</td>
+<td>2 · 2 · 2</td>
+<td>6 · 6 · 6</td>
+<td><strong>2 · 1 · 1</strong></td>
+<td>2 · 2 · 2</td>
+<td>0 · 0 · 0</td>
+<td>0 · 0 · 0</td>
+<td>5 · 5 · 5</td>
+<td><strong>0 · 1 · 1</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Forty-six of the 48 cells gave the same verdict three times, and every baseline was green every
+time. The two that moved are both <code>CHECK_DIGIT_EDGE_CASE</code>, the bug that depends on random data:</p>
+<ul>
+<li>the security suite caught it in <strong>one run of three</strong> — the lucky catch from point 5, now
+  measured;</li>
+<li><strong>Gatling caught it in two runs of three</strong>, which contradicts point 6 as I first wrote it.
+  No Gatling request failed an assertion; the simulation books with generated container
+  numbers, and when enough of them needed the broken remainder-10 rule, the rejected bookings
+  pushed the error rate over the 1 % gate.</li>
+</ul>
+<p>So "zero catches is the right answer" was true of the first run, not of the suite: a load test
+that uses realistic data is also a crude functional test. The API suite's six of six and the
+race being caught by one test held in every run.</p><footer><a href="../">← TestHarness quality site</a> · source: <a href="https://github.com/RaktimChandra/TestHarness/blob/main/docs/blog/fault-seeding-results.md">fault-seeding-results.md</a></footer></main></body></html>

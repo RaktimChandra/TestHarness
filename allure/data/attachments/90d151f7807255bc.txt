@@ -1,0 +1,2 @@
+[console.info] page booted
+[js-error] Error: deliberate failure

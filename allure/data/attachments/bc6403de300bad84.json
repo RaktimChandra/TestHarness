@@ -1,0 +1,9 @@
+{
+  "test" : "SelfHealingDemoTest.a_renamed_test_id_is_healed_and_reported_with_the_fix",
+  "target" : "Book slot button",
+  "brokenLocator" : "data-testid=\"book-submit\"",
+  "usedLocator" : "accessible name \"Book slot\" (button)",
+  "rank" : 1,
+  "suggestedFix" : "the element's data-testid is now \"book-button\": update the Target to testId(\"book-button\"), or restore data-testid in the UI if the rename was accidental",
+  "url" : "http://localhost:46287/driver"
+}

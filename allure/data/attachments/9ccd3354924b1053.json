@@ -1,0 +1,6 @@
+{
+  "page" : "driver-validation-error",
+  "browser" : "firefox",
+  "url" : "http://localhost:40925/driver",
+  "violations" : [ ]
+}

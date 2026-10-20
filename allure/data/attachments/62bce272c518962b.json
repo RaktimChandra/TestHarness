@@ -1,0 +1,9 @@
+{
+  "test" : "HealingTest.aDriftedTestIdIsHealedReportedAndGivenAPreciseFix",
+  "target" : "Username field",
+  "brokenLocator" : "data-testid=\"user\"",
+  "usedLocator" : "accessible name \"Username\" (input)",
+  "rank" : 1,
+  "suggestedFix" : "the element's data-testid is now \"user-v2\": update the Target to testId(\"user-v2\"), or restore data-testid in the UI if the rename was accidental",
+  "url" : "file:///home/runner/work/TestHarness/TestHarness/harness/harness-ui/target/test-classes/healing.html"
+}

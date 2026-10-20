@@ -1,0 +1,28 @@
+<html lang="en"><head><meta charset="utf-8"><title>Delayed page</title></head>
+<body>
+<p data-testid="status">ready</p>
+<button data-testid="go">Go</button>
+<ul id="items"></ul>
+<script>
+  console.log('page booted');
+  setTimeout(() => {
+    document.querySelector('[data-testid=status]').textContent = 'ready';
+    const go = document.querySelector('[data-testid=go]');
+    go.disabled = false;
+    go.addEventListener('click', () => {
+      setTimeout(() => {
+        document.querySelector('[data-testid=status]').textContent = 'clicked';
+        for (let i = 0; i < 3; i++) {
+          const li = document.createElement('li');
+          li.dataset.testid = 'item-' + i;
+          li.textContent = 'item ' + i;
+          document.getElementById('items').appendChild(li);
+        }
+      }, 300);
+    });
+    setTimeout(() => { throw new Error('deliberate failure'); }, 50);
+  }, 400);
+</script>
+
+
+</body></html>

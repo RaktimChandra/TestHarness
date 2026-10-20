@@ -1,0 +1,1739 @@
+{
+  "generated" : "2026-10-20T20:51:29.355471320Z",
+  "historyResults" : 1233,
+  "runs" : [ {
+    "runId" : "demo-1",
+    "startedAt" : "2026-10-15T11:51:24.982627019Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 1,
+    "failed" : 1,
+    "skipped" : 0,
+    "passRate" : 0.5
+  }, {
+    "runId" : "demo-2",
+    "startedAt" : "2026-10-15T11:51:45.595607350Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 1,
+    "failed" : 1,
+    "skipped" : 0,
+    "passRate" : 0.5
+  }, {
+    "runId" : "demo-3",
+    "startedAt" : "2026-10-15T11:52:06.566963578Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 2,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "demo-4",
+    "startedAt" : "2026-10-15T11:52:27.113172744Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 2,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "demo-5",
+    "startedAt" : "2026-10-15T11:52:47.148966507Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 1,
+    "failed" : 1,
+    "skipped" : 0,
+    "passRate" : 0.5
+  }, {
+    "runId" : "demo-6",
+    "startedAt" : "2026-10-15T11:53:07.591772313Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 2,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "demo-7",
+    "startedAt" : "2026-10-15T11:53:28.259319199Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 2,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "demo-8",
+    "startedAt" : "2026-10-15T11:53:48.266778005Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 2,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "demo-9",
+    "startedAt" : "2026-10-15T11:54:09.090542517Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 2,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "demo-10",
+    "startedAt" : "2026-10-15T11:54:31.480607361Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 2,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "demo-11",
+    "startedAt" : "2026-10-15T11:54:53.616262439Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 2,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "demo-12",
+    "startedAt" : "2026-10-15T11:55:16.061947036Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 1,
+    "failed" : 1,
+    "skipped" : 0,
+    "passRate" : 0.5
+  }, {
+    "runId" : "demo-13",
+    "startedAt" : "2026-10-15T11:55:38.066776246Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 2,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "demo-14",
+    "startedAt" : "2026-10-15T11:56:00.041691045Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 2,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "demo-15",
+    "startedAt" : "2026-10-15T11:56:22.357005094Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 1,
+    "failed" : 1,
+    "skipped" : 0,
+    "passRate" : 0.5
+  }, {
+    "runId" : "demo-16",
+    "startedAt" : "2026-10-15T11:56:44.098177926Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 1,
+    "failed" : 1,
+    "skipped" : 0,
+    "passRate" : 0.5
+  }, {
+    "runId" : "demo-17",
+    "startedAt" : "2026-10-15T11:57:05.346540471Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 1,
+    "failed" : 1,
+    "skipped" : 0,
+    "passRate" : 0.5
+  }, {
+    "runId" : "demo-18",
+    "startedAt" : "2026-10-15T11:57:27.422343261Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 1,
+    "failed" : 1,
+    "skipped" : 0,
+    "passRate" : 0.5
+  }, {
+    "runId" : "demo-19",
+    "startedAt" : "2026-10-15T11:57:49.880481976Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 2,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "demo-20",
+    "startedAt" : "2026-10-15T11:58:11.361428037Z",
+    "commit" : "27a7ad6d8643492c04b13b7ae3716772c7148e0a",
+    "suites" : "flaky-demo",
+    "passed" : 2,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-105109",
+    "startedAt" : "2026-10-20T10:53:34.747624101Z",
+    "commit" : "768ee4df0b95b6bdbeeca4163193398425f300b5",
+    "suites" : "harness-cli, harness-insights, portsync",
+    "passed" : 76,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-105519",
+    "startedAt" : "2026-10-20T10:55:47.872549361Z",
+    "commit" : "768ee4df0b95b6bdbeeca4163193398425f300b5",
+    "suites" : "ui-suite",
+    "passed" : 14,
+    "failed" : 1,
+    "skipped" : 0,
+    "passRate" : 0.9333333333333333
+  }, {
+    "runId" : "20261020-105524",
+    "startedAt" : "2026-10-20T10:55:49.578519574Z",
+    "commit" : "768ee4df0b95b6bdbeeca4163193398425f300b5",
+    "suites" : "ui-suite",
+    "passed" : 14,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-105522",
+    "startedAt" : "2026-10-20T10:55:49.734493873Z",
+    "commit" : "768ee4df0b95b6bdbeeca4163193398425f300b5",
+    "suites" : "ui-suite",
+    "passed" : 15,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-105526",
+    "startedAt" : "2026-10-20T10:55:53.635755192Z",
+    "commit" : "768ee4df0b95b6bdbeeca4163193398425f300b5",
+    "suites" : "ui-suite",
+    "passed" : 29,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-105537",
+    "startedAt" : "2026-10-20T10:56:09.870035003Z",
+    "commit" : "768ee4df0b95b6bdbeeca4163193398425f300b5",
+    "suites" : "flaky-demo",
+    "passed" : 1,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-105617",
+    "startedAt" : "2026-10-20T10:56:27.969732813Z",
+    "commit" : "768ee4df0b95b6bdbeeca4163193398425f300b5",
+    "suites" : "bdd-suite",
+    "passed" : 23,
+    "failed" : 0,
+    "skipped" : 1,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-105603",
+    "startedAt" : "2026-10-20T10:56:28.910773031Z",
+    "commit" : "768ee4df0b95b6bdbeeca4163193398425f300b5",
+    "suites" : "ui-suite",
+    "passed" : 14,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-105616",
+    "startedAt" : "2026-10-20T10:56:46.759977034Z",
+    "commit" : "768ee4df0b95b6bdbeeca4163193398425f300b5",
+    "suites" : "api-suite",
+    "passed" : 112,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-120621",
+    "startedAt" : "2026-10-20T12:06:49.762276509Z",
+    "commit" : "768ee4df0b95b6bdbeeca4163193398425f300b5",
+    "suites" : "ui-suite",
+    "passed" : 17,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-125138",
+    "startedAt" : "2026-10-20T12:53:53.200900845Z",
+    "commit" : "989fa9f4e3df7c3e36c24910939111596e1654c4",
+    "suites" : "harness-cli, harness-insights, portsync",
+    "passed" : 76,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-125547",
+    "startedAt" : "2026-10-20T12:55:59.225250220Z",
+    "commit" : "989fa9f4e3df7c3e36c24910939111596e1654c4",
+    "suites" : "bdd-suite",
+    "passed" : 23,
+    "failed" : 0,
+    "skipped" : 1,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-125538",
+    "startedAt" : "2026-10-20T12:56:05.827045642Z",
+    "commit" : "989fa9f4e3df7c3e36c24910939111596e1654c4",
+    "suites" : "flaky-demo",
+    "passed" : 0,
+    "failed" : 1,
+    "skipped" : 0,
+    "passRate" : 0.0
+  }, {
+    "runId" : "20261020-125543",
+    "startedAt" : "2026-10-20T12:56:07.290560402Z",
+    "commit" : "989fa9f4e3df7c3e36c24910939111596e1654c4",
+    "suites" : "ui-suite",
+    "passed" : 12,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-125542",
+    "startedAt" : "2026-10-20T12:56:07.973292358Z",
+    "commit" : "989fa9f4e3df7c3e36c24910939111596e1654c4",
+    "suites" : "ui-suite",
+    "passed" : 12,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-125544",
+    "startedAt" : "2026-10-20T12:56:11.081772860Z",
+    "commit" : "989fa9f4e3df7c3e36c24910939111596e1654c4",
+    "suites" : "ui-suite",
+    "passed" : 17,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-125552",
+    "startedAt" : "2026-10-20T12:56:14.660965973Z",
+    "commit" : "989fa9f4e3df7c3e36c24910939111596e1654c4",
+    "suites" : "api-suite",
+    "passed" : 112,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-125601",
+    "startedAt" : "2026-10-20T12:56:28.224617573Z",
+    "commit" : "989fa9f4e3df7c3e36c24910939111596e1654c4",
+    "suites" : "ui-suite",
+    "passed" : 12,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-125608",
+    "startedAt" : "2026-10-20T12:56:35.387736876Z",
+    "commit" : "989fa9f4e3df7c3e36c24910939111596e1654c4",
+    "suites" : "ui-suite",
+    "passed" : 17,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-125609",
+    "startedAt" : "2026-10-20T12:56:37.828700114Z",
+    "commit" : "989fa9f4e3df7c3e36c24910939111596e1654c4",
+    "suites" : "ui-suite",
+    "passed" : 17,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-163944",
+    "startedAt" : "2026-10-20T16:41:43.033866428Z",
+    "commit" : "2b47bdee8b7c79fcbbe15c4e2e732dc0f12973cb",
+    "suites" : "harness-cli, harness-insights, portsync",
+    "passed" : 76,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-164326",
+    "startedAt" : "2026-10-20T16:43:36.543638273Z",
+    "commit" : "2b47bdee8b7c79fcbbe15c4e2e732dc0f12973cb",
+    "suites" : "bdd-suite",
+    "passed" : 23,
+    "failed" : 0,
+    "skipped" : 1,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-164329",
+    "startedAt" : "2026-10-20T16:43:55.872341739Z",
+    "commit" : "2b47bdee8b7c79fcbbe15c4e2e732dc0f12973cb",
+    "suites" : "ui-suite",
+    "passed" : 16,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-164330",
+    "startedAt" : "2026-10-20T16:43:57.778127371Z",
+    "commit" : "2b47bdee8b7c79fcbbe15c4e2e732dc0f12973cb",
+    "suites" : "flaky-demo, ui-suite",
+    "passed" : 30,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-164331",
+    "startedAt" : "2026-10-20T16:44:00.013191600Z",
+    "commit" : "2b47bdee8b7c79fcbbe15c4e2e732dc0f12973cb",
+    "suites" : "api-suite, ui-suite",
+    "passed" : 125,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-164337",
+    "startedAt" : "2026-10-20T16:44:09.355355985Z",
+    "commit" : "2b47bdee8b7c79fcbbe15c4e2e732dc0f12973cb",
+    "suites" : "ui-suite",
+    "passed" : 16,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-203413",
+    "startedAt" : "2026-10-20T20:36:46.945635899Z",
+    "commit" : "a3679219c3e13d0d4d884343ff366f0ffdf9d87a",
+    "suites" : "harness-cli, harness-insights, portsync",
+    "passed" : 78,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-204004",
+    "startedAt" : "2026-10-20T20:40:13.136152191Z",
+    "commit" : "a3679219c3e13d0d4d884343ff366f0ffdf9d87a",
+    "suites" : "bdd-suite, ui-suite",
+    "passed" : 38,
+    "failed" : 0,
+    "skipped" : 1,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-203959",
+    "startedAt" : "2026-10-20T20:40:23.031249869Z",
+    "commit" : "a3679219c3e13d0d4d884343ff366f0ffdf9d87a",
+    "suites" : "ui-suite",
+    "passed" : 15,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-204005",
+    "startedAt" : "2026-10-20T20:40:33.545084591Z",
+    "commit" : "a3679219c3e13d0d4d884343ff366f0ffdf9d87a",
+    "suites" : "api-suite",
+    "passed" : 112,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-204006",
+    "startedAt" : "2026-10-20T20:40:34.792167497Z",
+    "commit" : "a3679219c3e13d0d4d884343ff366f0ffdf9d87a",
+    "suites" : "ui-suite",
+    "passed" : 15,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  }, {
+    "runId" : "20261020-204007",
+    "startedAt" : "2026-10-20T20:40:35.764860196Z",
+    "commit" : "a3679219c3e13d0d4d884343ff366f0ffdf9d87a",
+    "suites" : "flaky-demo",
+    "passed" : 0,
+    "failed" : 1,
+    "skipped" : 0,
+    "passRate" : 0.0
+  }, {
+    "runId" : "20261020-204008",
+    "startedAt" : "2026-10-20T20:40:35.970627268Z",
+    "commit" : "a3679219c3e13d0d4d884343ff366f0ffdf9d87a",
+    "suites" : "ui-suite",
+    "passed" : 29,
+    "failed" : 0,
+    "skipped" : 0,
+    "passRate" : 1.0
+  } ],
+  "flaky" : [ {
+    "key" : "io.github.raktimchandra.testharness.suites.flaky.LastPlaceRaceTest#the_driver_who_asks_first_gets_the_last_place",
+    "displayName" : "the driver who asks first gets the last place",
+    "runs" : 24,
+    "transitions" : 19,
+    "flips" : 7,
+    "passes" : 14,
+    "failures" : 10,
+    "score" : 0.3684210526315789,
+    "failureCauses" : {
+      "ASSERTION" : 10
+    },
+    "meanDurationMs" : 1119
+  }, {
+    "key" : "io.github.raktimchandra.testharness.suites.ui.VisualRegressionTest#cancel_confirmation_dialog",
+    "displayName" : "cancel confirmation dialog (WebDriver, Waits)",
+    "runs" : 11,
+    "transitions" : 7,
+    "flips" : 2,
+    "passes" : 10,
+    "failures" : 1,
+    "score" : 0.2857142857142857,
+    "failureCauses" : {
+      "ASSERTION" : 1
+    },
+    "meanDurationMs" : 15683
+  } ],
+  "slowest" : [ {
+    "runs" : 13,
+    "key" : "io.github.raktimchandra.testharness.suites.ui.AccessibilityTest#driver_page_with_bookings_validation_and_dialog",
+    "displayName" : "driver page with bookings validation and dialog (WebDriver, Waits)",
+    "meanMs" : 33853
+  }, {
+    "runs" : 10,
+    "key" : "io.github.raktimchandra.testharness.suites.ui.AccessibilityTest#login_page_and_its_error_state",
+    "displayName" : "login page and its error state (WebDriver)",
+    "meanMs" : 30598
+  }, {
+    "runs" : 13,
+    "key" : "io.github.raktimchandra.testharness.suites.ui.SelfHealingDemoTest#a_renamed_test_id_is_healed_and_reported_with_the_fix",
+    "displayName" : "a renamed test id is healed and reported with the fix (WebDriver)",
+    "meanMs" : 29174
+  }, {
+    "runs" : 10,
+    "key" : "io.github.raktimchandra.testharness.suites.ui.VisualRegressionTest#login_error",
+    "displayName" : "login error (WebDriver, Waits)",
+    "meanMs" : 28876
+  }, {
+    "runs" : 4,
+    "key" : "features/gate_checkin.feature:36",
+    "displayName" : "A driver books from the booking screen",
+    "meanMs" : 28684
+  }, {
+    "runs" : 12,
+    "key" : "io.github.raktimchandra.testharness.suites.ui.ManageBookingJourneyTest#cancelling_asks_for_confirmation_and_keep_it_changes_nothing",
+    "displayName" : "cancelling asks for confirmation and keep it changes nothing",
+    "meanMs" : 26289
+  }, {
+    "runs" : 11,
+    "key" : "io.github.raktimchandra.testharness.suites.ui.LoginJourneyTest#submit_is_disabled_until_both_fields_are_filled",
+    "displayName" : "submit is disabled until both fields are filled",
+    "meanMs" : 25498
+  }, {
+    "runs" : 11,
+    "key" : "io.github.raktimchandra.testharness.suites.ui.LoginJourneyTest#a_deep_link_without_a_session_redirects_to_login",
+    "displayName" : "a deep link without a session redirects to login (WebDriver)",
+    "meanMs" : 24361
+  }, {
+    "runs" : 4,
+    "key" : "features/booking_rules.feature:56",
+    "displayName" : "Bookings cannot be changed in the hour before the slot",
+    "meanMs" : 23755
+  }, {
+    "runs" : 10,
+    "key" : "io.github.raktimchandra.testharness.suites.ui.ManageBookingJourneyTest#a_clerk_finds_a_booking_and_checks_the_truck_in",
+    "displayName" : "a clerk finds a booking and checks the truck in",
+    "meanMs" : 17175
+  } ],
+  "failureCauses" : {
+    "ASSERTION" : 11
+  },
+  "quarantine" : {
+    "generated" : "2026-10-15T11:58:17.058273256Z",
+    "policy" : {
+      "minRuns" : 5,
+      "minScore" : 0.2
+    },
+    "tests" : [ {
+      "key" : "io.github.raktimchandra.testharness.suites.flaky.LastPlaceRaceTest#the_driver_who_asks_first_gets_the_last_place",
+      "score" : 0.368,
+      "runs" : 20,
+      "flips" : 7,
+      "failureCauses" : {
+        "ASSERTION" : 8
+      },
+      "reason" : "7 flips in 19 same-commit transitions; failures: {ASSERTION=8}"
+    } ]
+  },
+  "quarantineSource" : "quarantine.json",
+  "coverage" : [ {
+    "module" : "adapters/portsync",
+    "lineCovered" : 16,
+    "lineTotal" : 183,
+    "branchCovered" : 1,
+    "branchTotal" : 22
+  }, {
+    "module" : "harness/harness-api",
+    "lineCovered" : 146,
+    "lineTotal" : 154,
+    "branchCovered" : 54,
+    "branchTotal" : 62
+  }, {
+    "module" : "harness/harness-bdd",
+    "lineCovered" : 35,
+    "lineTotal" : 35,
+    "branchCovered" : 4,
+    "branchTotal" : 6
+  }, {
+    "module" : "harness/harness-cli",
+    "lineCovered" : 296,
+    "lineTotal" : 324,
+    "branchCovered" : 127,
+    "branchTotal" : 176
+  }, {
+    "module" : "harness/harness-core",
+    "lineCovered" : 272,
+    "lineTotal" : 297,
+    "branchCovered" : 108,
+    "branchTotal" : 131
+  }, {
+    "module" : "harness/harness-data",
+    "lineCovered" : 156,
+    "lineTotal" : 172,
+    "branchCovered" : 51,
+    "branchTotal" : 60
+  }, {
+    "module" : "harness/harness-insights",
+    "lineCovered" : 941,
+    "lineTotal" : 1107,
+    "branchCovered" : 393,
+    "branchTotal" : 522
+  }, {
+    "module" : "harness/harness-reporting",
+    "lineCovered" : 104,
+    "lineTotal" : 120,
+    "branchCovered" : 25,
+    "branchTotal" : 32
+  }, {
+    "module" : "harness/harness-ui",
+    "lineCovered" : 651,
+    "lineTotal" : 813,
+    "branchCovered" : 274,
+    "branchTotal" : 396
+  }, {
+    "module" : "sut/gate-api",
+    "lineCovered" : 488,
+    "lineTotal" : 579,
+    "branchCovered" : 97,
+    "branchTotal" : 164
+  }, {
+    "module" : "sut/gate-domain",
+    "lineCovered" : 191,
+    "lineTotal" : 194,
+    "branchCovered" : 90,
+    "branchTotal" : 90
+  } ],
+  "mutation" : {
+    "module" : "sut/gate-domain",
+    "total" : 143,
+    "detected" : 143,
+    "score" : 1.0,
+    "byStatus" : {
+      "KILLED" : 142,
+      "TIMED_OUT" : 1
+    },
+    "survivors" : [ ]
+  },
+  "a11y" : [ {
+    "page" : "clerk-checked-in",
+    "browser" : "chrome",
+    "url" : "http://localhost:46287/clerk",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "clerk-checked-in",
+    "browser" : "edge",
+    "url" : "http://localhost:36947/clerk",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "clerk-checked-in",
+    "browser" : "firefox",
+    "url" : "http://localhost:40925/clerk",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "clerk",
+    "browser" : "chrome",
+    "url" : "http://localhost:46287/clerk",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "clerk",
+    "browser" : "edge",
+    "url" : "http://localhost:36947/clerk",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "clerk",
+    "browser" : "firefox",
+    "url" : "http://localhost:40925/clerk",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "clerk-results",
+    "browser" : "chrome",
+    "url" : "http://localhost:46287/clerk",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "clerk-results",
+    "browser" : "edge",
+    "url" : "http://localhost:36947/clerk",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "clerk-results",
+    "browser" : "firefox",
+    "url" : "http://localhost:40925/clerk",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "driver-cancel-dialog",
+    "browser" : "chrome",
+    "url" : "http://localhost:46287/driver",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "driver-cancel-dialog",
+    "browser" : "edge",
+    "url" : "http://localhost:36947/driver",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "driver-cancel-dialog",
+    "browser" : "firefox",
+    "url" : "http://localhost:40925/driver",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "driver",
+    "browser" : "chrome",
+    "url" : "http://localhost:46287/driver",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "driver",
+    "browser" : "edge",
+    "url" : "http://localhost:36947/driver",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "driver",
+    "browser" : "firefox",
+    "url" : "http://localhost:40925/driver",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "driver-reschedule-panel",
+    "browser" : "chrome",
+    "url" : "http://localhost:46287/driver",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "driver-reschedule-panel",
+    "browser" : "edge",
+    "url" : "http://localhost:36947/driver",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "driver-reschedule-panel",
+    "browser" : "firefox",
+    "url" : "http://localhost:40925/driver",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "driver-validation-error",
+    "browser" : "chrome",
+    "url" : "http://localhost:46287/driver",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "driver-validation-error",
+    "browser" : "edge",
+    "url" : "http://localhost:36947/driver",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "driver-validation-error",
+    "browser" : "firefox",
+    "url" : "http://localhost:40925/driver",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "login",
+    "browser" : "chrome",
+    "url" : "http://localhost:35459/login",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "login",
+    "browser" : "edge",
+    "url" : "http://localhost:38173/login",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "login-error",
+    "browser" : "chrome",
+    "url" : "http://localhost:35459/login",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "login-error",
+    "browser" : "edge",
+    "url" : "http://localhost:38173/login",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "login-error",
+    "browser" : "firefox",
+    "url" : "http://localhost:42863/login",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  }, {
+    "page" : "login",
+    "browser" : "firefox",
+    "url" : "http://localhost:42863/login",
+    "rules" : [ ],
+    "critical" : 0,
+    "serious" : 0,
+    "moderate" : 0,
+    "minor" : 0
+  } ],
+  "visual" : [ ],
+  "healing" : [ {
+    "test" : "SelfHealingDemoTest.a_renamed_test_id_is_healed_and_reported_with_the_fix",
+    "target" : "Book slot button",
+    "brokenLocator" : "data-testid=\"book-submit\"",
+    "usedLocator" : "accessible name \"Book slot\" (button)",
+    "rank" : 1,
+    "suggestedFix" : "the element's data-testid is now \"book-button\": update the Target to testId(\"book-button\"), or restore data-testid in the UI if the rename was accidental",
+    "url" : "http://localhost:46287/driver",
+    "module" : "suites/ui-suite"
+  }, {
+    "test" : "SelfHealingDemoTest.a_renamed_test_id_is_healed_and_reported_with_the_fix",
+    "target" : "Book slot button",
+    "brokenLocator" : "data-testid=\"book-submit\"",
+    "usedLocator" : "accessible name \"Book slot\" (button)",
+    "rank" : 1,
+    "suggestedFix" : "the element's data-testid is now \"book-button\": update the Target to testId(\"book-button\"), or restore data-testid in the UI if the rename was accidental",
+    "url" : "http://localhost:36947/driver",
+    "module" : "suites/ui-suite"
+  }, {
+    "test" : "SelfHealingDemoTest.a_renamed_test_id_is_healed_and_reported_with_the_fix",
+    "target" : "Book slot button",
+    "brokenLocator" : "data-testid=\"book-submit\"",
+    "usedLocator" : "accessible name \"Book slot\" (button)",
+    "rank" : 1,
+    "suggestedFix" : "the element's data-testid is now \"book-button\": update the Target to testId(\"book-button\"), or restore data-testid in the UI if the rename was accidental",
+    "url" : "http://localhost:40925/driver",
+    "module" : "suites/ui-suite"
+  } ],
+  "faultSeeding" : {
+    "baseline" : {
+      "a11y" : {
+        "tests" : 3,
+        "failed" : 0,
+        "skipped" : 0,
+        "exit_code" : 0,
+        "seconds" : 36.0,
+        "detected" : false,
+        "failures" : [ ],
+        "note" : ""
+      },
+      "api" : {
+        "tests" : 85,
+        "failed" : 0,
+        "skipped" : 0,
+        "exit_code" : 0,
+        "seconds" : 36.0,
+        "detected" : false,
+        "failures" : [ ],
+        "note" : ""
+      },
+      "bdd" : {
+        "tests" : 15,
+        "failed" : 0,
+        "skipped" : 0,
+        "exit_code" : 0,
+        "seconds" : 36.0,
+        "detected" : false,
+        "failures" : [ ],
+        "note" : ""
+      },
+      "contract" : {
+        "tests" : 9,
+        "failed" : 0,
+        "skipped" : 0,
+        "exit_code" : 0,
+        "seconds" : 28.0,
+        "detected" : false,
+        "failures" : [ ],
+        "note" : ""
+      },
+      "perf" : {
+        "tests" : 0,
+        "failed" : 0,
+        "skipped" : 0,
+        "exit_code" : 0,
+        "seconds" : 47.0,
+        "detected" : false,
+        "failures" : [ ],
+        "note" : "> request count                                                                      |       300 |       300 |         -\n> min response time (ms)                                                             |         2 |         2 |         -\n> max response time (ms)                                                             |       101 |       101 |         -\n> mean response time (ms)                                                            |        20 |        20 |         -\n> response time std deviation (ms)                                                   |        29 |        29 |         -\n> response time 50th percentile (ms)                                                 |         6 |         6 |         -\n> response time 75th percentile (ms)                                                 |         9 |         9 |         -\n> response time 95th percentile (ms)                                                 |        79 |        79 |         -\n> response time 99th percentile (ms)                                                 |        83 |        83 |         -\n> mean throughput (rps)                                                              |        10 |        10 |         -\n---- Response Time Distribution ----------------------------------------------------------------------------------------\n> OK: t < 800 ms                                                                                            300   (100%)"
+      },
+      "security" : {
+        "tests" : 17,
+        "failed" : 0,
+        "skipped" : 0,
+        "exit_code" : 0,
+        "seconds" : 29.0,
+        "detected" : false,
+        "failures" : [ ],
+        "note" : ""
+      },
+      "ui" : {
+        "tests" : 17,
+        "failed" : 0,
+        "skipped" : 0,
+        "exit_code" : 0,
+        "seconds" : 50.0,
+        "detected" : false,
+        "failures" : [ ],
+        "note" : ""
+      },
+      "visual" : {
+        "tests" : 5,
+        "failed" : 0,
+        "skipped" : 0,
+        "exit_code" : 0,
+        "seconds" : 34.0,
+        "detected" : false,
+        "failures" : [ ],
+        "note" : ""
+      }
+    },
+    "bugs" : [ "API_SKIPS_CONTAINER_VALIDATION", "CHECK_DIGIT_EDGE_CASE", "MISSING_AUTHORISATION_CHECK", "OFF_BY_ONE_CAPACITY", "RACE_ON_LAST_SLOT", "TIMEZONE_SLOT_TIMES" ],
+    "suites" : [ "contract", "api", "security", "ui", "a11y", "visual", "bdd", "perf" ],
+    "matrix" : {
+      "API_SKIPS_CONTAINER_VALIDATION" : {
+        "contract" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 9,
+          "exit_code" : 0,
+          "seconds" : 27.0,
+          "failures" : [ ]
+        },
+        "api" : {
+          "status" : "caught",
+          "failed" : 4,
+          "tests" : 85,
+          "exit_code" : 1,
+          "seconds" : 35.0,
+          "failures" : [ {
+            "test" : "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[5]",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 400 but was 201."
+          }, {
+            "test" : "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[7]",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 400 but was 201."
+          }, {
+            "test" : "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[10]",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 400 but was 201."
+          }, {
+            "test" : "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[6]",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 400 but was 201."
+          } ]
+        },
+        "security" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 17,
+          "exit_code" : 0,
+          "seconds" : 27.0,
+          "failures" : [ ]
+        },
+        "ui" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 17,
+          "exit_code" : 0,
+          "seconds" : 48.0,
+          "failures" : [ ]
+        },
+        "a11y" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 3,
+          "exit_code" : 0,
+          "seconds" : 36.0,
+          "failures" : [ ]
+        },
+        "visual" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 5,
+          "exit_code" : 0,
+          "seconds" : 32.0,
+          "failures" : [ ]
+        },
+        "bdd" : {
+          "status" : "caught",
+          "failed" : 2,
+          "tests" : 15,
+          "exit_code" : 1,
+          "seconds" : 35.0,
+          "failures" : [ {
+            "test" : "RunBddSuite > Example #1.4",
+            "type" : "AssertionError",
+            "message" : "[HTTP status]"
+          }, {
+            "test" : "RunBddSuite > Example #1.3",
+            "type" : "AssertionError",
+            "message" : "[HTTP status]"
+          } ]
+        },
+        "perf" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 0,
+          "exit_code" : 0,
+          "seconds" : 49.0,
+          "failures" : [ ]
+        }
+      },
+      "CHECK_DIGIT_EDGE_CASE" : {
+        "contract" : {
+          "status" : "caught",
+          "failed" : 1,
+          "tests" : 9,
+          "exit_code" : 1,
+          "seconds" : 25.0,
+          "failures" : [ {
+            "test" : "PactProviderTest > interactionHonoursTheContract(PactVerificationContext, HttpRequest)[1]",
+            "type" : "AssertionError",
+            "message" : "gate-ui - Upon a booking for a full slot"
+          } ]
+        },
+        "api" : {
+          "status" : "caught",
+          "failed" : 4,
+          "tests" : 85,
+          "exit_code" : 1,
+          "seconds" : 36.0,
+          "failures" : [ {
+            "test" : "Booking API > a_generated_remainder_ten_container_is_accepted",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 201 but was 400."
+          }, {
+            "test" : "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[2]",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 201 but was 400."
+          }, {
+            "test" : "cancel > another_driver_cannot_cancel_it",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
+          }, {
+            "test" : "cancel > clerks_cannot_cancel_and_unknown_references_are_404",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
+          } ]
+        },
+        "security" : {
+          "status" : "caught",
+          "failed" : 1,
+          "tests" : 17,
+          "exit_code" : 1,
+          "seconds" : 27.0,
+          "failures" : [ {
+            "test" : "Security smoke > a_driver_cannot_read_change_or_cancel_another_drivers_booking",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
+          } ]
+        },
+        "ui" : {
+          "status" : "caught",
+          "failed" : 1,
+          "tests" : 17,
+          "exit_code" : 1,
+          "seconds" : 51.0,
+          "failures" : [ {
+            "test" : "Booking journey > a_remainder_ten_container_number_is_accepted_end_to_end",
+            "type" : "TimeoutException",
+            "message" : "Expected condition failed: waiting 10000 ms for By.cssSelector: [data-testid=\"driver-notice\"] to contain text 'Booked '"
+          } ]
+        },
+        "a11y" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 3,
+          "exit_code" : 0,
+          "seconds" : 36.0,
+          "failures" : [ ]
+        },
+        "visual" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 5,
+          "exit_code" : 0,
+          "seconds" : 31.0,
+          "failures" : [ ]
+        },
+        "bdd" : {
+          "status" : "caught",
+          "failed" : 4,
+          "tests" : 15,
+          "exit_code" : 1,
+          "seconds" : 32.0,
+          "failures" : [ {
+            "test" : "RunBddSuite > A clerk checks a truck in from the gate screen",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
+          }, {
+            "test" : "RunBddSuite > Drivers cannot check themselves in",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
+          }, {
+            "test" : "RunBddSuite > Check-in is refused before the window opens",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 201 but got 400: {\"type\":\"https://github.com/RaktimChandra/TestHarness/blob/main/docs/errors.md#invalid-container-number\",\"title\":\"Bad Request\",\"status\":400,\"detail\":\"Check digit should be 0 but was 0\",\"instance\":\"/api/bookings\",\"code\":\"INVALID_CONTAINER_NUMBER\"}"
+          }, {
+            "test" : "RunBddSuite > Example #1.2",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 201 but was 400."
+          } ]
+        },
+        "perf" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 0,
+          "exit_code" : 0,
+          "seconds" : 50.0,
+          "failures" : [ ]
+        }
+      },
+      "MISSING_AUTHORISATION_CHECK" : {
+        "contract" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 9,
+          "exit_code" : 0,
+          "seconds" : 27.0,
+          "failures" : [ ]
+        },
+        "api" : {
+          "status" : "caught",
+          "failed" : 3,
+          "tests" : 85,
+          "exit_code" : 1,
+          "seconds" : 36.0,
+          "failures" : [ {
+            "test" : "reschedule > another_driver_cannot_reschedule_it",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 404 but was 200."
+          }, {
+            "test" : "cancel > another_driver_cannot_cancel_it",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 404 but was 200."
+          }, {
+            "test" : "Search and object-level access > a_driver_cannot_read_another_drivers_booking",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 404 but was 200."
+          } ]
+        },
+        "security" : {
+          "status" : "caught",
+          "failed" : 1,
+          "tests" : 17,
+          "exit_code" : 1,
+          "seconds" : 28.0,
+          "failures" : [ {
+            "test" : "Security smoke > a_driver_cannot_read_change_or_cancel_another_drivers_booking",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 404 but was 200."
+          } ]
+        },
+        "ui" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 17,
+          "exit_code" : 0,
+          "seconds" : 58.0,
+          "failures" : [ ]
+        },
+        "a11y" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 3,
+          "exit_code" : 0,
+          "seconds" : 35.0,
+          "failures" : [ ]
+        },
+        "visual" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 5,
+          "exit_code" : 0,
+          "seconds" : 33.0,
+          "failures" : [ ]
+        },
+        "bdd" : {
+          "status" : "caught",
+          "failed" : 1,
+          "tests" : 15,
+          "exit_code" : 1,
+          "seconds" : 34.0,
+          "failures" : [ {
+            "test" : "RunBddSuite > Drivers cannot see each other's bookings",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 404 but was 200."
+          } ]
+        },
+        "perf" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 0,
+          "exit_code" : 0,
+          "seconds" : 48.0,
+          "failures" : [ ]
+        }
+      },
+      "OFF_BY_ONE_CAPACITY" : {
+        "contract" : {
+          "status" : "caught",
+          "failed" : 1,
+          "tests" : 9,
+          "exit_code" : 1,
+          "seconds" : 24.0,
+          "failures" : [ {
+            "test" : "PactProviderTest > interactionHonoursTheContract(PactVerificationContext, HttpRequest)[1]",
+            "type" : "AssertionError",
+            "message" : "gate-ui - Upon a booking for a full slot"
+          } ]
+        },
+        "api" : {
+          "status" : "caught",
+          "failed" : 3,
+          "tests" : 85,
+          "exit_code" : 1,
+          "seconds" : 35.0,
+          "failures" : [ {
+            "test" : "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one",
+            "type" : "AssertionError",
+            "message" : "Expected size: 1 but was: 2 in:"
+          }, {
+            "test" : "Booking API > capacity_is_enforced_at_the_boundary",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 409 but was 201."
+          }, {
+            "test" : "reschedule > to_a_full_slot_is_rejected_and_nothing_changes",
+            "type" : "AssertionError",
+            "message" : "Expected HTTP 409 but was 200."
+          } ]
+        },
+        "security" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 17,
+          "exit_code" : 0,
+          "seconds" : 26.0,
+          "failures" : [ ]
+        },
+        "ui" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 17,
+          "exit_code" : 0,
+          "seconds" : 49.0,
+          "failures" : [ ]
+        },
+        "a11y" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 3,
+          "exit_code" : 0,
+          "seconds" : 35.0,
+          "failures" : [ ]
+        },
+        "visual" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 5,
+          "exit_code" : 0,
+          "seconds" : 31.0,
+          "failures" : [ ]
+        },
+        "bdd" : {
+          "status" : "caught",
+          "failed" : 1,
+          "tests" : 15,
+          "exit_code" : 1,
+          "seconds" : 33.0,
+          "failures" : [ {
+            "test" : "RunBddSuite > A slot cannot take more trucks than its capacity",
+            "type" : "AssertionError",
+            "message" : "[HTTP status]"
+          } ]
+        },
+        "perf" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 0,
+          "exit_code" : 0,
+          "seconds" : 47.0,
+          "failures" : [ ]
+        }
+      },
+      "RACE_ON_LAST_SLOT" : {
+        "contract" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 9,
+          "exit_code" : 0,
+          "seconds" : 23.0,
+          "failures" : [ ]
+        },
+        "api" : {
+          "status" : "caught",
+          "failed" : 1,
+          "tests" : 85,
+          "exit_code" : 1,
+          "seconds" : 26.0,
+          "failures" : [ {
+            "test" : "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one",
+            "type" : "AssertionError",
+            "message" : "Expected size: 1 but was: 6 in:"
+          } ]
+        },
+        "security" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 17,
+          "exit_code" : 0,
+          "seconds" : 19.0,
+          "failures" : [ ]
+        },
+        "ui" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 17,
+          "exit_code" : 0,
+          "seconds" : 34.0,
+          "failures" : [ ]
+        },
+        "a11y" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 3,
+          "exit_code" : 0,
+          "seconds" : 24.0,
+          "failures" : [ ]
+        },
+        "visual" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 5,
+          "exit_code" : 0,
+          "seconds" : 21.0,
+          "failures" : [ ]
+        },
+        "bdd" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 15,
+          "exit_code" : 0,
+          "seconds" : 22.0,
+          "failures" : [ ]
+        },
+        "perf" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 0,
+          "exit_code" : 0,
+          "seconds" : 43.0,
+          "failures" : [ ]
+        }
+      },
+      "TIMEZONE_SLOT_TIMES" : {
+        "contract" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 9,
+          "exit_code" : 0,
+          "seconds" : 25.0,
+          "failures" : [ ]
+        },
+        "api" : {
+          "status" : "caught",
+          "failed" : 6,
+          "tests" : 85,
+          "exit_code" : 1,
+          "seconds" : 34.0,
+          "failures" : [ {
+            "test" : "Auth API > seeded_users_log_in_and_receive_a_bearer_token(String, String)[1]",
+            "type" : "AssertionError",
+            "message" : "Expecting actual:"
+          }, {
+            "test" : "Auth API > seeded_users_log_in_and_receive_a_bearer_token(String, String)[2]",
+            "type" : "AssertionError",
+            "message" : "Expecting actual:"
+          }, {
+            "test" : "Booking API > the_booking_reports_the_slot_time_exactly_as_the_slot_does",
+            "type" : "AssertionFailedError",
+            "message" : "expected: 10:30"
+          }, {
+            "test" : "Slots API > listing_by_date_includes_new_slots_in_start_order",
+            "type" : "AssertionFailedError",
+            "message" : "Expecting actual:"
+          }, {
+            "test" : "Slots API > a_slot_requested_in_utc_is_reported_in_terminal_time",
+            "type" : "AssertionFailedError",
+            "message" : "expected: 2026-10-16T08:30:00Z"
+          }, {
+            "test" : "Slots API > slot_times_are_the_terminal_wall_clock_with_its_offset",
+            "type" : "AssertionFailedError",
+            "message" : "[same instant as requested]"
+          } ]
+        },
+        "security" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 17,
+          "exit_code" : 0,
+          "seconds" : 26.0,
+          "failures" : [ ]
+        },
+        "ui" : {
+          "status" : "caught",
+          "failed" : 3,
+          "tests" : 17,
+          "exit_code" : 1,
+          "seconds" : 54.0,
+          "failures" : [ {
+            "test" : "Booking journey > the_slot_table_shows_the_terminal_time_and_live_remaining_places",
+            "type" : "AssertionFailedError",
+            "message" : "expected: \"14:30–15:00\""
+          }, {
+            "test" : "Booking journey > a_driver_books_a_slot_and_sees_it_in_their_bookings",
+            "type" : "AssertionError",
+            "message" : "Expecting actual:"
+          }, {
+            "test" : "Reschedule, cancel and check-in journeys > a_driver_reschedules_to_another_slot",
+            "type" : "AssertionFailedError",
+            "message" : "Expecting value to be true but was false"
+          } ]
+        },
+        "a11y" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 3,
+          "exit_code" : 0,
+          "seconds" : 34.0,
+          "failures" : [ ]
+        },
+        "visual" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 5,
+          "exit_code" : 0,
+          "seconds" : 29.0,
+          "failures" : [ ]
+        },
+        "bdd" : {
+          "status" : "caught",
+          "failed" : 1,
+          "tests" : 15,
+          "exit_code" : 1,
+          "seconds" : 33.0,
+          "failures" : [ {
+            "test" : "RunBddSuite > A driver books from the booking screen",
+            "type" : "AssertionError",
+            "message" : "Expecting actual:"
+          } ]
+        },
+        "perf" : {
+          "status" : "escaped",
+          "failed" : 0,
+          "tests" : 0,
+          "exit_code" : 0,
+          "seconds" : 48.0,
+          "failures" : [ ]
+        }
+      }
+    },
+    "detection_rate_per_suite" : {
+      "contract" : 0.3333333333333333,
+      "api" : 1.0,
+      "security" : 0.3333333333333333,
+      "ui" : 0.3333333333333333,
+      "a11y" : 0.0,
+      "visual" : 0.0,
+      "bdd" : 0.8333333333333334,
+      "perf" : 0.0
+    },
+    "caught_by" : {
+      "API_SKIPS_CONTAINER_VALIDATION" : [ "api", "bdd" ],
+      "CHECK_DIGIT_EDGE_CASE" : [ "contract", "api", "security", "ui", "bdd" ],
+      "MISSING_AUTHORISATION_CHECK" : [ "api", "security", "bdd" ],
+      "OFF_BY_ONE_CAPACITY" : [ "contract", "api", "bdd" ],
+      "RACE_ON_LAST_SLOT" : [ "api" ],
+      "TIMEZONE_SLOT_TIMES" : [ "api", "ui", "bdd" ]
+    },
+    "escaped_all" : [ ]
+  },
+  "tia" : {
+    "started" : "2026-10-15T11:34:22+0000",
+    "finished" : "2026-10-15T12:09:38+0000",
+    "mvn" : "mvn -B -o -Dui.node=system -Dharness.ui.binary.chrome=/opt/browsers/chrome/chrome -Dharness.ui.driver-path.chrome=/opt/browsers/drivers/chromedriver -Dharness.ui.no-sandbox=true",
+    "record" : {
+      "exit" : 0,
+      "seconds" : 202.7,
+      "maven_total_time" : "03:20 min",
+      "log" : "logs/record.log",
+      "note" : "Recorded by the first invocation (2026-10-15 16:51 IST). The experiment was then restarted with --skip-record after a fix to the selection filter (it read harness.select instead of select), reusing this recording; the per-bug runs below are all from the restarted invocation."
+    },
+    "map" : {
+      "tests" : 120,
+      "files" : 44,
+      "sum_test_ms" : 171051
+    },
+    "runs" : {
+      "OFF_BY_ONE_CAPACITY" : {
+        "changed_file" : "sut/gate-domain/src/main/java/io/github/raktimchandra/gate/domain/CapacityPolicy.java",
+        "selected" : {
+          "exit" : 0,
+          "maven_seconds" : 160.9,
+          "tests" : 95,
+          "failed" : 4,
+          "sum_test_seconds" : 238.3,
+          "failing" : [ "reschedule > to_a_full_slot_is_rejected_and_nothing_changes", "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one", "Booking API > capacity_is_enforced_at_the_boundary", "RunBddSuite > A slot cannot take more trucks than its capacity" ],
+          "caught" : true
+        },
+        "selector_output" : [ "sut/gate-domain/src/main/java/io/github/raktimchandra/gate/domain/CapacityPolicy.java: 80 test(s) executed this file", "80 of 120 tests selected; estimated 125.0 s of 171.1 s test time", "Selection written to /home/claude/testharness/experiments/tia/selection-OFF_BY_ONE_CAPACITY.txt  (run with: harness run --select /home/claude/testharness/experiments/tia/selection-OFF_BY_ONE_CAPACITY.txt)" ],
+        "full" : {
+          "exit" : 0,
+          "maven_seconds" : 167.2,
+          "tests" : 138,
+          "failed" : 4,
+          "sum_test_seconds" : 249.1,
+          "failing" : [ "reschedule > to_a_full_slot_is_rejected_and_nothing_changes", "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one", "Booking API > capacity_is_enforced_at_the_boundary", "RunBddSuite > A slot cannot take more trucks than its capacity" ],
+          "caught" : true
+        }
+      },
+      "CHECK_DIGIT_EDGE_CASE" : {
+        "changed_file" : "sut/gate-domain/src/main/java/io/github/raktimchandra/gate/domain/ContainerNumber.java",
+        "selected" : {
+          "exit" : 0,
+          "maven_seconds" : 145.9,
+          "tests" : 73,
+          "failed" : 9,
+          "sum_test_seconds" : 204.0,
+          "failing" : [ "check-in > checking_in_twice_or_after_cancelling_is_invalid", "cancel > inside_the_cutoff_it_cannot_be_cancelled", "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one", "Booking API > a_generated_remainder_ten_container_is_accepted", "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[2]", "Search and object-level access > a_driver_lists_only_their_own_bookings", "Booking journey > a_remainder_ten_container_number_is_accepted_end_to_end", "Reschedule, cancel and check-in journeys > a_clerk_finds_a_booking_and_checks_the_truck_in", "RunBddSuite > Example #1.2" ],
+          "caught" : true
+        },
+        "selector_output" : [ "sut/gate-domain/src/main/java/io/github/raktimchandra/gate/domain/ContainerNumber.java: 64 test(s) executed this file", "64 of 120 tests selected; estimated 111.9 s of 171.1 s test time", "Selection written to /home/claude/testharness/experiments/tia/selection-CHECK_DIGIT_EDGE_CASE.txt  (run with: harness run --select /home/claude/testharness/experiments/tia/selection-CHECK_DIGIT_EDGE_CASE.txt)" ],
+        "full" : {
+          "exit" : 0,
+          "maven_seconds" : 186.2,
+          "tests" : 138,
+          "failed" : 10,
+          "sum_test_seconds" : 277.2,
+          "failing" : [ "reschedule > to_an_unknown_slot_is_404", "reschedule > another_driver_cannot_reschedule_it", "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one", "Booking API > a_generated_remainder_ten_container_is_accepted", "Booking API > capacity_is_enforced_at_the_boundary", "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[2]", "Booking journey > a_remainder_ten_container_number_is_accepted_end_to_end", "Reschedule, cancel and check-in journeys > a_driver_reschedules_to_another_slot", "RunBddSuite > Example #1.2", "RunBddSuite > A driver books from the booking screen" ],
+          "caught" : true
+        }
+      },
+      "TIMEZONE_SLOT_TIMES" : {
+        "changed_file" : "sut/gate-domain/src/main/java/io/github/raktimchandra/gate/domain/SlotTimes.java",
+        "selected" : {
+          "exit" : 0,
+          "maven_seconds" : 167.9,
+          "tests" : 115,
+          "failed" : 10,
+          "sum_test_seconds" : 259.3,
+          "failing" : [ "Slots API > listing_by_date_includes_new_slots_in_start_order", "Slots API > a_slot_requested_in_utc_is_reported_in_terminal_time", "Slots API > slot_times_are_the_terminal_wall_clock_with_its_offset", "Auth API > seeded_users_log_in_and_receive_a_bearer_token(String, String)[2]", "Auth API > seeded_users_log_in_and_receive_a_bearer_token(String, String)[1]", "Booking API > the_booking_reports_the_slot_time_exactly_as_the_slot_does", "Booking journey > the_slot_table_shows_the_terminal_time_and_live_remaining_places", "Booking journey > a_driver_books_a_slot_and_sees_it_in_their_bookings", "Reschedule, cancel and check-in journeys > a_driver_reschedules_to_another_slot", "RunBddSuite > A driver books from the booking screen" ],
+          "caught" : true
+        },
+        "selector_output" : [ "sut/gate-domain/src/main/java/io/github/raktimchandra/gate/domain/SlotTimes.java: 97 test(s) executed this file", "97 of 120 tests selected; estimated 133.3 s of 171.1 s test time", "Selection written to /home/claude/testharness/experiments/tia/selection-TIMEZONE_SLOT_TIMES.txt  (run with: harness run --select /home/claude/testharness/experiments/tia/selection-TIMEZONE_SLOT_TIMES.txt)" ],
+        "full" : {
+          "exit" : 0,
+          "maven_seconds" : 181.1,
+          "tests" : 138,
+          "failed" : 10,
+          "sum_test_seconds" : 273.6,
+          "failing" : [ "Slots API > listing_by_date_includes_new_slots_in_start_order", "Slots API > a_slot_requested_in_utc_is_reported_in_terminal_time", "Slots API > slot_times_are_the_terminal_wall_clock_with_its_offset", "Auth API > seeded_users_log_in_and_receive_a_bearer_token(String, String)[1]", "Auth API > seeded_users_log_in_and_receive_a_bearer_token(String, String)[2]", "Booking API > the_booking_reports_the_slot_time_exactly_as_the_slot_does", "Booking journey > the_slot_table_shows_the_terminal_time_and_live_remaining_places", "Booking journey > a_driver_books_a_slot_and_sees_it_in_their_bookings", "Reschedule, cancel and check-in journeys > a_driver_reschedules_to_another_slot", "RunBddSuite > A driver books from the booking screen" ],
+          "caught" : true
+        }
+      },
+      "RACE_ON_LAST_SLOT" : {
+        "changed_file" : "sut/gate-api/src/main/java/io/github/raktimchandra/gate/api/service/BookingService.java",
+        "selected" : {
+          "exit" : 0,
+          "maven_seconds" : 174.1,
+          "tests" : 84,
+          "failed" : 1,
+          "sum_test_seconds" : 244.2,
+          "failing" : [ "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one" ],
+          "caught" : true
+        },
+        "selector_output" : [ "sut/gate-api/src/main/java/io/github/raktimchandra/gate/api/service/BookingService.java: 73 test(s) executed this file", "73 of 120 tests selected; estimated 124.4 s of 171.1 s test time", "Selection written to /home/claude/testharness/experiments/tia/selection-RACE_ON_LAST_SLOT.txt  (run with: harness run --select /home/claude/testharness/experiments/tia/selection-RACE_ON_LAST_SLOT.txt)" ],
+        "full" : {
+          "exit" : 0,
+          "maven_seconds" : 184.0,
+          "tests" : 138,
+          "failed" : 1,
+          "sum_test_seconds" : 276.1,
+          "failing" : [ "Booking API > concurrent_requests_for_the_last_place_admit_exactly_one" ],
+          "caught" : true
+        }
+      },
+      "MISSING_AUTHORISATION_CHECK" : {
+        "changed_file" : "sut/gate-domain/src/main/java/io/github/raktimchandra/gate/domain/BookingAccessPolicy.java",
+        "selected" : {
+          "exit" : 0,
+          "maven_seconds" : 157.6,
+          "tests" : 49,
+          "failed" : 5,
+          "sum_test_seconds" : 187.1,
+          "failing" : [ "cancel > another_driver_cannot_cancel_it", "reschedule > another_driver_cannot_reschedule_it", "Search and object-level access > a_driver_cannot_read_another_drivers_booking", "Security smoke > a_driver_cannot_read_change_or_cancel_another_drivers_booking", "RunBddSuite > Drivers cannot see each other's bookings" ],
+          "caught" : true
+        },
+        "selector_output" : [ "sut/gate-domain/src/main/java/io/github/raktimchandra/gate/domain/BookingAccessPolicy.java: 39 test(s) executed this file", "39 of 120 tests selected; estimated 81.9 s of 171.1 s test time", "Selection written to /home/claude/testharness/experiments/tia/selection-MISSING_AUTHORISATION_CHECK.txt  (run with: harness run --select /home/claude/testharness/experiments/tia/selection-MISSING_AUTHORISATION_CHECK.txt)" ],
+        "full" : {
+          "exit" : 0,
+          "maven_seconds" : 190.7,
+          "tests" : 138,
+          "failed" : 5,
+          "sum_test_seconds" : 277.4,
+          "failing" : [ "reschedule > another_driver_cannot_reschedule_it", "cancel > another_driver_cannot_cancel_it", "Search and object-level access > a_driver_cannot_read_another_drivers_booking", "Security smoke > a_driver_cannot_read_change_or_cancel_another_drivers_booking", "RunBddSuite > Drivers cannot see each other's bookings" ],
+          "caught" : true
+        }
+      },
+      "API_SKIPS_CONTAINER_VALIDATION" : {
+        "changed_file" : "sut/gate-api/src/main/java/io/github/raktimchandra/gate/api/service/BookingService.java",
+        "selected" : {
+          "exit" : 0,
+          "maven_seconds" : 179.8,
+          "tests" : 84,
+          "failed" : 6,
+          "sum_test_seconds" : 265.2,
+          "failing" : [ "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[10]", "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[7]", "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[5]", "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[6]", "RunBddSuite > Example #1.4", "RunBddSuite > Example #1.3" ],
+          "caught" : true
+        },
+        "selector_output" : [ "sut/gate-api/src/main/java/io/github/raktimchandra/gate/api/service/BookingService.java: 73 test(s) executed this file", "73 of 120 tests selected; estimated 124.4 s of 171.1 s test time", "Selection written to /home/claude/testharness/experiments/tia/selection-API_SKIPS_CONTAINER_VALIDATION.txt  (run with: harness run --select /home/claude/testharness/experiments/tia/selection-API_SKIPS_CONTAINER_VALIDATION.txt)" ],
+        "full" : {
+          "exit" : 0,
+          "maven_seconds" : 215.9,
+          "tests" : 138,
+          "failed" : 6,
+          "sum_test_seconds" : 277.2,
+          "failing" : [ "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[6]", "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[7]", "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[5]", "Booking API > container_number_rules_are_enforced_by_the_api(ContainerCase)[10]", "RunBddSuite > Example #1.4", "RunBddSuite > Example #1.3" ],
+          "caught" : true
+        }
+      }
+    }
+  },
+  "missing" : [ ]
+}

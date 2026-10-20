@@ -1,0 +1,6 @@
+{
+  "page" : "login",
+  "browser" : "firefox",
+  "url" : "http://localhost:42863/login",
+  "violations" : [ ]
+}

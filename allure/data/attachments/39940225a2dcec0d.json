@@ -1,0 +1,9 @@
+{
+  "test" : "HealingTest.aDriftedTestIdIsHealedReportedAndGivenAPreciseFix",
+  "target" : "Save button",
+  "brokenLocator" : "data-testid=\"save\"",
+  "usedLocator" : "accessible name \"Save\" (button)",
+  "rank" : 1,
+  "suggestedFix" : "the element's data-testid is now \"save-v2\": update the Target to testId(\"save-v2\"), or restore data-testid in the UI if the rename was accidental",
+  "url" : "file:///home/runner/work/TestHarness/TestHarness/harness/harness-ui/target/test-classes/healing.html"
+}

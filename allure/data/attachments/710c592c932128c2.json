@@ -1,0 +1,6 @@
+{
+  "page" : "clerk-results",
+  "browser" : "chrome",
+  "url" : "http://localhost:46287/clerk",
+  "violations" : [ ]
+}
