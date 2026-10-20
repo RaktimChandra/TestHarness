@@ -45,7 +45,10 @@ jobs:
           r=harness/harness-ui/target/surefire-reports/TEST-io.github.raktimchandra.testharness.ui.RealBrowserTest.xml
           mv "$r" "${r%.xml}-chrome.xml"   # each run rewrites the report; keep one per browser
           for b in firefox edge; do
-            $MVN surefire:test -pl harness/harness-ui -Dtest='RealBrowserTest' -Dharness.ui.browser=$b 2>&1 \
+            # no-sandbox as in the suites' CI profile, which is not on harness-ui's classpath:
+            # without it Edge exits at start on the runner ("Chrome instance exited").
+            $MVN surefire:test -pl harness/harness-ui -Dtest='RealBrowserTest' -Dharness.ui.browser=$b \
+              -Dharness.ui.no-sandbox=true 2>&1 \
               | tee -a "$RUNNER_TEMP/build.log"
             mv "$r" "${r%.xml}-$b.xml"
           done
