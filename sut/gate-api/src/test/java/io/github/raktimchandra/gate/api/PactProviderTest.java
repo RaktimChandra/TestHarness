@@ -20,12 +20,10 @@ import org.junit.jupiter.api.TestTemplate;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.jdbc.core.simple.JdbcClient;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 
 /**
  * Verifies the consumer contract generated from the UI's API client
@@ -39,16 +37,16 @@ import org.testcontainers.junit.jupiter.Testcontainers;
  */
 @Provider("gate-api")
 @PactFolder("../../contracts/pacts")
-@Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, properties = {
     "gate.seed.password=gate-demo-pass", "gate.terminal-zone=Asia/Kolkata"})
 class PactProviderTest {
 
     private static final Instant PINNED_NOW = OffsetDateTime.parse("2026-11-20T09:00:00+05:30").toInstant();
 
-    @Container
-    @ServiceConnection
-    static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:16-alpine");
+    @DynamicPropertySource
+    static void database(DynamicPropertyRegistry registry) {
+        TestDatabase.register(registry, "pact");
+    }
 
     @LocalServerPort
     int port;

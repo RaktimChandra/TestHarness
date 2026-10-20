@@ -318,6 +318,7 @@ The last lines list every build with its result; logs and artifacts are under
 | Symptom | Fix |
 |---|---|
 | `Could not find a valid Docker environment` | Docker Desktop is not running, or WSL2 integration is off (Settings → Resources → WSL integration). |
+| No Docker at all (e.g. a locked-down machine) | Use a local PostgreSQL instead of Testcontainers: create a `gate` role and databases, set `$env:HARNESS_DB_PASSWORD` and `$env:GATE_IT_DB_PASSWORD`, then add `"-Dharness.db.url=jdbc:postgresql://localhost:5432/<db>"` for the suites and `"-Dgate.it.jdbc-url=jdbc:postgresql://localhost:5432/gate_it_{db}"` for `sut/gate-api` (databases `gate_it_api` and `gate_it_pact`). This is exactly what `.github/workflows/windows.yml` does on GitHub's Windows runners. |
 | `client version ... is too old` from Docker | Update Docker Desktop. (Testcontainers 1.21.4, used here, was verified against Docker Engine 29.8.) |
 | UI tests fail to start a browser | Install/update Chrome; Selenium Manager downloads the matching driver automatically. |
 | Port 8080 or 5432 busy (Compose) | Stop the other program, or change the left-hand port in `docker-compose.yml`. |
