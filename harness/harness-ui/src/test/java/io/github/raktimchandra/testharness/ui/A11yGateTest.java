@@ -52,7 +52,7 @@ class A11yGateTest {
         A11yReport more = new A11yReport("login", "chrome", "u", List.of(
                 new Violation("color-contrast", "serious", "Contrast", "u", 2, List.of("#a", "#new"))));
         assertThat(gate.known(more)).isEmpty();
-        assertThat(gate.breaches(more)).containsExactly("1 serious (max 0): color-contrast (2 elements: #a #new)");
+        assertThat(gate.breaches(more)).containsExactly("1 serious (max 0): color-contrast (2 elements: #new #a)");
     }
 
     @Test
@@ -82,6 +82,33 @@ class A11yGateTest {
         assertThat(gate.breaches(parentOnly)).hasSize(1);
         assertThat(gate.breaches(otherRule)).hasSize(1);
         assertThat(gate.breaches(untargeted)).hasSize(1);
+    }
+
+    @Test
+    void aKnownChainMatchesThroughAttributeSelectorsWithSpacesButNotElsewhere() {
+        A11yGate gate = A11yGate.from(HarnessConfig.load(Map.of(),
+                props("harness.a11y.known-issues", "color-contrast@.hull-label .code.muted"), getClass().getClassLoader()));
+        A11yReport onTheHull = new A11yReport("p", "chrome", "u", List.of(new Violation("color-contrast", "serious",
+                "Contrast", "u", 1, List.of("div[title=\"Eastern Star: 58 of 58 moves\"] > .hull-label > .code.muted"))));
+        A11yReport elsewhere = new A11yReport("p", "chrome", "u", List.of(new Violation("color-contrast", "serious",
+                "Contrast", "u", 1, List.of(".panel > .code.muted"))));
+        assertThat(gate.breaches(onTheHull)).isEmpty();
+        assertThat(gate.breaches(elsewhere)).hasSize(1);
+        A11yReport mixed = new A11yReport("p", "chrome", "u", List.of(new Violation("color-contrast", "serious",
+                "Contrast", "u", 3, List.of(".a > .hull-label > .code.muted", ".b > .hull-label > .code.muted",
+                        "#new-one"))));
+        assertThat(gate.breaches(mixed)).containsExactly(
+                "1 serious (max 0): color-contrast (3 elements: #new-one .a > .hull-label > .code.muted "
+                        + ".b > .hull-label > .code.muted)");
+    }
+
+    @Test
+    void axeTargetListsBecomePlainSelectors() {
+        // axe-core's node target is a list (one entry per frame); its toString() was "[.tone-warn]"
+        assertThat(io.github.raktimchandra.testharness.ui.a11y.A11yScannerTargets.of(List.of(".tone-warn")))
+                .isEqualTo(".tone-warn");
+        assertThat(io.github.raktimchandra.testharness.ui.a11y.A11yScannerTargets.of(
+                List.of("iframe#app", List.of("my-widget", ".label")))).isEqualTo("iframe#app >>> my-widget >>> .label");
     }
 
     private static Properties props(String k, String v) {

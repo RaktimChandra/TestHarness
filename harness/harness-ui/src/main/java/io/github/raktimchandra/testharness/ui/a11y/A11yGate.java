@@ -18,8 +18,9 @@ import java.util.Set;
  *
  * <p>axe names an element by the shortest selector that is unique on the page: {@code .tone-warn}
  * while there is one such element, {@code tr:nth-child(2) > td:nth-child(1) > .tone-warn.pill}
- * once there are several. So a listed selector matches a target that equals it, or whose last
- * compound selector (the element itself) has every class, id and tag of the listed one. A
+ * once there are several. So a listed selector is read as a descendant chain: it matches a
+ * target that equals it, or whose own element has every class, id and tag of the listed
+ * selector's last compound and whose ancestors match its earlier compounds in order. A
  * violation counts as known only when axe returned a target for each of its elements.
  */
 public record A11yGate(int maxCritical, int maxSerious, int maxModerate, int maxMinor, Set<String> knownIssues) {
@@ -51,21 +52,74 @@ public record A11yGate(int maxCritical, int maxSerious, int maxModerate, int max
             return false;
         }
         String selector = known.substring(at + 1).strip();
+        if (selector.isEmpty()) {
+            return false;
+        }
         if (selector.equals(target.strip())) {
             return true;
         }
-        if (selector.isEmpty() || selector.matches(".*[\\s>+~].*")) {
-            return false; // only a single compound selector is matched loosely
+        // Read as a descendant chain: the target's own element must have every part of the
+        // listed selector's last compound, and each earlier listed compound must match one of the
+        // target's ancestors, in order.
+        List<Set<String>> wanted = compounds(selector);
+        List<Set<String>> path = compounds(target);
+        if (wanted.isEmpty() || path.isEmpty() || wanted.stream().anyMatch(Set::isEmpty)
+                || !path.get(path.size() - 1).containsAll(wanted.get(wanted.size() - 1))) {
+            return false;
         }
-        String[] parts = target.strip().split("\\s*[\\s>+~]\\s*");
-        Set<String> element = simpleSelectors(parts[parts.length - 1]);
-        Set<String> wanted = simpleSelectors(selector);
-        return !wanted.isEmpty() && element.containsAll(wanted);
+        int i = path.size() - 2;
+        for (int w = wanted.size() - 2; w >= 0; w--) {
+            while (i >= 0 && !path.get(i).containsAll(wanted.get(w))) {
+                i--;
+            }
+            if (i < 0) {
+                return false;
+            }
+            i--;
+        }
+        return true;
+    }
+
+    /** The compound selectors of a selector, split at combinators outside brackets, parentheses and quotes. */
+    static List<Set<String>> compounds(String selector) {
+        List<Set<String>> out = new ArrayList<>();
+        StringBuilder current = new StringBuilder();
+        int depth = 0;
+        char quote = 0;
+        for (char ch : selector.toCharArray()) {
+            if (quote != 0) {
+                if (ch == quote) {
+                    quote = 0;
+                }
+                current.append(ch);
+            } else if (ch == '"' || ch == '\'') {
+                quote = ch;
+                current.append(ch);
+            } else if (ch == '[' || ch == '(') {
+                depth++;
+                current.append(ch);
+            } else if (ch == ']' || ch == ')') {
+                depth--;
+                current.append(ch);
+            } else if (depth == 0 && (Character.isWhitespace(ch) || ch == '>' || ch == '+' || ch == '~')) {
+                if (!current.isEmpty()) {
+                    out.add(simpleSelectors(current.toString()));
+                    current.setLength(0);
+                }
+            } else {
+                current.append(ch);
+            }
+        }
+        if (!current.isEmpty()) {
+            out.add(simpleSelectors(current.toString()));
+        }
+        return out;
     }
 
     /** Tag, {@code #id} and {@code .class} parts of one compound selector; pseudo-classes and attributes dropped. */
     private static Set<String> simpleSelectors(String compound) {
-        String plain = compound.replaceAll(":{1,2}[\\w-]+(\\([^)]*\\))?", "").replaceAll("\\[[^\\]]*\\]", "");
+        String plain = compound.replaceAll("\\[(?:[^\\]\"']|\"[^\"]*\"|'[^']*')*\\]", "")
+                .replaceAll(":{1,2}[\\w-]+(\\([^)]*\\))?", "");
         Set<String> out = new java.util.HashSet<>();
         java.util.regex.Matcher m = java.util.regex.Pattern.compile("[.#]?[\\w-]+").matcher(plain);
         while (m.find()) {
@@ -82,7 +136,7 @@ public record A11yGate(int maxCritical, int maxSerious, int maxModerate, int max
     /** Human-readable breaches; empty when the report is within the thresholds. */
     public List<String> breaches(A11yReport report) {
         report = new A11yReport(report.page(), report.browser(), report.url(),
-                report.violations().stream().filter(v -> !isKnown(v)).toList());
+                report.violations().stream().filter(v -> !isKnown(v)).map(this::unlistedFirst).toList());
         Map<String, Integer> counts = report.countsByImpact();
         List<String> out = new ArrayList<>();
         check(out, "critical", counts.get("critical"), maxCritical, report);
@@ -90,6 +144,17 @@ public record A11yGate(int maxCritical, int maxSerious, int maxModerate, int max
         check(out, "moderate", counts.get("moderate"), maxModerate, report);
         check(out, "minor", counts.get("minor"), maxMinor, report);
         return out;
+    }
+
+    /** The elements no known issue covers come first, so a failure message names them. */
+    private A11yReport.Violation unlistedFirst(A11yReport.Violation v) {
+        if (knownIssues.isEmpty() || v.targets() == null) {
+            return v;
+        }
+        List<String> sorted = new ArrayList<>(v.targets());
+        sorted.sort(java.util.Comparator.comparing(
+                (String t) -> knownIssues.stream().anyMatch(k -> matches(k, v.rule(), t))));
+        return new A11yReport.Violation(v.rule(), v.impact(), v.help(), v.helpUrl(), v.nodes(), sorted);
     }
 
     private static void check(List<String> out, String impact, int count, int max, A11yReport report) {

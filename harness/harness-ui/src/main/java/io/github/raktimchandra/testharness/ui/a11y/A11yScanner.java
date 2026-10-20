@@ -84,7 +84,22 @@ public final class A11yScanner {
     }
 
     private static String target(CheckedNode node) {
-        Object t = node.getTarget();
-        return t == null ? "?" : t.toString();
+        return target(node.getTarget());
+    }
+
+    /**
+     * axe gives a node's target as a list: one selector per frame (and a nested list per shadow
+     * root) on the way to the element. Joined with {@code " >>> "}; in a page without frames it is
+     * just the element's selector, e.g. {@code .tone-warn}. (Until 2026-10-20 the list's
+     * {@code toString()} was used, {@code [.tone-warn]}, which no known issue could ever match.)
+     */
+    static String target(Object t) {
+        if (t == null) {
+            return "?";
+        }
+        if (t instanceof java.util.List<?> parts) {
+            return parts.stream().map(A11yScanner::target).collect(java.util.stream.Collectors.joining(" >>> "));
+        }
+        return t.toString();
     }
 }

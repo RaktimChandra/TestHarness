@@ -73,9 +73,22 @@ class VisualCheckTest {
         assertThatThrownBy(() -> new VisualCheck(driver, settings(false, true)).matches("form",
                 element(png(Color.WHITE, true))))
                 .isInstanceOf(AssertionError.class)
-                .hasMessageContaining("Visual mismatch 'form': 12.500% of pixels differ");
+                .hasMessageContaining("Visual mismatch 'form': 12.500% of pixels differ")
+                // the black 10x10 box sits in the top-left quarter of the 40x20 capture
+                .hasMessageContaining("in a 40x20 capture, changed area x=0..9 y=0..9, per quarter TL/TR/BL/BR 100/0/0/0");
         assertThat(dir.resolve("out/diff/chrome-test/form-diff.png")).exists();
         assertThat(dir.resolve("out/diff/chrome-test/form-actual.png")).exists();
+    }
+
+    @Test
+    void aCaptureTakenMidRepaintIsRetakenUntilTwoAgree() throws Exception {
+        new VisualCheck(driver, settings(true, false)).matches("settle", element(png(Color.WHITE, false)));
+        WebElement repainting = element(png(Color.WHITE, false));
+        // first capture mid-repaint (the box), then the settled page twice
+        when(repainting.getScreenshotAs(OutputType.BYTES))
+                .thenReturn(png(Color.WHITE, true), png(Color.WHITE, false), png(Color.WHITE, false));
+        assertThat(new VisualCheck(driver, settings(false, true)).matches("settle", repainting))
+                .isEqualTo(VisualCheck.Outcome.MATCHED);
     }
 
     @Test

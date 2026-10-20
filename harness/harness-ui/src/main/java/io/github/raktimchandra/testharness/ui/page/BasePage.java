@@ -37,7 +37,7 @@ public abstract class BasePage<P extends BasePage<P>> {
 
     @SuppressWarnings("unchecked")
     public P open() {
-        Report.step("Open " + getClass().getSimpleName() + " (" + path() + ")", () -> driver.get(baseUrl + path()));
+        Report.step("Open " + getClass().getSimpleName() + " (" + path() + ")", () -> Navigation.open(driver, baseUrl + path()));
         return waitUntilLoaded();
     }
 

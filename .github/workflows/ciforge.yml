@@ -45,7 +45,11 @@ jobs:
         run: |
           set -o pipefail
           git fetch -q origin "+refs/heads/${GITHUB_REF_NAME}:refs/remotes/origin/${GITHUB_REF_NAME}" || true
+          # Visual baselines are per platform; this runner renders like the ci.yml UI jobs, whose
+          # baselines are "chrome-ci". Without this the checks look for chrome-linux and, with
+          # HARNESS_ENV=ci, fail for want of a baseline (the first run on main did exactly that).
           ciforge run .ciforge.yml --source . --branch "${GITHUB_REF_NAME}" --data-dir "$RUNNER_TEMP/cf" \
+            -p "suite.args=-Dharness.visual.platform=chrome-ci" \
             2>&1 | tee "$RUNNER_TEMP/ciforge.log"
       - name: Export the run record
         if: always()

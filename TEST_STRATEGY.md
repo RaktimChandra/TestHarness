@@ -131,8 +131,16 @@ Domain unit and SUT integration tests were not part of the matrix (they test the
 | `MISSING_AUTHORISATION_CHECK` | API, security, BDD | API, security, BDD | as expected |
 | `API_SKIPS_CONTAINER_VALIDATION` | API, BDD — not UI | API, BDD | as expected; the UI hides it |
 
-Accessibility, visual and Gatling caught none of the six, which is correct for functional
-bugs. **Every bug was caught by at least one suite; the API suite caught all six.**
+Accessibility, visual and Gatling caught none of the six in that run, which is correct for
+functional bugs. **Every bug was caught by at least one suite; the API suite caught all six.**
+
+**Repeated (Phase 6, runs 38869649371 and 38875469031,
+[repeats.md](experiments/fault-seeding/repeats.md)):** 46 of the 48 cells gave the same verdict
+three times. The two that moved are both `CHECK_DIGIT_EDGE_CASE`: the security suite caught it
+in 1 of 3 runs, and **Gatling in 2 of 3** — its booking flow uses random container numbers,
+and when enough needed the broken remainder-10 rule the error rate crossed the 1 % gate. So the
+load test is also a weak functional net for data-dependent bugs; the strategy does not rely on
+it for that.
 
 ## Principles applied everywhere
 - **Isolation by data, not by teardown:** each test makes its own users and its own lane.

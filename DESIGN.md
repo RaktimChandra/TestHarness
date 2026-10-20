@@ -547,7 +547,7 @@ artifact retention. *Limit:* GitHub Pages must be switched on once in the reposi
 `tia-map` records per-test coverage on every push to main and stores the map in `ci-history`;
 the `impacted` job on a pull request selects with `th tia select --base origin/<base>` and runs
 that subset first. It is feedback, not a gate: the full suites still run (D39's measured
-savings were 4–22 %, too little to skip anything on merge).
+savings were 4–33 % over three recordings, too little to skip anything on merge).
 
 ### D53 — Sign-in throttling in the SUT, tested from three sides — Built
 Five failures per username or 100 per client address within 15 minutes lock that key for
@@ -610,6 +610,43 @@ environment.
 `release.yml` refuses to run off main, re-use a tag or release without a CHANGELOG section; it
 publishes the source archive, the SBOM and, given a pipeline run, its Allure report and site.
 
+### D62 — Known accessibility issues are matched like CSS, against axe's real output — Built
+A listed `rule@selector` is read as a descendant chain: the failing element must carry every
+class, id and tag of the last compound, and its ancestors the earlier ones, in order. Exact
+string matching failed as soon as axe had to name several elements with structural selectors,
+and — found only in CI — the scanner had been storing axe's target *list* as `[.tone-warn]`,
+so nothing had ever matched. A violation counts as known only if every element is covered, and
+failure messages name the uncovered elements first. *Lesson kept in the tests:* unit tests now
+use the exact shape axe returns, not a simplified one.
+
+### D63 — A re-run attempt keeps only the history it produced — Built
+"Re-run failed jobs" carries the passed jobs' artifacts into the new attempt; publishing them
+again doubled those results in durations and flakiness. The publish step drops any file a later
+attempt copied unchanged from an earlier attempt of the same run. The re-run jobs' own results
+stay, so a test that failed and then passed on the same commit still counts as a flip.
+
+### D64 — Visual captures are retaken until two agree — Built
+A capture is compared only once two consecutive captures, 150 ms and two frames apart, are
+pixel-identical (at most five). It targets the one intermittent visual failure seen (Firefox,
+`cancel-dialog`, RESULTS §40), whose cause has not been observed directly; each UI job reports
+which checks needed retaking, so the explanation can be confirmed or rejected by data.
+*Rejected:* raising the Firefox threshold, which would hide real changes of the same size.
+
+### D65 — Anti-aliased edge pixels are not counted as differences — Built
+`ImageDiff` now applies pixelmatch's anti-aliasing detector (Vysniauskas 2009): a differing
+pixel is discounted when, in either image, it sits on a smooth slope between a darker and a
+brighter neighbour that each belong to a flat area. Discounted pixels are reported separately
+(orange in the diff, a count in the report), so they stay visible. This replaces D26's
+"no anti-aliasing detection" simplification after Firefox in CI drew the same heading with its
+glyphs half a pixel apart from run to run (RESULTS §40). *Rejected again:* a higher threshold.
+
+### D66 — One repeat for a browser-plumbing timeout during navigation, and only that — Built
+`Navigation.open` repeats a navigation once when ChromeDriver or EdgeDriver reports `Timed out
+receiving message from renderer` — a renderer process that stopped answering the driver,
+seen twice in one Edge run on the Windows runner (2026-10-20). It is logged and added to the
+report; a second failure, or any other timeout, fails the test. Assertions are still never
+retried (D36): a slow page is a finding, a deaf renderer is not.
+
 ---
 
 ## Build and tooling
@@ -636,11 +673,12 @@ sandbox). Lifecycle plugins (clean, resources, install, …) are pinned because 
 - Edge has not been run outside CI (no Edge binary in the authoring sandbox).
 - Selenium Grid and the Docker Compose stack have only run in CI (Docker Hub is blocked in
   the authoring sandbox).
-- Visual diff has no anti-aliasing detection (D26); tests must keep layouts deterministic.
 - Performance numbers come from a shared runner and are for regression detection (D29).
 - Test impact analysis attributes SUT start-up code to the first test that boots it, and has no
   per-test JavaScript coverage (D39).
-- The AI features have not been exercised against a real model provider (D41).
+- The AI drafter has been measured against small open models served by Ollama (D57), not
+  against a hosted frontier model, and the score is step reuse, not whether a draft tests the
+  right behaviour.
 - The race-condition bug uses a configurable pause (`gate.race-window`, 150 ms) to make the
   race reproducible on any machine; without it the race is real but intermittent.
 - Coverage numbers in RESULTS.md are per-module unit/integration coverage; per-test coverage
@@ -649,8 +687,8 @@ sandbox). Lifecycle plugins (clean, resources, install, …) are pinned because 
   per test, so that run's per-module JaCoCo reports are not meaningful (D39). The same reset
   made `harness-insights` report 9 % line coverage until its test classes got one JVM each
   (77.5 % after).
-- The TeamCity configuration is compiled and generated in CI, never run on a TeamCity agent
-  (D49); the CIForge pipeline ran on the authoring machine only (D48).
+- TeamCity has run on one server and one agent, both containers started inside a GitHub
+  Actions job (D60) — not on a long-lived installation with several agents.
 - The PortSync suites run only in CI (PortSync needs Kafka; Docker Hub is blocked in the
   authoring sandbox), and their schemas are the adapter's expectations, not a published
   PortSync contract (D44).

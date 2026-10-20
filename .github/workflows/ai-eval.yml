@@ -10,6 +10,9 @@ on:
       repeats:
         description: Drafts per story per model
         default: '2'
+      models:
+        description: Models to evaluate (JSON list)
+        default: '["qwen2.5:1.5b", "llama3.2:3b", "qwen2.5:7b"]'
 
 permissions:
   contents: read
@@ -26,7 +29,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        model: ['qwen2.5:1.5b', 'llama3.2:3b', 'qwen2.5:7b']
+        model: ${{ fromJSON(inputs.models || '["qwen2.5:1.5b", "llama3.2:3b", "qwen2.5:7b"]') }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v6
@@ -35,18 +38,37 @@ jobs:
           java-version: '21'
           cache: maven
       - name: Ollama with ${{ matrix.model }}
+        # The Ollama server image (a pinned release) rather than the install script: the first
+        # run of this workflow failed inside install.sh, and a container gives the same server
+        # on any runner with no system changes.
         run: |
-          curl -fsSL https://ollama.com/install.sh | sh
-          for i in $(seq 1 30); do curl -sf http://localhost:11434/api/version && break; sleep 2; done
-          ollama pull '${{ matrix.model }}'
-          ollama list
+          set -o pipefail
+          {
+            docker run -d --name ollama -p 11434:11434 ollama/ollama:0.9.0
+            for i in $(seq 1 60); do curl -sf http://localhost:11434/api/version && break; sleep 2; done
+            curl -sf http://localhost:11434/api/version
+            docker exec ollama ollama pull '${{ matrix.model }}'
+            docker exec ollama ollama list
+          } 2>&1 | tee "$RUNNER_TEMP/ollama.log"
+      - uses: ./.github/actions/log-tail
+        if: failure()
+        with:
+          file: ${{ runner.temp }}/ollama.log
       - name: Build
         run: ./mvnw -B -ntp -q install -DskipTests
       - name: Draft and score
+        # pipefail: the first run's qwen2.5:7b job ended "success" without a summary, because tee
+        # hid the evaluator's exit code.
         run: |
+          set -o pipefail
+          mkdir -p out
           python3 tools/ai_eval.py --model '${{ matrix.model }}' --repeats ${{ inputs.repeats || '2' }} \
-            --out out --explain | tee console.txt
+            --out out --explain 2>&1 | tee out/console-${{ strategy.job-index }}.txt
           echo "::notice title=ai-eval ${{ matrix.model }}::$(python3 -c "import json,glob;print(json.dumps(json.load(open(glob.glob('out/*/ai-eval.json')[0]))['summary']))")"
+      - uses: ./.github/actions/log-tail
+        if: failure()
+        with:
+          file: out/console-${{ strategy.job-index }}.txt
       - uses: actions/upload-artifact@v7
         if: always()
         with:
@@ -70,10 +92,19 @@ jobs:
       - name: Summarise
         run: python3 tools/ai_eval_report.py experiments/ai/results | tee -a "$GITHUB_STEP_SUMMARY"
       - name: Push
+        if: hashFiles('experiments/ai/results/**/ai-eval.json') != ''
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -b "ai-eval/${{ github.run_id }}"
-          git add -f experiments/ai/results
-          git commit -m "experiment: AI drafter evaluation from run ${{ github.run_id }}"
-          git push origin "ai-eval/${{ github.run_id }}"
+          set -o pipefail
+          {
+            git checkout -b "ai-eval/${{ github.run_id }}"
+            git add -f experiments/ai/results
+            git status --short | head -20
+            git commit -q -m "experiment: AI drafter evaluation from run ${{ github.run_id }}"
+            git push origin "ai-eval/${{ github.run_id }}"
+          } 2>&1 | tee "$RUNNER_TEMP/push.log"
+      - uses: ./.github/actions/log-tail
+        if: failure()
+        with:
+          file: ${{ runner.temp }}/push.log

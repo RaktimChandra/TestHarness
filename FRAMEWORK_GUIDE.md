@@ -67,15 +67,20 @@ Choose the environment with `-Dharness.env=docker` or `HARNESS_ENV=docker`.
 | `visual.max-mismatch` / `visual.pixel-tolerance` | `0.002` / `0.1` | allowed share of differing pixels / per-pixel YIQ tolerance |
 | `visual.require-baseline` | `true` in `ci`, else `false` | a missing baseline fails instead of skipping |
 | `a11y.max-critical` / `-serious` / `-moderate` / `-minor` | `0` / `0` / `-1` / `-1` | violations allowed per impact (`-1` = report only) |
+| `a11y.known-issues` | empty | `rule@selector, ...`: violations in a system you cannot change, reported but not counted; the selector is read as a descendant chain (`color-contrast@.hull-label .code.muted`); any other element still fails |
 | `ui.healing` | `report` | `report` (heal and mark), `fail` (diagnose and fail), `off` |
 | `history.enabled` / `history.dir` | `true` / `target/test-history` | JSON Lines history of every result |
 | `history.jdbc-url` / `history.db-user` | empty / `harness` | also store history in PostgreSQL (password: `HARNESS_HISTORY_DB_PASSWORD`) |
 | `quarantine.mode` / `quarantine.file` | `off` / `quarantine.json` | `exclude` (blocking jobs) or `only` (quarantine job) |
 | `select` | empty | file of test keys to run (`-Dharness.select=...`) |
 | `shard` | empty | `k/n`: run only this shard (`-Dharness.shard=2/4`) |
+| `shard.durations` | empty | JSON of mean test durations (`th history durations`): shards are balanced longest-first; tests not in the file use the hash |
 | `tia.record` / `tia.dir` | `false` / `target/tia` | record per-test coverage (needs sequential tests) |
 | `ai.provider` / `ai.model` / `ai.base-url` | `none` / — / provider default | optional model for drafts (`HARNESS_AI_API_KEY`) |
 | `data.seed` | random | fix the Faker seed to replay a run |
+
+Any key can also come from the environment: `HARNESS_DB_PASSWORD` reaches `harness.db.password`
+or `harness.db-password` (an `_` matches `.` or `-`).
 
 Secrets are **only** environment variables, read with `config.secret("NAME", localFallback)`.
 In `ci` there is no fallback. Current secrets: `GATE_SEED_PASSWORD`,
@@ -337,6 +342,18 @@ non-blocking job runs `-Dharness.quarantine.mode=only`. Locally the default is `
 
 Each failure is classified (locator, timeout, assertion, environment, data, unknown) in the
 history, the leaderboard and the failure summary.
+
+**In CI** the history needs no database: after every pipeline on `main` the `publish` job
+appends the run's JSON Lines files to the `ci-history` branch (newest 120 runs), writes
+`shard-durations.json`, `flaky.txt` and `quarantine-proposal.txt` there, and publishes the
+dashboard built from that window to `gh-pages`. The same files work locally:
+
+```bash
+git fetch origin ci-history && git worktree add ../ci-history origin/ci-history
+./th history flaky --jsonl ../ci-history/runs
+./th history durations --jsonl ../ci-history/runs --suite ui-suite --shards 2   # the planned split
+./mvnw verify -pl suites/ui-suite -Dharness.shard=1/2 -Dharness.shard.durations=../ci-history/shard-durations.json
+```
 
 The deliberately flaky demo lives in `suites/flaky-demo` and runs only with
 `-DskipFlakyDemo=false`.

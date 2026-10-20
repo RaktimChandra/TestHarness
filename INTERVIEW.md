@@ -15,9 +15,11 @@ likely to ask, with honest answers. Every number links back to a run in
 > timezone shift, a race on the last place, a missing authorisation check, and validation that
 > only exists in the UI.
 >
-> In CI I switch each bug on and run every suite type against it. The result is a defect
-> detection matrix: the API suite caught all six; BDD five; contract, security and UI two
-> each; accessibility, visual and performance none — which is correct for functional bugs.
+> In CI I switch each bug on and run every suite type against it — three times, because one
+> run of a noisy thing isn't a measurement. The API suite caught all six every time; BDD five;
+> contract and UI two. Security caught two in one run and one in the other two, and Gatling
+> caught the check-digit bug in two runs of three through its error-rate gate: both depend on
+> random container numbers hitting the broken case.
 > The race was caught by **one test out of 151**. And one of my own strategy assumptions was
 > wrong: I expected Pact to catch the timezone bug, and it can't, because it matches
 > timestamps by format. I kept that in the docs.
@@ -25,13 +27,15 @@ likely to ask, with honest answers. Every number links back to a run in
 > On top of that: flakiness is measured from run history — a test that flips pass/fail on
 > the same commit is scored and quarantined into a non-blocking job, never retried until
 > green. Self-healing locators exist, but every heal is reported with the exact fix. Mutation
-> testing took the domain rules from 95.1 % to 100 %. Test impact analysis caught all six bugs
-> with a subset — but only saved 4–22 % of the time, and I explain why.
+> testing took the domain rules from 95.1 % to 100 %. Test impact analysis caught the bug in
+> 18 of 18 selected runs — but saved only 4–33 % of the time, and I explain why.
 >
-> Everything is one command: `./mvnw verify`, 485 tests in about six minutes on a 2-vCPU
-> machine. CI runs it across Chrome, Firefox and Edge, sharded, on Selenium Grid, with a
-> single quality gate. And to show it isn't tied to my demo app, the same framework tests
-> PortSync — a Kafka event-processing system I also built — with 42 tests in CI.
+> Everything is one command: `./mvnw verify`, 534 JVM tests in six and a half minutes on a
+> 2-vCPU machine. CI runs it across Chrome, Firefox and Edge, sharded by recorded duration, on
+> Selenium Grid, with a single quality gate, plus OSV and ZAP scans and a Windows job. The same
+> pipeline runs on a real TeamCity server and on CIForge, my own CI orchestrator. And to show
+> it isn't tied to my demo app, the same framework tests PortSync — a Kafka event-processing
+> system I also built — with 54 tests in CI, where it found two real contrast defects.
 
 ## Questions and answers
 
@@ -81,17 +85,21 @@ message existed, not what it said. 100 % on a small rules module is meaningful; 
 there, where mutants are cheap and the logic matters most.
 
 **9. Does test impact analysis work?**
-It caught all six seeded bugs with the selected subset, but saved only 3.8–21.6 % of
-wall-clock. Most tests go through the same booking service, and start-up (JVM, Spring,
-PostgreSQL) is a fixed cost. It pays off for narrow changes. I'd use it to order tests and
-fail fast, not to skip them on main.
+Over three recordings, the selected subset caught the bug 18 times out of 18, but saved only
+3.8–33.2 % of wall-clock, and the same bug moved by up to 16 points between runs. Most tests go through the same booking service, and start-up (JVM, Spring,
+PostgreSQL) is a fixed cost. It pays off for narrow changes. The map also isn't stable —
+two recordings of the same code selected 83 and 81 tests for one file, because random test
+data takes different paths. So CI re-records it on every push to main, and on PRs it orders
+tests to fail fast; it never skips them.
 
 ### Flakiness, healing, AI
 
 **10. How do you define flaky?**
 Flips between pass and fail on consecutive runs of the **same commit**, divided by the number
-of transitions. Pass on one commit and fail on the next is a regression, not flakiness. The
-demo test scored 0.368 over 20 CI runs and was quarantined; its stable twin scored 0.
+of transitions. Pass on one commit and fail on the next is a regression, not flakiness. In
+three repeats of 20 CI runs each, the demo test scored 0.368, 0.474 and 0.421 and was
+quarantined every time; its stable twin scored 0 every time. Its failure rate moved from 25 %
+to 45 %, which is why the score uses flips rather than the failure rate.
 
 **11. What does quarantine actually do?**
 A JUnit Platform discovery filter reads `quarantine.json`. Blocking jobs exclude those tests;
@@ -107,8 +115,13 @@ the demo that breaks a locator on purpose.
 **13. What does the AI feature do, and did you test it with a real model?**
 It drafts Gherkin from a user story and summarises failed runs, through any OpenAI-compatible
 or Anthropic endpoint. Drafts are parsed, banner-marked, tagged `@draft` and never written into
-the source tree. I tested the wire formats against stub servers; I have **not** run it against
-a real provider, so I make no claims about output quality.
+the source tree. I measured it with three small open models served by Ollama in CI, on eight
+user stories, twice each — scored by how many drafted steps an existing step definition
+already runs, matched the way Cucumber matches. qwen2.5 7B: 100 % valid Gherkin and 68.5 % step
+reuse (69.9 % in a second run); the 1.5B and 3B models: 88 % and 69 % valid, 43 % and 36 %
+reuse. Only one 7B draft per run ran with no new glue code. And asked to explain the failures of a seeded capacity bug, the two
+smallest models mostly blamed the tests or the environment — so drafts and explanations are a
+starting point for a human, which is exactly how the tool labels them. I haven't measured a large hosted model.
 
 ### CI/CD and cloud
 
@@ -119,14 +132,19 @@ Quarantined tests run in a non-blocking job. One quality-gate job is the require
 only if every blocking job succeeded, and "skipped" counts as not passed.
 
 **15. How does sharding work?**
-A stable hash (CRC32) of each test's key modulo the shard count. It's deterministic, so a test
-always lands in the same shard and history stays comparable. The trade-off is uneven shard
-durations; a duration-aware split from history would be the next step.
+Longest test first onto the currently lightest shard (LPT), using mean durations that the
+`publish` job records on the `ci-history` branch after every run on main. Every shard computes
+the same plan from the same file, so there's no coordinator. A test without a recorded
+duration — a new one — falls back to a stable CRC32 hash, so a stale file can never lose or
+duplicate a test. Before any history exists, it's all hash; RESULTS shows the before and after.
 
 **16. You wrote a TeamCity config — did you run it?**
-The Kotlin DSL compiles and generates in CI, so the syntax and model are checked. It has
-**not** run on a TeamCity server; agent requirements are declared, not proven. I say so in the
-file header.
+Yes. A workflow starts a TeamCity 2025.07 server and an agent image I built (JDK 21, Docker,
+Chrome), turns on versioned settings in Kotlin over REST, and the server itself imports and
+compiles `settings.kts` and runs the chain: build 350 tests, API 112, BDD 24, UI in two shards,
+Gatling, PIT — all green. The first two runs failed only on visual checks: the agent renders
+fonts differently from the runner that made the baselines, so baselines are now per agent
+platform. That's the kind of thing you only learn by running it.
 
 **17. What is CIForge?**
 A small TeamCity-style CI orchestrator I wrote in Python (FastAPI, SQLite): build chains with
@@ -150,17 +168,24 @@ precisely because a secret was missing, which is the behaviour I wanted.
 Eight while building Phases 1–2 (in RESULTS.md with the run that found each): e.g. Pact
 provider verification found inconsistent timestamp precision; security tests found URLs that
 bypassed the error contract. Later the dashboard exposed a coverage-measurement bug in my own
-framework: one test was resetting the JaCoCo agent and erasing other tests' coverage.
+framework: one test was resetting the JaCoCo agent and erasing other tests' coverage. In
+Phase 6: 41 known vulnerabilities in transitive dependencies, six missing security headers
+(ZAP), two contrast defects in PortSync — and several bugs in my own tooling that only real
+runs exposed: a Gatling parser that read "1,500" as zero, a scanner that stored axe's target
+list as a string so known issues never matched, and re-runs that doubled history.
 
 **21. What can't the framework tell you?**
-Whether the visual baselines are right in the first place (a human approves them), anything
-about AI output quality, and anything about systems it hasn't been pointed at. Performance
-numbers come from shared CI runners, so they catch regressions, not capacity.
+Whether the visual baselines are right in the first place (a human approves them), and
+anything about systems it hasn't been pointed at. The AI evaluation measures how much of a
+draft runs on existing steps, not whether it tests the right thing. Performance smoke numbers
+come from shared CI runners, so they catch regressions; the capacity experiment pins the SUT
+to 2 CPUs and 1 GiB so its numbers mean something, but only for that box.
 
 **22. What would you do differently?**
 Start the measurement harness earlier — some Phase 1 tests would have been designed
-differently had I seen the detection matrix first. And record per-test durations from the
-start to balance shards.
+differently had I seen the detection matrix first. Repeat every experiment from the start: my
+first fault-seeding run said Gatling caught nothing, and the repeats showed that held for one
+run only. And record per-test durations from day one to balance shards.
 
 **23. How did you make sure the numbers are real?**
 Every figure in RESULTS.md has the run ID or commit, the machine, and the method. Where
@@ -176,4 +201,4 @@ eight-line API test. Running the module took 54 s for the API suite and 39 s for
 Ask me to change something live: add a seeded bug and predict which suites catch it, explain
 why `RACE_ON_LAST_SLOT` only fails under concurrency, or walk through why the quarantine
 filter had to treat parameterised tests as containers. The design decisions and their
-alternatives are written down in DESIGN.md (D1–D45), including the ones that turned out wrong.
+alternatives are written down in DESIGN.md (D1–D66), including the ones that turned out wrong.

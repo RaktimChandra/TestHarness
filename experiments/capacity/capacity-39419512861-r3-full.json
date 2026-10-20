@@ -1,0 +1,288 @@
+{
+  "flow": "full",
+  "label": "39419512861-r3",
+  "duration_s": 60,
+  "started": "2026-10-20T12:06:13+0000",
+  "sut_cpus": 2.0,
+  "sut_memory_bytes": 1073741824,
+  "host_cpus": 4,
+  "rules": {
+    "p95_ms": 800,
+    "max_error_pct": 1.0,
+    "min_achieved_ratio": 0.95
+  },
+  "levels": [
+    {
+      "offered_flows_per_s": 5.0,
+      "maven_exit": 0,
+      "wall_s": 75.5,
+      "requests": 1500,
+      "failed": 0,
+      "error_pct": 0.0,
+      "p50_ms": 4.0,
+      "p95_ms": 81.0,
+      "p99_ms": 98.0,
+      "max_ms": 165.0,
+      "rps": 25.0,
+      "by_request": {
+        "login": {
+          "total": 300,
+          "ok": 300,
+          "ko": 0
+        },
+        "list slots": {
+          "total": 300,
+          "ok": 300,
+          "ko": 0
+        },
+        "book": {
+          "total": 300,
+          "ok": 300,
+          "ko": 0
+        },
+        "read booking": {
+          "total": 300,
+          "ok": 300,
+          "ko": 0
+        },
+        "cancel": {
+          "total": 300,
+          "ok": 300,
+          "ko": 0
+        }
+      },
+      "completed_flows_per_s": 5.0,
+      "achieved_ratio": 1.0,
+      "sut_cpu_pct_mean": 43.8,
+      "sut_cpu_pct_max": 104.5,
+      "keeps_up": true
+    },
+    {
+      "offered_flows_per_s": 10.0,
+      "maven_exit": 0,
+      "wall_s": 72.2,
+      "requests": 3000,
+      "failed": 0,
+      "error_pct": 0.0,
+      "p50_ms": 3.0,
+      "p95_ms": 92.0,
+      "p99_ms": 150.0,
+      "max_ms": 241.0,
+      "rps": 50.0,
+      "by_request": {
+        "login": {
+          "total": 600,
+          "ok": 600,
+          "ko": 0
+        },
+        "list slots": {
+          "total": 600,
+          "ok": 600,
+          "ko": 0
+        },
+        "book": {
+          "total": 600,
+          "ok": 600,
+          "ko": 0
+        },
+        "read booking": {
+          "total": 600,
+          "ok": 600,
+          "ko": 0
+        },
+        "cancel": {
+          "total": 600,
+          "ok": 600,
+          "ko": 0
+        }
+      },
+      "completed_flows_per_s": 10.0,
+      "achieved_ratio": 1.0,
+      "sut_cpu_pct_mean": 69.4,
+      "sut_cpu_pct_max": 151.4,
+      "keeps_up": true
+    },
+    {
+      "offered_flows_per_s": 15.0,
+      "maven_exit": 0,
+      "wall_s": 72.2,
+      "requests": 4500,
+      "failed": 0,
+      "error_pct": 0.0,
+      "p50_ms": 7.0,
+      "p95_ms": 177.0,
+      "p99_ms": 270.0,
+      "max_ms": 487.0,
+      "rps": 73.77,
+      "by_request": {
+        "login": {
+          "total": 900,
+          "ok": 900,
+          "ko": 0
+        },
+        "list slots": {
+          "total": 900,
+          "ok": 900,
+          "ko": 0
+        },
+        "book": {
+          "total": 900,
+          "ok": 900,
+          "ko": 0
+        },
+        "read booking": {
+          "total": 900,
+          "ok": 900,
+          "ko": 0
+        },
+        "cancel": {
+          "total": 900,
+          "ok": 900,
+          "ko": 0
+        }
+      },
+      "completed_flows_per_s": 15.0,
+      "achieved_ratio": 1.0,
+      "sut_cpu_pct_mean": 110.6,
+      "sut_cpu_pct_max": 199.3,
+      "keeps_up": true
+    },
+    {
+      "offered_flows_per_s": 20.0,
+      "maven_exit": 0,
+      "wall_s": 72.6,
+      "requests": 6000,
+      "failed": 0,
+      "error_pct": 0.0,
+      "p50_ms": 87.0,
+      "p95_ms": 589.0,
+      "p99_ms": 794.0,
+      "max_ms": 1302.0,
+      "rps": 98.36,
+      "by_request": {
+        "login": {
+          "total": 1200,
+          "ok": 1200,
+          "ko": 0
+        },
+        "list slots": {
+          "total": 1200,
+          "ok": 1200,
+          "ko": 0
+        },
+        "book": {
+          "total": 1200,
+          "ok": 1200,
+          "ko": 0
+        },
+        "read booking": {
+          "total": 1200,
+          "ok": 1200,
+          "ko": 0
+        },
+        "cancel": {
+          "total": 1200,
+          "ok": 1200,
+          "ko": 0
+        }
+      },
+      "completed_flows_per_s": 20.0,
+      "achieved_ratio": 1.0,
+      "sut_cpu_pct_mean": 137.8,
+      "sut_cpu_pct_max": 201.3,
+      "keeps_up": true
+    },
+    {
+      "offered_flows_per_s": 25.0,
+      "maven_exit": 0,
+      "wall_s": 76.0,
+      "requests": 7500,
+      "failed": 0,
+      "error_pct": 0.0,
+      "p50_ms": 875.0,
+      "p95_ms": 3228.0,
+      "p99_ms": 5036.0,
+      "max_ms": 8800.0,
+      "rps": 117.19,
+      "by_request": {
+        "login": {
+          "total": 1500,
+          "ok": 1500,
+          "ko": 0
+        },
+        "list slots": {
+          "total": 1500,
+          "ok": 1500,
+          "ko": 0
+        },
+        "book": {
+          "total": 1500,
+          "ok": 1500,
+          "ko": 0
+        },
+        "read booking": {
+          "total": 1500,
+          "ok": 1500,
+          "ko": 0
+        },
+        "cancel": {
+          "total": 1500,
+          "ok": 1500,
+          "ko": 0
+        }
+      },
+      "completed_flows_per_s": 25.0,
+      "achieved_ratio": 1.0,
+      "sut_cpu_pct_mean": 165.7,
+      "sut_cpu_pct_max": 201.5,
+      "keeps_up": false
+    },
+    {
+      "offered_flows_per_s": 30.0,
+      "maven_exit": 0,
+      "wall_s": 92.1,
+      "requests": 8996,
+      "failed": 8,
+      "error_pct": 0.089,
+      "p50_ms": 4795.0,
+      "p95_ms": 15554.0,
+      "p99_ms": 20940.0,
+      "max_ms": 30914.0,
+      "rps": 113.87,
+      "by_request": {
+        "login": {
+          "total": 1800,
+          "ok": 1799,
+          "ko": 1
+        },
+        "list slots": {
+          "total": 1800,
+          "ok": 1798,
+          "ko": 2
+        },
+        "book": {
+          "total": 1800,
+          "ok": 1798,
+          "ko": 2
+        },
+        "read booking": {
+          "total": 1798,
+          "ok": 1796,
+          "ko": 2
+        },
+        "cancel": {
+          "total": 1798,
+          "ok": 1797,
+          "ko": 1
+        }
+      },
+      "completed_flows_per_s": 29.95,
+      "achieved_ratio": 0.998,
+      "sut_cpu_pct_mean": 169.1,
+      "sut_cpu_pct_max": 205.9,
+      "keeps_up": false
+    }
+  ],
+  "capacity_flows_per_s": 20.0,
+  "finished": "2026-10-20T12:13:54+0000"
+}

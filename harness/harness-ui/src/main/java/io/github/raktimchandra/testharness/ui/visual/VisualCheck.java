@@ -57,7 +57,7 @@ public final class VisualCheck {
     /** Compares the element against baseline {@code name}, ignoring the given child regions. */
     public Outcome matches(String name, WebElement element, By... ignore) {
         stabilise();
-        BufferedImage actual = read(element.getScreenshotAs(OutputType.BYTES));
+        BufferedImage actual = settledCapture(name, element);
         List<Rectangle> regions = regions(element, ignore);
         Path baseline = settings.baselineDir().resolve(settings.platform()).resolve(name + ".png");
         if (settings.update()) {
@@ -79,8 +79,10 @@ public final class VisualCheck {
         BufferedImage expected = read(baseline);
         ImageDiff.Result r = ImageDiff.compare(expected, actual, regions, settings.pixelTolerance());
         Report.parameter("visual." + name + ".mismatch", String.format("%.5f", r.ratio()));
-        log.info("Visual {} [{}]: {} of {} pixels differ ({})", name, settings.platform(), r.differingPixels(),
-                r.comparedPixels(), String.format("%.4f%%", r.ratio() * 100));
+        Report.parameter("visual." + name + ".anti-aliased-pixels", Long.toString(r.antiAliasedPixels()));
+        log.info("Visual {} [{}]: {} of {} pixels differ ({}), {} anti-aliased edge pixels not counted", name,
+                settings.platform(), r.differingPixels(), r.comparedPixels(), String.format("%.4f%%", r.ratio() * 100),
+                r.antiAliasedPixels());
         if (r.sizeMismatch() || r.ratio() > settings.maxMismatch()) {
             Path dir = settings.outputDir().resolve("diff").resolve(settings.platform());
             write(dir.resolve(name + "-actual.png"), actual);
@@ -91,10 +93,94 @@ public final class VisualCheck {
             throw new AssertionError(r.sizeMismatch()
                     ? "Visual mismatch '" + name + "': size " + actual.getWidth() + "x" + actual.getHeight()
                             + " differs from baseline " + expected.getWidth() + "x" + expected.getHeight()
-                    : String.format("Visual mismatch '%s': %.3f%% of pixels differ (allowed %.3f%%); diff at %s",
-                            name, r.ratio() * 100, settings.maxMismatch() * 100, dir.resolve(name + "-diff.png")));
+                    : String.format("Visual mismatch '%s': %.3f%% of pixels differ (allowed %.3f%%) %s; diff at %s",
+                            name, r.ratio() * 100, settings.maxMismatch() * 100, changedArea(r.diffImage()),
+                            dir.resolve(name + "-diff.png")));
         }
         return Outcome.MATCHED;
+    }
+
+    /** Captures tried before giving up on two identical ones in a row. */
+    static final int MAX_CAPTURES = 5;
+
+    /**
+     * Captures until two consecutive captures are pixel-identical, waiting a little between
+     * them, because a browser can repaint after the page looks ready and a capture taken
+     * mid-repaint makes a check flaky rather than wrong. (Suspected, not proven, for Firefox's
+     * intermittent cancel-dialog mismatches in CI on 2026-10-20: 0.55 % of pixels, in the
+     * heading and button rows, never reproduced locally.)
+     */
+    private BufferedImage settledCapture(String name, WebElement element) {
+        BufferedImage previous = read(element.getScreenshotAs(OutputType.BYTES));
+        for (int i = 1; i < MAX_CAPTURES; i++) {
+            pause();
+            BufferedImage next = read(element.getScreenshotAs(OutputType.BYTES));
+            if (samePixels(previous, next)) {
+                if (i > 1) {
+                    log.info("Visual capture of {} settled after {} captures", name, i + 1);
+                }
+                return next;
+            }
+            previous = next;
+        }
+        log.warn("Visual capture of {} did not settle after {} captures; comparing the last one", name, MAX_CAPTURES);
+        Report.note("Visual capture of " + name + " did not settle after " + MAX_CAPTURES + " captures");
+        return previous;
+    }
+
+    private void pause() {
+        if (driver instanceof org.openqa.selenium.JavascriptExecutor js) {
+            js.executeAsyncScript(SETTLE);
+        }
+    }
+
+    static boolean samePixels(BufferedImage a, BufferedImage b) {
+        if (a.getWidth() != b.getWidth() || a.getHeight() != b.getHeight()) {
+            return false;
+        }
+        for (int y = 0; y < a.getHeight(); y++) {
+            for (int x = 0; x < a.getWidth(); x++) {
+                if (a.getRGB(x, y) != b.getRGB(x, y)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /** Resolves after 150 ms and two animation frames. */
+    static final String SETTLE = """
+            const done = arguments[arguments.length - 1];
+            setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(() => done(true))), 150);
+            """;
+
+    /** Pixels added on every side of a masked element (see {@link #regions}). */
+    static final int MASK_MARGIN = 2;
+
+    /**
+     * Where the differing (red) pixels are, so a CI failure can be understood from its message
+     * alone when the diff image is out of reach: bounding box and pixel count per quarter.
+     */
+    static String changedArea(BufferedImage diff) {
+        int minX = Integer.MAX_VALUE, minY = Integer.MAX_VALUE, maxX = -1, maxY = -1;
+        int w = diff.getWidth(), h = diff.getHeight();
+        long[] quarters = new long[4];
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                if ((diff.getRGB(x, y) & 0xFFFFFF) == 0xFF0000) {
+                    minX = Math.min(minX, x);
+                    minY = Math.min(minY, y);
+                    maxX = Math.max(maxX, x);
+                    maxY = Math.max(maxY, y);
+                    quarters[(y < h / 2 ? 0 : 2) + (x < w / 2 ? 0 : 1)]++;
+                }
+            }
+        }
+        if (maxX < 0) {
+            return "in a " + w + "x" + h + " capture";
+        }
+        return String.format("in a %dx%d capture, changed area x=%d..%d y=%d..%d, per quarter TL/TR/BL/BR %d/%d/%d/%d",
+                w, h, minX, maxX, minY, maxY, quarters[0], quarters[1], quarters[2], quarters[3]);
     }
 
     /** Script that removes run-to-run rendering noise unrelated to the design. */
@@ -117,6 +203,9 @@ public final class VisualCheck {
 
     private void stabilise() {
         if (driver instanceof org.openqa.selenium.JavascriptExecutor js) {
+            // Let effects queued by the last interaction run first (a component that focuses an
+            // element after paint would otherwise do it after the blur below).
+            js.executeAsyncScript(TWO_FRAMES);
             js.executeScript(STABILISE);
             // The pointer stays where the last click left it; native form controls paint a hover
             // border (Chrome on Windows: 2.1 % of a capture differed). Park it on the page corner.
@@ -134,8 +223,13 @@ public final class VisualCheck {
         List<Rectangle> out = new ArrayList<>();
         for (By by : ignore) {
             for (WebElement e : driver.findElements(by)) {
+                // Element rects arrive as whole pixels, truncated separately for the element and
+                // the root; with fractional layout (a dialog centred in the viewport) the mask can
+                // be off by a pixel and expose the anti-aliased edge of text that changes every
+                // run. A small margin keeps the mask over the whole element.
                 org.openqa.selenium.Rectangle r = e.getRect();
-                out.add(new Rectangle(r.getX() - base.getX(), r.getY() - base.getY(), r.getWidth(), r.getHeight()));
+                out.add(new Rectangle(r.getX() - base.getX() - MASK_MARGIN, r.getY() - base.getY() - MASK_MARGIN,
+                        r.getWidth() + 2 * MASK_MARGIN, r.getHeight() + 2 * MASK_MARGIN));
             }
         }
         return out;

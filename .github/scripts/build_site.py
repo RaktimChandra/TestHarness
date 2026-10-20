@@ -65,7 +65,7 @@ cards = [("Quality dashboard", "dashboard/", f"Pass rates, flakiness, coverage, 
           f"built from the last {runs} pipeline run(s) on main.")]
 if os.path.isfile(os.path.join(site, "allure", "index.html")):
     cards.append(("Allure report", "allure/", "Every test of the latest pipeline with steps, evidence and history."))
-cards += [(t, href, "Blog post (draft).") for t, href in posts]
+cards += [(t, href, "Blog post.") for t, href in posts]
 cards.append(("Source and results", f"https://github.com/{repo}", "README, RESULTS.md (every number with its run), DESIGN.md."))
 body = ("<h1>TestHarness</h1><p class=\"muted\">Published by CI from <code>main</code> after every pipeline. "
         "Nothing here is edited by hand.</p><div class=\"cards\">"

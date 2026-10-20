@@ -41,3 +41,24 @@ checked out the commit into a fresh workspace per build, and ran the chain with
 - `run-20261016-053049-a47fe6.json` — the run, every build and step with timestamps and exit
   codes, as stored in CIForge's SQLite database, plus the key lines of each build log.
 - `quality-gate.log` — the gate's own log.
+
+## In GitHub Actions — `ciforge.yml`, 2026-10-20
+
+`ciforge.yml` installs CIForge from its repository on a GitHub runner and runs `.ciforge.yml`
+against the pushed commit, with the quality gate in CIForge's **Docker runner**
+(`python:3.12-slim`). The run record is exported by `tools/ciforge_export.py` and pushed to a
+`ciforge/<run id>` branch; both runs are copied here.
+
+| Actions run | CIForge run | Commit | Result | Wall-clock | Notes |
+|---|---|---|---|---|---|
+| 39410844981 | `20261020-105132-7c7e70` | `768ee4d` (main) | **failure** | — | both UI shards failed: with `HARNESS_ENV=ci` the visual checks require a baseline, and they looked for `chrome-linux`, which does not exist. The quality gate was cancelled, as designed. |
+| 39419521879 | `20261020-120450-36aafa` | `f5fa6a1` | **success**, 9 of 9 builds | **5 min 25 s** (12:04:50 → 12:10:15) | `-p suite.args=-Dharness.visual.platform=chrome-ci`: this runner renders like the `ci.yml` UI jobs |
+
+Second run, from the run record: API 112 tests, BDD 24 (1 skipped: the drafted-step report),
+UI 15 + 14 with the visual checks **run and passed** (they were skipped in the sandbox run
+above), PIT 143 of 143 mutants killed, Gatling and the quarantined test green, quality gate
+green in its container. It is faster than the sandbox run (8 min 11 s) because the runner has
+4 vCPUs to the sandbox's 2.
+
+The failed first run is kept on purpose: it is the gate doing its job on a configuration
+mistake.

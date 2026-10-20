@@ -16,6 +16,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 /**
  * Screenshot comparisons of stable components. Anything that legitimately changes between
@@ -77,8 +78,14 @@ class VisualRegressionTest extends UiTest {
         Models.Booking b = api.book(user, fx.slotTomorrowAt(LocalTime.of(11, 30), 1).id(), GateFixtures.container());
         pages().driverSignedInViaApi(user);
         waits.clickable(testId("booking-cancel-" + b.reference())).click();
+        WebElement dialog = waits.visible(testId("confirm-dialog"));
+        // The dialog moves focus to its confirm button in an effect that runs after the dialog is
+        // painted. Capturing before that effect ran let Firefox draw the focus ring in some CI
+        // runs (0.55 % and 2.39 % mismatches on 2026-10-20); wait for the app's own end state.
+        waits.until("focus on the confirm button", d -> d.switchTo().activeElement()
+                .equals(d.findElement(testId("confirm-yes"))));
         // The dialog text names the reference and the date: masked.
-        visual(driver).matches("cancel-dialog", waits.visible(testId("confirm-dialog")),
+        visual(driver).matches("cancel-dialog", dialog,
                 org.openqa.selenium.By.id("confirm-message"));
     }
 

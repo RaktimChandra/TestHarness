@@ -10,8 +10,8 @@ portsync:
 ui:
   headless: true
 a11y:
-  # Found by DashboardUiTest once warning alerts are open (2026-10-16, portsync.yml): in the light
-  # theme, .tone-warn text (--signal #b06c00) on the white panel is 4.21:1, below WCAG AA's 4.5:1
-  # for small text (on #eef2f5: 3.74:1). A fix for PortSync: --signal #965b00 (5.54:1 / 4.92:1).
-  # Listed here because this repository cannot change PortSync; any other element still fails.
-  known-issues: color-contrast@.tone-warn
+  # No known issues. Two contrast defects the scans found in PortSync (2026-10-16 and 2026-10-20:
+  # .tone-warn 4.21:1, the quay schematic's vessel code 3.03:1) were listed here as
+  # a11y.known-issues until PortSync fixed them (PortSync 1bd2080); the gate counts everything
+  # again. The mechanism stays for systems this repository cannot change.
+  max-serious: 0

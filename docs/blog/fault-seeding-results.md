@@ -1,7 +1,7 @@
 # I broke my own app six ways to see which tests would notice
 
-*Draft — Raktim Chandra, October 2026. Data: [experiments/fault-seeding](../../experiments/fault-seeding/fault-seeding.md),
-CI run 38726144795.*
+*Raktim Chandra, October 2026. Data: [experiments/fault-seeding](../../experiments/fault-seeding/fault-seeding.md),
+CI run 38726144795; repeated in runs 38869649371 and 38875469031 (see "Update" at the end).*
 
 Test suites are usually judged by how many tests they have or how much code they cover. Neither
 tells you whether they would catch the bug you are about to ship. So in
@@ -85,9 +85,33 @@ Judging every suite by one bug class would argue them away.
   recorded in advance, that is a bias; independent bugs (or mutation testing, which the project
   also runs on the domain rules — 143 mutants, all killed after one round of new tests) are a
   fairer measure.
-- Six bugs is a small sample, and each cell ran once on a shared CI runner.
+- Six bugs is a small sample, and every run was on a shared CI runner.
 - The race bug is made reproducible by a deliberate pause inside the critical section; a real
   race is usually rarer and harder to catch.
 
 The workflow, the per-bug results and every failing test with its message are in the
 repository, so the experiment can be re-run on any commit.
+
+## Update: the same experiment, three times
+
+Point 5 said a matrix built from one run overstates coverage, so I ran the whole experiment
+twice more ([repeats.md](../../experiments/fault-seeding/repeats.md)). Bugs caught of six, per
+run:
+
+| | contract | API | security | UI | a11y | visual | BDD | Gatling |
+|---|---|---|---|---|---|---|---|---|
+| run 1 · 2 · 3 | 2 · 2 · 2 | 6 · 6 · 6 | **2 · 1 · 1** | 2 · 2 · 2 | 0 · 0 · 0 | 0 · 0 · 0 | 5 · 5 · 5 | **0 · 1 · 1** |
+
+Forty-six of the 48 cells gave the same verdict three times, and every baseline was green every
+time. The two that moved are both `CHECK_DIGIT_EDGE_CASE`, the bug that depends on random data:
+
+- the security suite caught it in **one run of three** — the lucky catch from point 5, now
+  measured;
+- **Gatling caught it in two runs of three**, which contradicts point 6 as I first wrote it.
+  No Gatling request failed an assertion; the simulation books with generated container
+  numbers, and when enough of them needed the broken remainder-10 rule, the rejected bookings
+  pushed the error rate over the 1 % gate.
+
+So "zero catches is the right answer" was true of the first run, not of the suite: a load test
+that uses realistic data is also a crude functional test. The API suite's six of six and the
+race being caught by one test held in every run.

@@ -366,7 +366,9 @@ that suite). Baseline: every suite green.
   contract matches timestamps by format, and a shifted time has the right format. Recorded
   in TEST_STRATEGY as a strategy error, not hidden.
 - **Accessibility, visual and Gatling caught nothing,** correctly: none of the six bugs
-  changes markup, appearance or latency.
+  changes markup, appearance or latency. *(Repeated in Phase 6, §38: Gatling caught
+  `CHECK_DIGIT_EDGE_CASE` in two of three runs through its error-rate gate, and security
+  caught it in one of three.)*
 - Part of `CHECK_DIGIT_EDGE_CASE`'s detection is incidental (random container numbers hit the
   remainder-10 case about 1 time in 11); the dedicated remainder-10 tests catch it every time.
 
@@ -386,6 +388,8 @@ message existed), negative-duration checks per argument, a zero or negative slot
 seeded-bug switches defaulting to off. The 95 % gate runs in the CI `mutation` job.
 
 ### 19. Test impact analysis — sandbox, 2026-10-15
+
+*Repeated twice in Phase 6 (§38) and run on a real pull request (§44).*
 
 **Method and full write-up:** [experiments/tia/README.md](experiments/tia/README.md). Per-test
 JaCoCo coverage of the in-process SUT recorded once (202.7 s; 120 tests × 44 production
@@ -408,6 +412,8 @@ full runs (identical 138 tests) varied from 167 s to 216 s, so differences under
 within noise.
 
 ### 20. Flaky-test intelligence — CI run 38730129263, 2026-10-15
+
+*Repeated twice in Phase 6 (§38): quarantined in all three runs.*
 
 **Method and files:** [experiments/flaky-demo](experiments/flaky-demo/README.md). The
 deliberately flaky test and its stable control ran 20 times on one commit with history in
@@ -598,10 +604,411 @@ the project configuration — 16 build configurations: build, API, BDD, six UI s
 smoke, Grid, Gatling, PIT, quarantined tests, Allure report, and the composite quality gate —
 against the DSL library served by a throwaway TeamCity 2025.07 server started in the job.
 Getting there took six CI iterations and fixed three real defects in the DSL (DESIGN D49).
-**No TeamCity agent ran these builds.**
+**No TeamCity agent ran these builds** in Phase 5; in Phase 6 they ran on a real server and agent (§37).
 
 ### What could not run in Phase 5, and why
 - **A TeamCity agent** — there is no TeamCity server with agents available; the DSL is compiled
-  and generated only (§29).
+  and generated only (§29). *Closed in Phase 6: §37.*
 - **CIForge with the Docker runner for this pipeline** — Docker Hub is blocked in the sandbox,
   so the run used CIForge's local runner (the Docker runner is covered by CIForge's own tests).
+
+## Phase 6
+
+### 30. One-command build — sandbox, 2026-10-20
+
+**Method:** as §16, `mvn -o clean install` on commit `57c48a1` (version 1.1.0); counts from the
+surefire XML by `.github/scripts/test_summary.py`.
+
+| Module | Tests | Failed | Errors | Skipped | Σ test time (s) |
+|---|---:|---:|---:|---:|---:|
+| sut/gate-domain | 69 | 0 | 0 | 0 | 0.4 |
+| sut/gate-api (+ throttle unit and integration tests, security headers, caching) | 26 | 0 | 0 | 0 | 8.3 |
+| harness/harness-core (+ relaxed environment keys) | 44 | 0 | 0 | 0 | 3.2 |
+| harness/harness-reporting | 8 | 0 | 0 | 0 | 0.2 |
+| harness/harness-data | 75 | 0 | 0 | 0 | 4.5 |
+| harness/harness-api | 13 | 0 | 0 | 0 | 1.1 |
+| harness/harness-ui (+ known accessibility issues, anti-aliasing, settled captures, navigation) | 54 | 0 | 0 | 0 | 20.8 |
+| harness/harness-bdd (+ hooks through the real Cucumber engine) | 4 | 0 | 0 | 0 | 2.6 |
+| harness/harness-insights (+ duration shard plan) | 49 | 0 | 0 | 0 | 5.4 |
+| harness/harness-cli (+ every command against a fake repository) | 19 | 0 | 0 | 0 | 6.3 |
+| suites/api-suite (+ brute force, no enumeration, headers, caching) | 112 | 0 | 0 | 0 | 100.0 |
+| suites/ui-suite | 29 | 0 | 0 | 5 | 86.7 |
+| suites/bdd-suite (+ drafted-step coverage) | 24 | 0 | 0 | 1 | 58.0 |
+| adapters/portsync (offline: schemas, architecture, consumer pact) | 8 | 0 | 0 | 0 | 10.0 |
+| **Total (JVM)** | **534** | **0** | **0** | **6** | **307.4** |
+| sut/gate-ui (Vitest) | 32 | 0 | 0 | 0 | — |
+| dashboard (Vitest, run separately) | 9 | 0 | 0 | 0 | — |
+| suites/perf-suite (Gatling) | 1 simulation, 300 requests | 0 KO | — | — | p95 92 ms · p99 98 ms |
+| tools/tests (Python, `unittest`) | 5 | 0 | 0 | 0 | — |
+
+**Wall-clock: 6 min 32 s** (Maven total time; the whole command 16:14:04 → 16:20:38 UTC). Skipped: the 5 visual checks (they run
+in CI only, §12) and `DraftStepCoverageTest.reportOnDrafts`, which runs only when
+`-Dai.drafts` points at drafts to score (§43).
+
+### 31. The pipeline on `main` — run 39410820490, commit `768ee4d` (the Phase 6 merge), 2026-10-20
+
+**Method:** `ci.yml` on the push to `main`; counts from each job's test-summary annotation.
+`main` runs three jobs pull requests do not: `tia-map`, the `publish` job, and history-based
+sharding for the next pipelines.
+
+| Job | Tests | Failed | Notes |
+|---|---:|---:|---|
+| Build + framework & SUT tests | 353 | 0 | |
+| API suite · Docker Compose + API suite | 112 · 112 | 0 · 0 | |
+| BDD suite | 24 | 0 | 1 skipped (drafted-step report) |
+| UI — Chrome · Edge · Firefox, 2 shards each | 15 + 14 each | **1** | Firefox shard 1: `cancel-dialog` visual check, 2.389 % of pixels (§40) |
+| Selenium Grid (24 per browser), Gatling (300 requests, p95 70 ms), PIT, dashboard, TeamCity DSL | — | 0 | |
+| Test impact map | 138 tests × 47 SUT files | — | stored on `ci-history` |
+| Allure report | — | — | **failed with no message**; passed on re-run — cause not found |
+| Quality gate | | | **failure** (attempt 1) → **success** after "re-run failed jobs" (attempt 2) |
+| Publish | | | ran after both attempts: `ci-history` and `gh-pages` created |
+
+- Attempt 1: 10:51:01 → 11:06:17 UTC (15 min 16 s). The Selenium Grid job is the long pole
+  (10 min 46 s); every other job finished by 10:58:27.
+- Attempt 2 re-ran only the Firefox shard, the Allure report, the gate and the publish job
+  (12:05:44 → 12:09:16); all green.
+- Every blocking job other than that Firefox shard passed in attempt 1. The re-run is recorded
+  rather than hidden: the second publish is also where the duplicated-history bug in §39 came
+  from.
+
+### 32. Dependency vulnerabilities (OSV-Scanner) and the ZAP baseline — `security.yml`
+
+**Method:** OSV-Scanner 2.x over a CycloneDX SBOM that Maven resolves for the whole reactor
+(test scope included) plus the npm lockfiles; OWASP ZAP baseline (`zap-stable` image) against
+the SUT started from its jar. Both fail the job on any finding not triaged in
+`osv-scanner.toml` / `.zap/rules.tsv` (DESIGN D54, D55).
+
+| Scan | First run | After the fixes | Green runs |
+|---|---|---|---|
+| OSV, Maven + npm | **41 advisories (9 critical, 13 high) in 18 transitive packages** — jackson 2.21.4, netty 4.1.135, httpclient5 5.5.2, commons-lang3 3.17.0, commons-compress 1.24.0, opentelemetry 1.49.0 and others | second scan: 8 packages left; floors added for 5 of them (Tomcat, httpcore5, log4j-api, freemarker, PostgreSQL JDBC). **0 untriaged**; 3 Spring Framework 6.2.19 advisories ignored until 2027-01-31 | runs on `bfd85da`, `22743d4`, `d26ea7d`, `88fd713` |
+| ZAP baseline | **8 alert types** | 6 header findings **fixed in the SUT** (CSP directives without `default-src` fallback and inline styles, Permissions-Policy, COOP, COEP, CORP); 3 informational rules triaged with reasons | same runs |
+
+- The three ignored Spring advisories are fixed only in Spring 7.0.9; 6.2.19 is the last
+  open-source 6.2 release and the project stays on Spring Boot 3 (DESIGN D22). Each needs a
+  feature this repository does not use (SSE view fragments, `XsltView`, WebFlux functional
+  endpoints), checked by searching the code. For the WebFlux one, `mvn dependency:tree
+  -Dincludes=org.springframework:spring-webflux` (sandbox, 2026-10-20) shows it only in
+  `gate-api`, in **test** scope, through Pact's `junit5spring`; no `RouterFunction` exists.
+- One floor had to be corrected: Tomcat 10.1.58 is not published on Maven Central, so the
+  first version of the floor failed to resolve; it is 10.1.61 (`fdf5ae2`).
+- The strict CSP was checked by the UI suite: 29 tests in Chrome pass under it.
+- **The scanner image itself broke the gate once.** On 2026-10-20 a new `zaproxy:stable`
+  image failed before scanning (`Failed to access summary file /home/zap/zap_out.json`,
+  run 39410820542). ZAP is now pinned to 2.16.1; its "ZAP is out of date" rule is triaged with
+  that reason, and run 39422919352 passed: 63 rules pass, 0 warnings.
+
+### 33. Sign-in throttling — new SUT behaviour, tested from three sides
+
+Five failed sign-ins per username, or 100 per client address, within 15 minutes lock that key
+for 5 minutes (`429 TOO_MANY_ATTEMPTS`, `Retry-After`; DESIGN D53).
+
+| Level | Test | Result |
+|---|---|---|
+| Unit (manual clock) | `LoginThrottleTest` — 9 tests: the fifth failure locks, failures outside the window do not count, usernames compared case- and whitespace-insensitively, success clears the username but not the client, one client trying many usernames is locked, unknown usernames lock like real ones, idle keys are cleaned up, Retry-After rounding | pass |
+| Integration over HTTP | `GateApiIntegrationTest` — after five failures the correct password gets 429 `TOO_MANY_ATTEMPTS` with `Retry-After` 290–300 s; other accounts still sign in | pass |
+| Black box (api-suite) | `SecuritySmokeTest` — five failures lock the account even against the right password, and the lock response for a non-existent account is identical (no enumeration through the lock) | pass |
+| UI unit (Vitest) | `LoginPage.test.jsx` — the 429 message | pass |
+
+**Found while testing it:** Apache HttpClient 5, which `TestRestTemplate` uses, honours
+`Retry-After` on a 429 by sleeping and retrying. The first integration test therefore waited
+the whole 300 s lock. It now uses the JDK `HttpClient`, which does not retry.
+
+### 34. Windows — `windows.yml` on `windows-2025`, run 39408840976, commit `dc4c3e7`
+
+**Method:** the commands of [docs/WINDOWS.md](docs/WINDOWS.md) in PowerShell with `mvnw.cmd`
+and `th.cmd`; the UI suite in Chrome and Edge on Windows. Hosted Windows runners cannot run
+Linux containers, so the runner's PostgreSQL stands in for Testcontainers through
+`-Dharness.db.url`. Skipped tests are listed by name in the job's annotation.
+
+| | |
+|---|---|
+| Result | **success**, 10 min 1 s (10:34:00 → 10:44:01 UTC) |
+| JVM tests | **492, 0 failed, 20 skipped** |
+| Skipped | 5 visual checks (no Windows baselines: baselines are rendered per platform on Linux, so the job writes Windows candidates instead); 14 BDD scenarios outside `@smoke` (the guide's BDD step runs the smoke tag); `DraftStepCoverageTest.reportOnDrafts` (needs `-Dai.drafts`) |
+| Not run on Windows | `gate-api`'s 26 tests (Testcontainers integration tests; they run in the Linux build job) |
+
+Earlier green runs: 38890845411 (`d26ea7d`, 490 tests) and 39406598745 (`88fd713`); latest
+39452849947 (`d303237`): **500 tests, 0 failed**, the same 20 skips.
+
+**One Edge failure on Windows** (run 39449323500): two journeys stopped while opening a page
+with `Timed out receiving message from renderer` — EdgeDriver lost contact with a renderer
+process on the loaded runner, before the page under test was involved. Navigations now repeat
+once in exactly that case, logged and reported (DESIGN D66); every other timeout and every
+assertion still fails at once.
+
+It found four problems that Linux CI could not: `install -DskipTests` still ran the Gatling
+simulation; a framework test assumed a container; `cmd.exe` split `-Dname=value` arguments
+at `=` when `th.cmd` called `mvnw.cmd` (fixed by quoting, `ProcessesTest`); and a 2.1 %
+visual diff from a focus ring under the parked pointer, fixed by moving the pointer away and
+waiting two frames before capture.
+
+### 35. Coverage gaps closed — sandbox
+
+| Module | Lines before | Lines after | What was added |
+|---|---:|---:|---|
+| `harness-cli` | 51 % | **90.7 %** | every command that runs Maven, serves pages, maps or selects TIA, drafts through a model or ingests into PostgreSQL, against a fake repository whose Maven Wrapper records its arguments (`sh` and `cmd` versions) |
+| `harness-bdd` | 48.6 % | **100 %** | `ScenarioHooks` through the real Cucumber engine, including evidence capture for a failing `@ui` scenario in a real browser |
+| `harness-insights` | 78.3 % | **85.6 %** | the JaCoCo-recorder test moved to its own class — its agent reset was erasing the coverage of the other tests in the same JVM — plus failure summaries and `RepoFiles` |
+
+One real bug turned up: a failure without a message was summarised as an empty
+`message:` line; it now reads `(none)`.
+
+### 36. PortSync — contract, SLA scenarios and two accessibility defects in PortSync
+
+**Run:** `portsync.yml`, run 38890845346, commit `d26ea7d`: **54 tests, 0 failed**
+(42 in Phase 4, §24, plus the contract and SLA tests below).
+
+- **Consumer contract:** the adapter's real `CoreApi` (strict schemas on) generates a pact of
+  **7 interactions** against Pact's mock server; `PortSyncProviderPactTest` verifies it
+  against the running PortSync core. Only interactions that hold on any running PortSync
+  are in it, so no provider states are needed (DESIGN D59).
+- **SLA scenarios** (`SlaScenariosTest`, isolated because they change the whole terminal):
+  a gate surge raises `YARD_BLOCK_UTILISATION`, a vessel surge raises `VESSEL_BERTH_WAIT`,
+  the SSE stream delivers `event` and `dlq` messages, and with the simulation paused the
+  core's yard equals the simulator's block by block. The first version subscribed to
+  `/api/events/stream` and got 404; PortSync serves the stream at `/api/stream`.
+- **Two real accessibility defects in PortSync**, both colour contrast in its light theme and
+  both visible only in some terminal states:
+  1. once warning alerts are open, `.tone-warn` text (`--signal` `#b06c00`) on the white panel
+     is **4.21:1**, below WCAG AA's 4.5:1 (3.74:1 on `#eef2f5`) — run 38889245065, `22743d4`,
+     2026-10-16. Computed fix: `#965b00`, 5.54:1 and 4.92:1.
+  2. once a berthed vessel is almost fully worked, its code in the quay schematic
+     (`.hull-label .code.muted`, `#536a7c`) sits on the progress fill (35 % of `--ok` over
+     `--raised` = `#9dc6c2`) at **3.03:1** — run 39422919521, 2026-10-20. Computed fix (from
+     PortSync's `styles.css` at `f34ac31`): `--ink` for that code, 8.90:1 on the fill.
+- **Recording them as known issues took three fixes to the harness**, each found by a failing
+  PortSync run. This repository cannot change PortSync, so `a11y.known-issues` (`rule@selector`)
+  reports a listed violation without counting it, while any other element still fails.
+  1. Exact matching broke as soon as several elements failed: axe then names them
+     `tr:nth-child(1) > td:nth-child(1) > .tone-warn.pill` (run 39406598844). A listed selector
+     now matches by the element's own classes, and as a descendant chain for the second defect.
+  2. Failure messages showed the first three elements, all listed ones, hiding the unlisted one
+     (run 39425329400); unlisted elements are now named first.
+  3. **The match had never worked in CI.** The scanner stored axe's node target with
+     `List.toString()`, so every target read `[.tone-warn]` (run 39428100885 showed it once the
+     message named the element). The green PortSync runs in between (38890845346,
+     39408840903) passed because the defect's page state did not occur in them, not because
+     the mechanism worked. The unit tests had used plain selectors; one now feeds axe's real
+     list shape (`52112b4`).
+  **First run in which it worked:** 39431122556 (`9b26d27`): axe reported one serious
+  colour-contrast violation on the overview and one on the alerts page, both counted as known,
+  and the suite passed — **54 tests, 0 failed**. (In 39429169337, `52112b4`, neither state
+  occurred: 0 violations.)
+- **Fixed in PortSync** (PortSync `1bd2080`, release 1.1.0): light `--signal` `#965b00`
+  (5.54:1), labels over the quay fill in `--ink` (8.90:1), and a third defect found by auditing
+  every colour pair there — the primary button's text on the light amber was 4.41:1, now its own
+  `--on-signal` token. PortSync gained a contrast test over all its theme blocks that fails on
+  the old palette. This repository's PortSync config lists **no known issues** any more; run
+  39444742884 (`f5b0b8a`) scanned with the gate fully strict: 0 violations, 54 tests, 0 failed.
+
+### 37. TeamCity — the real settings on a real server and agent
+
+**Method:** `teamcity.yml` starts TeamCity 2025.07 and an agent built from
+`docker/teamcity-agent.Dockerfile` (JDK 21, Docker, Chrome), creates the project over REST
+and enables versioned settings in Kotlin, so the TeamCity server itself imports and compiles
+`.teamcity/settings.kts` from the branch. `tools/teamcity_run.py` triggers the chain and
+reads the results back over REST. Raw results: branches `teamcity/<run id>`.
+
+| Run | Commit | Imported build types | Builds that ran | Result |
+|---|---|---:|---|---|
+| 38886217452 | `bfd85da` | 16 | settings import and compile only | success |
+| 38889245239 | `22743d4` | 16 | Build 349 tests · API 112 · BDD 24 (23 passed, 1 ignored) · Perf · Mutation 69 · UI Chrome 15 + 14 | UI: **5 visual failures**, everything else passed |
+| 38890845376 | `d26ea7d` | 16 | Build 350 · API 112 · BDD 24 · Perf · Mutation 69 · UI 15 + 14 | the same 5 visual failures |
+| 39406598779 | `88fd713` | 16 | Build 350 · API 112 · BDD 24 (1 ignored) · Perf · Mutation 69 · UI Chrome 15 + 14 (5 visual checks ignored: no baselines for the agent's platform) | **success — every build in the chain green**, 17 min 27 s |
+
+The visual failures (0.67 % to 1.69 % of pixels against a 0.2 % threshold) were real
+differences: the agent container renders fonts differently from the GitHub runner that
+produced the baselines. Visual baselines are per platform, so each agent now declares its
+platform (`visual.platform.suffix`) and, without baselines for it, writes candidates instead
+of failing — the same rule as Windows (§34).
+
+### 38. Repeated experiments — how stable the Phase 3 numbers are
+
+Each experiment was run three times. A single run is not a measurement of a noisy quantity.
+
+**Fault seeding** — CI runs 38726144795, 38869649371, 38875469031
+([repeats.md](experiments/fault-seeding/repeats.md)). Detection per suite, bugs caught of 6,
+per run: contract 2/2/2 · api 6/6/6 · **security 2/1/1** · ui 2/2/2 · a11y 0/0/0 ·
+visual 0/0/0 · bdd 5/5/5 · **perf 0/1/1**. Two verdicts changed between runs, both for
+`CHECK_DIGIT_EDGE_CASE`, the bug that depends on random data: the security suite caught it
+in 1 of 3 runs, and Gatling in 2 of 3 — not through a failed test but through its error-rate
+gate, when generated container numbers hit the broken remainder-10 case. So §17's "Gatling
+caught nothing" held for that run only. Every baseline was green in every run, and every
+other cell gave the same verdict three times.
+
+**Flaky-test demo** — runs 38730129263, 38869660669, 38869821887
+([flaky-demo](experiments/flaky-demo/README.md#repeated-3-runs)). The flaky test failed
+8, 9 and 5 times in 20 runs (scores 0.368, 0.474, 0.421) and was quarantined every time; the
+control scored 0 every time.
+
+**Test impact analysis** — sandbox, three recordings
+([repeats](experiments/tia/repeats/README.md)). **18 of 18** selected runs caught their bug.
+Wall-clock saved ranged **3.8 % to 33.2 %**, and the same bug moved by up to 16 points between
+runs. The map itself differs between recordings of the same code (83 vs 81 tests selected
+for `CapacityPolicy.java`), because tests with random data take different paths — which is
+why CI re-records it on every push to `main`.
+
+### 39. CI history, the published site and duration-balanced shards
+
+**History and site.** The first `publish` job on `main` (run 39410820490) created the
+`ci-history` branch — each pipeline's JSON Lines history per job, `shard-durations.json` (186
+tests), the TIA map (138 tests × 47 SUT files), the flakiness leaderboard and a quarantine
+proposal — and force-pushed the site (dashboard, Allure report, blog) to `gh-pages`. Turning
+on GitHub Pages is a repository setting that a workflow token cannot change, so the site is
+served once the owner selects the `gh-pages` branch.
+
+**A bug the re-run exposed.** "Re-run failed jobs" keeps the passed jobs' artifacts, so the
+second publish stored 11 history files a second time under the attempt-2 directory: the same
+results twice, which doubles that run's durations and adds same-commit "runs" to flakiness.
+`dedupe_attempts.py` now drops files a later attempt copied unchanged (tested, idempotent; it
+also cleans the copy already on the branch at the next publish).
+
+**Duration-balanced shards.** Pull-request pipelines read the durations recorded on `main`.
+Balance is measured as |Σ shard 1 − Σ shard 2| / (Σ shard 1 + Σ shard 2) of the per-shard sum
+of test time, per browser; job time is the shard job's wall-clock.
+
+| Run | Split | Chrome | Edge | Firefox | Longest shard job per browser (s) |
+|---|---|---:|---:|---:|---|
+| 39408840965 (`dc4c3e7`) | hash, 15 + 14 | 7.9 % | 26.8 % | 2.6 % | 108 · 132 · 128 |
+| 39410820490 (`768ee4d`) | hash, 15 + 14 | 8.2 % | 13.9 % | 14.5 % | 99 · 126 · 125 |
+| 39419767821 (`f5fa6a1`) | durations, 12 + 17 | 0.7 % | 2.0 % | 14.4 % | 92 · 138 · 158 |
+| 39422919285 (`3454758`) | durations, 12 + 17 | 6.3 % | 8.9 % | 11.6 % | 96 · 174 · 132 |
+| 39423058413 (`b9e4d1f`) | durations, 12 + 17 | 10.4 % | 6.7 % | 18.0 % | 105 · 137 · 105 |
+| 39425545521 (`989fa9f`, main) | durations, 12 + 17 | 17.7 % | 6.9 % | 0.6 % | 101 · 119 · 132 |
+
+- The plan does what it was built to do — **the split is stable and every test runs exactly
+  once** (12 + 17 = 29 in every browser) — and the mean imbalance fell from **12.3 %** (hash,
+  6 shard pairs) to **8.7 %** (durations, 12 pairs).
+- **It did not shorten the pipeline.** The longest UI shard job averaged 120 s with the hash and
+  124 s with durations. Run-to-run noise on shared runners (the same shard's Σ varies by tens of
+  seconds) is as large as what the plan corrects, and the durations come from one recorded run
+  averaged over three browsers, while Firefox and Edge run the same tests about twice as long
+  as Chrome. Durations per browser and more history are the next steps; the claim stays "more
+  even", not "faster".
+
+### 40. An intermittent visual failure in Firefox — `cancel-dialog`
+
+**Observed:** the Firefox `cancel-dialog` check failed in five CI runs on 2026-10-20 and passed
+in the others, while five consecutive local Firefox runs (and three full UI-suite runs under
+load) differed by **0 pixels**.
+
+| Run | Commit | Mismatch | Changed area (from the failure message, 440×200 capture) |
+|---|---|---:|---|
+| 39410820490 | `768ee4d` | 2.389 % | — (message added later) |
+| 39419767821 | `f5fa6a1` | 0.552 % | — |
+| 39425329315 | `da81231` | 0.552 % | — |
+| 39429169339 | `52112b4` | 0.567 % | x=90..415, y=31..137: heading row and button row |
+| 39444742951 | `f5b0b8a` | 0.306 % | x=90..221, y=31..45: the heading only, from just after "Cancel " |
+
+The diff images stay in CI artifacts, which this environment cannot download, so each step
+below was an explanation tested against the next runs:
+
+1. *The capture raced the dialog's focus ring* (it focuses its button in an effect after
+   paint). The test now waits for that focus (`3454758`) — the failure came back.
+2. *The mask over the per-run message was off by a pixel* (element rects are truncated to whole
+   pixels). Masks got a 2-pixel margin (`045271f`) — it came back.
+3. *The browser repainted after the page looked ready.* Captures are now retaken until two in a
+   row are identical, and each UI job reports when that took more than two (`9b26d27`,
+   `f82f93a`). In the failing run on `f5b0b8a` no capture needed retaking: the image was
+   stable, just different. Rejected.
+4. **What the changed area shows:** the differing pixels are the heading's glyphs *after its
+   first word*, and in one run the button labels' — text drawn at a different sub-pixel offset
+   from run to run, which changes every anti-aliased edge pixel and nothing else. That is what
+   anti-aliasing detection exists for, and it was the simplification D26 had recorded: the diff
+   now discounts anti-aliased edge pixels with pixelmatch's detector, reports them separately,
+   and still fails on moved edges and changed colours (`ImageDiffTest`, DESIGN D65).
+
+**Status: open, with the likely cause addressed.** Since D65 (`e29d4ac`, run 39449323307;
+`d303237`, run 39452850062) the check passed; in the second run, which already reports the
+counts, every visual check in every browser matched with **0 differing and 0 anti-aliased
+pixels** — the alternate rendering simply did not occur, so D65 has not yet met it in CI. Its
+unit tests show the case it targets (an edge drawn half a pixel further) is discounted while a
+moved edge or a recoloured area still fails. Each UI job now annotates, per check, the
+differing and the discounted pixels, so the next occurrence will show whether it is enough.
+### 41. TestHarness on CIForge inside GitHub Actions — `ciforge.yml`
+
+**Method and both run records:** [experiments/ciforge](experiments/ciforge/README.md#in-github-actions--ciforgeyml-2026-10-20).
+CIForge is installed from its repository on the runner and runs `.ciforge.yml` against the
+pushed commit; the quality gate runs in CIForge's Docker runner (`python:3.12-slim`).
+
+| Actions run | Commit | Result | Wall-clock |
+|---|---|---|---|
+| 39410844981 | `768ee4d` | **failure** — both UI shards: no `chrome-linux` visual baselines, and with `HARNESS_ENV=ci` a missing baseline fails; the gate was cancelled | — |
+| 39419521879 | `f5fa6a1` | **success, 9 of 9 builds**: API 112, BDD 24, UI 15 + 14 with the visual checks run and passed, PIT 143/143, Gatling, quarantine, gate | **5 min 25 s** |
+
+### 42. Capacity on fixed resources — run 39419512861, commit `f5fa6a1`
+
+**Method and raw data:** [experiments/capacity](experiments/capacity/README.md). The SUT runs
+in Compose with 2 CPUs / 1 GiB; an open arrival rate of booking flows is stepped up (60 s per
+level) on three runners per flow. A level keeps up when errors < 1 %, p95 ≤ 800 ms and
+completed flows ≥ 95 % of offered.
+
+| Flow | Capacity, runner 1 / 2 / 3 (flows/s) | What breaks first |
+|---|---|---|
+| full — sign in on every flow | **25 / 30 / 20** (median 25) | latency: p95 3.2–7.3 s at the next level, 0 % errors; app CPU 162–166 % of its 200 % |
+| authenticated — token reused | **200 / 200 / 200** | at 240/s requests time out (p95 60 s, 29.5–35.5 % errors) while the app uses ~97 % CPU: the 20-connection pool had ~5,600 requests waiting |
+
+- **Signing in on every flow costs 8× the capacity** (25 vs 200 flows/s): the password check
+  is the work, and the app's CPU rises with the rate until it saturates.
+- **The authenticated flow's limit is the connection pool, not CPU.** The app's log at the end
+  of the 240/s level, in all three runs: `HikariPool-1 - Connection is not available ...
+  (total=20, active=20, idle=0, waiting≈5,600)`.
+- **Runners disagreed by up to 50 %** on the CPU-bound flow (20 to 30) with the same limits and
+  code — one runner's number alone would have been misleading.
+- The first run (39410838330) is discarded: its parser read Gatling's "1,500" as 0 requests, so
+  every level failed. Found because a capacity of 0 flows/s at 5 flows/s with 0 errors could not
+  be true; fixed with a test (`tools/tests`), and the same latent bug fixed in the CI Gatling
+  summary.
+
+### 43. The AI drafter against real models — `ai-eval.yml`
+
+**Method and raw data:** [experiments/ai](experiments/ai/README.md). Three open models served by
+Ollama on the runner (CPU only), eight user stories drafted twice each; every drafted step is
+matched against the BDD suite's 28 real step definitions the way Cucumber matches.
+
+| Model (run) | Valid Gherkin | Step reuse | Fully runnable drafts | Median s / draft |
+|---|---:|---:|---:|---:|
+| qwen2.5 1.5B (39419517177) | 14 / 16 | **43.3 %** | 0 | 24 |
+| llama3.2 3B (39419517177) | 11 / 16 | **36.3 %** | 0 | 56 |
+| qwen2.5 7B (39438329586) | 16 / 16 | **68.5 %** | 1 | 96 |
+| qwen2.5 7B (39430576335, summary only) | 15 / 16 | **69.9 %** | 1 | 118 |
+
+- The 7B model reuses existing steps about twice as often as the smaller ones, and two runs of
+  it agree within 1.4 points; still only one draft per run runs without new glue code. Most
+  misses are near-misses of existing step texts.
+- Asked to explain a seeded capacity bug, the 1.5B and 3B models mostly blamed the tests or the
+  environment; the 7B model pointed at the API's conflict handling for two of three failures
+  but misquoted a status code. The tool labels drafts and explanations as unverified.
+- Two runs went wrong and are kept as such: the first 7B job hid its evaluator's failure behind
+  `tee` (now `pipefail`), and run 39430576335's results push failed twice without a message (now
+  logged; the following run pushed normally).
+
+### 44. Test impact analysis on a real pull request — PR #7
+
+PR #7 changes only Javadoc in `BookingAccessPolicy.java`, a file the map on `ci-history` knows.
+The `impacted` job (run 39423058413) selected **53 test cases** — 36 API, 10 BDD, 7 UI, the
+same 53 the sandbox experiment selected for that file (§38) — and ran them in a **2 min 7 s**
+job, 0 failed. PR #6, which changes workflows and tools, was correctly treated as unscopable:
+"run all", nothing early.
+
+**But "first" bought nothing here.** The full API (1 min 19 s) and BDD (1 min 24 s) jobs started
+at the same moment on their own runners and finished *before* the impacted subset, and the
+Chrome UI shards finished within 30 s of it. With every suite already parallel and about two
+minutes long, a subset run first does not give earlier feedback; it would on a serial pipeline
+or with much longer suites. The job stays — it is cheap and shows what a change touches — but
+it is not a speed-up in this pipeline.
+
+### What could not run in Phase 6, or is still open
+
+- **The diff images of CI visual failures** cannot be downloaded into the authoring
+  environment (artifact downloads are blocked there), which is why the Firefox `cancel-dialog`
+  failure (§40) is diagnosed from its message, not its picture.
+- **GitHub Pages** cannot be switched on by a workflow token; the owner switched it on and the
+  site is live at <https://raktimchandra.github.io/TestHarness/>.
+- **`gate-api`'s Testcontainers tests on Windows** — hosted Windows runners cannot run Linux
+  containers (§34).
+- **A hosted frontier model** for the AI evaluation — it uses small open models through Ollama
+  on the runner, so it needs no key and costs nothing, and says nothing about larger models (§43).
+- **Repository settings** (branch rules, the dependency graph, Actions variables) cannot be
+  changed from the authoring environment; they are set by the owner (README, "Repository
+  settings").

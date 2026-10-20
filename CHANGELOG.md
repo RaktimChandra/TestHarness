@@ -3,6 +3,97 @@
 All notable changes, one section per phase. Each phase ends with the whole project
 compiling, every test passing, and `./mvnw verify` running end to end.
 
+## [1.1.0] — 2026-10-20 — Phase 6: closing the gaps
+
+### Added
+- **Duration-balanced UI shards** (`ShardPlan`, longest-first onto the lightest shard): every
+  shard computes the same plan from the durations recorded on `main`; tests without a
+  recorded duration fall back to the hash, so a stale file never loses or duplicates a test.
+  `th history durations` writes the file.
+- **CI history and a published dashboard:** after every pipeline on `main`, the `publish` job
+  appends the run's results to the `ci-history` branch (120-run window), derives shard
+  durations, the flakiness leaderboard and a quarantine proposal, and publishes the dashboard,
+  the Allure report and the blog to `gh-pages`.
+- **Test impact analysis on pull requests:** `tia-map` records per-test coverage on every push
+  to `main`; the `impacted` job runs the selected tests first on a PR (feedback, not a gate).
+- **Sign-in throttling in the SUT:** 5 failures per username or 100 per client in 15 minutes
+  lock that key for 5 minutes (`429 TOO_MANY_ATTEMPTS`, `Retry-After`), tested at unit,
+  integration, black-box and UI level.
+- **Security workflow:** OSV-Scanner over a Maven-resolved CycloneDX SBOM plus npm lockfiles,
+  and an OWASP ZAP baseline of the running SUT; both fail on anything untriaged.
+- **Windows workflow** running the commands of `docs/WINDOWS.md` (`mvnw.cmd`, `th.cmd`, the UI
+  suite in Chrome and Edge) on `windows-2025`.
+- **TeamCity on a real server and agent** (`teamcity.yml`, `docker/teamcity-agent.Dockerfile`,
+  `tools/teamcity_run.py`): the server imports and compiles `.teamcity/settings.kts` through
+  versioned settings and runs the chain.
+- **TestHarness on CIForge inside Actions** (`ciforge.yml`, quality gate in CIForge's Docker
+  runner); CIForge 1.1.0 gained API tokens.
+- **AI drafter evaluation against real models** (`ai-eval.yml`: Ollama on the runner, 8 user
+  stories) scored by `DraftStepCoverage`, which matches drafted steps against the BDD suite's
+  real step definitions.
+- **Capacity experiment** (`capacity.yml`, `tools/capacity.py`): stepped arrival rate against
+  the SUT limited to 2 CPUs and 1 GiB, with and without sign-in on the request path.
+- **PortSync consumer contract** (7 interactions, verified against the running core) and SLA
+  scenarios (gate surge, vessel surge, SSE, paused-yard agreement).
+- **Accessibility known issues** (`a11y.known-issues: rule@selector`) for systems the tests do
+  not control: reported, not counted, and any other element still fails.
+- **Release workflow** (`release.yml`): tag, notes from this file, source archive, SBOM,
+  Allure report and site.
+- **Anti-aliasing detection** in the visual diff (pixelmatch's detector): anti-aliased edge
+  pixels are counted separately and do not fail a check; moved edges and changed colours do.
+- Visual captures are retaken until two consecutive ones agree; each UI job annotates retaken
+  captures and the differing / anti-aliased pixels per check.
+- Tests for the Python tools and CI scripts (`tools/tests`, run in CI).
+- Environment variables reach dashed configuration keys (`HARNESS_DB_PASSWORD` →
+  `harness.db.password` or `harness.db-password`).
+
+### Changed
+- Response headers: a CSP that names every directive without `'unsafe-inline'`,
+  Permissions-Policy, COOP/COEP/CORP; content-hashed assets cached for a year, pages and API
+  `no-store`.
+- Security version floors in the root pom (14 entries, four of them BOMs: Jackson, Netty, OpenTelemetry, Log4j), ahead of the Spring Boot
+  BOM.
+- The suites no longer spend failed sign-ins on shared seeded accounts.
+- Project version 1.1.0 (was 1.0.0-SNAPSHOT).
+
+### Fixed — found while closing the gaps
+- 41 known vulnerabilities in transitive dependencies (OSV), in two rounds of floors.
+- 6 header findings from the first ZAP baseline.
+- `install -DskipTests` still ran the Gatling simulation (found on Windows).
+- `th.cmd` → `mvnw.cmd`: `cmd.exe` split `-Dname=value` arguments at `=`.
+- Visual captures could include a focus ring under the pointer; the pointer is parked and
+  two frames are awaited.
+- A JaCoCo agent reset in one test erased the coverage of the other tests in the same JVM.
+- A failure without a message was summarised as an empty line.
+- The PortSync SSE scenario used a path PortSync does not serve.
+- Known accessibility issues were matched by exact selector, which broke as soon as axe
+  needed structural selectors for several elements.
+- Known accessibility issues never matched in CI: the scanner stored axe's target list as
+  `[.tone-warn]`. Found once failure messages named the unlisted elements first.
+- Re-run attempts on `main` stored the passed jobs' history twice.
+- Gatling's `1,500` was parsed as 0 requests (capacity experiment and CI summary).
+- The AI evaluation could end "success" without a result (missing `pipefail`).
+- A navigation that hits `Timed out receiving message from renderer` (EdgeDriver on Windows) is
+  repeated once; any other timeout still fails at once.
+- Two accessibility defects found in PortSync (contrast 4.21:1 and 3.03:1) were fixed in
+  PortSync 1.1.0, together with a third its new contrast test found; the adapter lists no
+  known issues any more.
+
+### Measured
+- Local `clean install` (2 vCPU): **534 JVM tests, 0 failed**, 6 min 32 s.
+- OSV: 41 advisories on the first scan → 0 untriaged. ZAP: 8 alert types → 6 fixed, now 0 warnings.
+- Windows: 500 tests, 0 failed. TeamCity: every build of the chain green. CIForge in Actions:
+  9 of 9 builds, 5 min 25 s.
+- Capacity on 2 CPUs: 25 flows/s with sign-in on every flow, 200 without (three runners each).
+- Repeats: fault seeding 46 of 48 cells stable over three runs; flaky demo quarantined 3 of 3;
+  TIA 18 of 18 bugs caught by the selected subset, 3.8–33.2 % saved.
+- AI drafter, step reuse on 8 stories × 2: qwen2.5 7B 68.5 % and 69.9 % (two runs), qwen2.5 1.5B 43.3 %, llama3.2 3B 36.3 %.
+
+### Open
+- The Firefox `cancel-dialog` visual check failed intermittently in CI on 2026-10-20 and was
+  never reproduced locally (RESULTS §40).
+
+
 ## [1.0.0] — 2026-10-16 — Phase 5: the pipeline in three CI systems
 
 ### Added

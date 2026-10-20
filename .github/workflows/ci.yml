@@ -118,6 +118,16 @@ jobs:
       - name: Accessibility summary
         if: always() && matrix.suite == 'ui'
         run: python3 .github/scripts/a11y_summary.py "${{ matrix.browser }}" "suites/ui-suite/target/a11y/*.json"
+      - name: Visual check diagnostics (retaken captures, anti-aliased pixels)
+        if: always() && matrix.suite == 'ui'
+        run: |
+          # Evidence for RESULTS §40: does a browser repaint after the page looks ready?
+          lines=$(grep -oE "Visual capture of [a-z-]+ (settled after [0-9]+|did not settle after [0-9]+) captures" "$RUNNER_TEMP/suite.log" | sort | uniq -c | tr '\n' ';' || true)
+          [ -z "$lines" ] || echo "::notice title=visual settle ${{ matrix.browser }} ${{ matrix.tag }}::$lines"
+          # and how many edge pixels anti-aliasing detection discounted per check (RESULTS §40)
+          aa=$(grep -oE "Visual [a-z-]+ \[[^]]+\]: [0-9]+ of [0-9]+ pixels differ \([0-9.]+%\), [0-9]+ anti-aliased" "$RUNNER_TEMP/suite.log" \
+               | sed -E 's/Visual ([a-z-]+) \[[^]]+\]: ([0-9]+) of [0-9]+ pixels differ \([0-9.]+%\), ([0-9]+) anti-aliased/\1=\2+\3aa/' | tr '\n' ' ' || true)
+          [ -z "$aa" ] || echo "::notice title=visual ${{ matrix.browser }} ${{ matrix.tag }} (differing+anti-aliased pixels)::$aa"
       - uses: ./.github/actions/dashboard-inputs
         if: always()
         with:
@@ -238,6 +248,9 @@ jobs:
       - run: npm run build
       - name: The page committed into harness-insights matches its source
         run: git diff --exit-code -- ../harness/harness-insights/src/main/resources/io/github/raktimchandra/testharness/insights/dashboard/site/index.html
+      - name: Tests of the Python tools and CI scripts
+        working-directory: .
+        run: python3 -m unittest discover -s tools/tests -v
 
   teamcity-dsl:
     name: TeamCity Kotlin DSL compiles and generates
@@ -546,9 +559,12 @@ jobs:
           echo "Impacted tests ran in $(( $(date +%s) - start )) s" >> "$GITHUB_STEP_SUMMARY"
       - name: Nothing to run early
         if: steps.select.outputs.count == '0' || steps.select.outputs.runall != '0'
-        run: echo "No early subset - documentation only, or a change the map cannot scope (the full suites run anyway)." >> "$GITHUB_STEP_SUMMARY"
+        run: |
+          msg="No early subset - documentation only, or a change the map cannot scope (the full suites run anyway)."
+          echo "$msg" >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice title=tia::$msg $(grep -m1 -i 'run all' "$RUNNER_TEMP/select.txt" 2>/dev/null)"
       - name: Test summary
-        if: always() && steps.select.outputs.count != '' && steps.select.outputs.count != '0'
+        if: always() && steps.select.outputs.count != '' && steps.select.outputs.count != '0' && steps.select.outputs.runall == '0'
         run: python3 .github/scripts/test_summary.py "impacted" "suites/*-suite/**/TEST-*.xml"
       - uses: ./.github/actions/log-tail
         if: failure()
