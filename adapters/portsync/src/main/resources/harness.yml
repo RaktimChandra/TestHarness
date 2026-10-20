@@ -13,5 +13,9 @@ a11y:
   # Found by DashboardUiTest once warning alerts are open (2026-10-16, portsync.yml): in the light
   # theme, .tone-warn text (--signal #b06c00) on the white panel is 4.21:1, below WCAG AA's 4.5:1
   # for small text (on #eef2f5: 3.74:1). A fix for PortSync: --signal #965b00 (5.54:1 / 4.92:1).
+  # Second, found 2026-10-20 (run 39422919521) once a berthed vessel is nearly worked: the vessel
+  # code in the quay schematic (.hull-label .code.muted, --muted #536a7c) sits on the progress
+  # fill (35 % --ok over --raised = #9dc6c2) at 3.03:1. A fix for PortSync: --ink for that code
+  # (8.90:1 on the fill, 13.76:1 on --raised). Computed from PortSync's styles.css at f34ac31.
   # Listed here because this repository cannot change PortSync; any other element still fails.
-  known-issues: color-contrast@.tone-warn
+  known-issues: color-contrast@.tone-warn, color-contrast@.hull-label .code.muted

@@ -84,6 +84,18 @@ class A11yGateTest {
         assertThat(gate.breaches(untargeted)).hasSize(1);
     }
 
+    @Test
+    void aKnownChainMatchesThroughAttributeSelectorsWithSpacesButNotElsewhere() {
+        A11yGate gate = A11yGate.from(HarnessConfig.load(Map.of(),
+                props("harness.a11y.known-issues", "color-contrast@.hull-label .code.muted"), getClass().getClassLoader()));
+        A11yReport onTheHull = new A11yReport("p", "chrome", "u", List.of(new Violation("color-contrast", "serious",
+                "Contrast", "u", 1, List.of("div[title=\"Eastern Star: 58 of 58 moves\"] > .hull-label > .code.muted"))));
+        A11yReport elsewhere = new A11yReport("p", "chrome", "u", List.of(new Violation("color-contrast", "serious",
+                "Contrast", "u", 1, List.of(".panel > .code.muted"))));
+        assertThat(gate.breaches(onTheHull)).isEmpty();
+        assertThat(gate.breaches(elsewhere)).hasSize(1);
+    }
+
     private static Properties props(String k, String v) {
         Properties p = new Properties();
         p.setProperty(k, v);
