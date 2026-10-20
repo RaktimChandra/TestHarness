@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.github.raktimchandra.testharness</groupId>
         <artifactId>testharness-parent</artifactId>
-        <version>1.0.0-SNAPSHOT</version>
+        <version>1.1.0</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
@@ -15,7 +15,11 @@
     <description>Gatling (Java DSL) performance smoke test of the booking flow with p95/p99 and error-rate gates.</description>
 
     <properties>
-        <skipPerf>false</skipPerf>
+        <!-- -DskipTests skips the load test too (install -DskipTests must not run Gatling);
+             -DskipPerf skips only it. Unset, ${skipTests} stays literal and reads as false. -->
+        <skipPerf>${skipTests}</skipPerf>
+        <!-- -Dperf.simulation=...CapacitySimulation for one level of tools/capacity.py -->
+        <perf.simulation>io.github.raktimchandra.testharness.perf.BookingFlowSimulation</perf.simulation>
     </properties>
 
     <!-- Gatling 3.16 is built on Netty 4.2; the Spring Boot BOM imported by the parent pins 4.1,
@@ -51,7 +55,7 @@
                 <groupId>io.gatling</groupId>
                 <artifactId>gatling-maven-plugin</artifactId>
                 <configuration>
-                    <simulationClass>io.github.raktimchandra.testharness.perf.BookingFlowSimulation</simulationClass>
+                    <simulationClass>${perf.simulation}</simulationClass>
                     <runMultipleSimulations>false</runMultipleSimulations>
                     <failOnError>true</failOnError>
                 </configuration>

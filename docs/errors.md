@@ -32,4 +32,5 @@ problem points to the matching section below.
 | <a id="checkin-too-early"></a>`CHECKIN_TOO_EARLY` | 409 | Check-in opens 2 hours before the slot starts. |
 | <a id="checkin-too-late"></a>`CHECKIN_TOO_LATE` | 409 | Check-in closed 30 minutes after the slot ended. |
 | <a id="same-slot"></a>`SAME_SLOT` | 409 | A reschedule to the slot the booking is already in. |
+| <a id="too-many-attempts"></a>`TOO_MANY_ATTEMPTS` | 429 | Sign-in refused: 5 failed sign-ins for this username, or 100 from this client address, within 15 minutes lock it for 5 minutes. Sent with `Retry-After` (seconds). While locked even the right password is refused, and unknown usernames lock exactly like real ones. Running suites repeatedly against one long-lived SUT can reach the client limit; restart the SUT (or wait 5 minutes). |
 | `INTERNAL_ERROR` | 500 | Unexpected server error (logged with the request path). |

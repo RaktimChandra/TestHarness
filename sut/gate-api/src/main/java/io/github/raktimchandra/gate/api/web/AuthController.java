@@ -3,6 +3,7 @@ package io.github.raktimchandra.gate.api.web;
 import io.github.raktimchandra.gate.api.persistence.UserRecord;
 import io.github.raktimchandra.gate.api.security.TokenService;
 import io.github.raktimchandra.gate.api.service.AuthService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
@@ -27,8 +28,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    Dtos.LoginResponse login(@Valid @RequestBody Dtos.LoginRequest body) {
-        UserRecord user = auth.authenticate(body.username(), body.password());
+    Dtos.LoginResponse login(@Valid @RequestBody Dtos.LoginRequest body, HttpServletRequest request) {
+        UserRecord user = auth.authenticate(body.username(), body.password(), request.getRemoteAddr());
         TokenService.IssuedToken token = tokens.issue(user);
         return new Dtos.LoginResponse(token.value(), "Bearer", views.time(token.expiresAt()), views.user(user));
     }

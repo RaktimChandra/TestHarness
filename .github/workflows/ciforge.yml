@@ -1,0 +1,87 @@
+# The same pipeline on CIForge (github.com/RaktimChandra/CIForge): .ciforge.yml runs end to end
+# on this runner with `ciforge run` - nine builds, snapshot and artifact dependencies, the
+# quality gate inside a container (Docker runner). The run record is pushed to the branch
+# ciforge/<run id>.
+name: ciforge
+
+on:
+  workflow_dispatch:
+    inputs:
+      ciforge_ref:
+        description: CIForge branch, tag or commit
+        default: main
+  schedule:
+    - cron: '41 4 * * 3'   # weekly
+
+permissions:
+  contents: read
+
+env:
+  HARNESS_ENV: ci
+  GATE_SEED_PASSWORD: cf-${{ github.run_id }}
+
+jobs:
+  ciforge:
+    name: .ciforge.yml on CIForge
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install CIForge
+        run: |
+          pip install --quiet "git+https://github.com/RaktimChandra/CIForge@${{ inputs.ciforge_ref || 'main' }}"
+          ciforge --version
+          ciforge validate .ciforge.yml
+          ciforge graph .ciforge.yml >> "$GITHUB_STEP_SUMMARY"
+      - name: Run the pipeline
+        run: |
+          set -o pipefail
+          git fetch -q origin "+refs/heads/${GITHUB_REF_NAME}:refs/remotes/origin/${GITHUB_REF_NAME}" || true
+          ciforge run .ciforge.yml --source . --branch "${GITHUB_REF_NAME}" --data-dir "$RUNNER_TEMP/cf" \
+            2>&1 | tee "$RUNNER_TEMP/ciforge.log"
+      - name: Export the run record
+        if: always()
+        run: |
+          mkdir -p out
+          python3 tools/ciforge_export.py "$RUNNER_TEMP/cf" out | tee -a "$GITHUB_STEP_SUMMARY"
+      - uses: ./.github/actions/log-tail
+        if: failure()
+        with:
+          file: ${{ runner.temp }}/ciforge.log
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ciforge-run
+          path: out
+
+  results:
+    name: Push results
+    needs: ciforge
+    if: always() && needs.ciforge.result != 'cancelled'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        id: download
+        continue-on-error: true
+        with:
+          name: ciforge-run
+          path: experiments/ciforge
+      - if: steps.download.outcome == 'success'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "ciforge/${{ github.run_id }}"
+          git add -f experiments/ciforge
+          git commit -m "experiment: CIForge run ${{ github.run_id }}"
+          git push origin "ciforge/${{ github.run_id }}"

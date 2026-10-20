@@ -14,6 +14,8 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import org.openqa.selenium.WebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Runs axe-core against the current page with the WCAG 2.0/2.1 level A and AA rule sets,
@@ -21,6 +23,8 @@ import org.openqa.selenium.WebDriver;
  * dashboard), attaches it to the report, and checks it against an {@link A11yGate}.
  */
 public final class A11yScanner {
+
+    private static final Logger log = LoggerFactory.getLogger(A11yScanner.class);
 
     public static final List<String> WCAG_21_AA = List.of("wcag2a", "wcag2aa", "wcag21a", "wcag21aa");
     private static final ObjectMapper JSON = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
@@ -42,7 +46,7 @@ public final class A11yScanner {
         }
         List<A11yReport.Violation> violations = new ArrayList<>();
         for (Rule rule : results.getViolations()) {
-            List<String> targets = rule.getNodes().stream().limit(5).map(A11yScanner::target).toList();
+            List<String> targets = rule.getNodes().stream().map(A11yScanner::target).toList();
             violations.add(new A11yReport.Violation(rule.getId(), rule.getImpact(), rule.getHelp(), rule.getHelpUrl(),
                     rule.getNodes().size(), targets));
         }
@@ -54,6 +58,12 @@ public final class A11yScanner {
     /** Scans and fails the test if the gate is breached. */
     public A11yReport assertWithin(String page, A11yGate gate) {
         A11yReport report = scan(page);
+        for (A11yReport.Violation v : gate.known(report)) {
+            String msg = "Known accessibility issue on '" + page + "' (" + browser + "), not counted: " + v.rule()
+                    + " (" + v.impact() + ") " + v.targets();
+            log.warn(msg);
+            Report.text("Known accessibility issue", msg);
+        }
         List<String> breaches = gate.breaches(report);
         if (!breaches.isEmpty()) {
             throw new AssertionError("Accessibility gate failed on '" + page + "' (" + browser + "): "

@@ -29,7 +29,7 @@ class LoginJourneyTest extends UiTest {
     @Test
     void a_wrong_password_shows_an_error_and_stays_on_login() {
         LoginPage login = pages().login().open();
-        login.enter("driver1", "definitely-wrong").submit();
+        login.enter(fx.newDriver().username(), "definitely-wrong").submit();
         assertThat(login.error()).isEqualTo("Invalid username or password");
         assertThat(login.currentPath()).isEqualTo("/login");
     }

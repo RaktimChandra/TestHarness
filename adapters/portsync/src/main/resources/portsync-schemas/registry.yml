@@ -27,6 +27,11 @@ rules:
   - {method: POST, path: "/api/faults/impossible",             status: "200", schema: injection.json}
   - {method: POST, path: "/api/faults/cranes/{crane}/fault",   status: "200", schema: injection.json}
   - {method: POST, path: "/api/faults/cranes/{crane}/recover", status: "200", schema: injection.json}
+  - {method: POST, path: "/api/faults/cranes/{crane}/slow",    status: "200", schema: injection.json}
+  - {method: POST, path: "/api/faults/gate-surge",             status: "200", schema: injection.json}
+  - {method: POST, path: "/api/faults/vessel-surge",           status: "200", schema: injection.json}
+  - {method: POST, path: "/api/simulation/pause",              status: "200", schema: simulation-status.json}
+  - {method: POST, path: "/api/simulation/resume",             status: "200", schema: simulation-status.json}
   - {method: POST, path: "/api/faults/impossible",             status: 4xx,   schema: simulator-problem.json}
   - {method: POST, path: "/api/faults/duplicates",             status: 4xx,   schema: simulator-problem.json}
   - {method: GET,  path: "/api/simulation/status",             status: "200", schema: simulation-status.json}

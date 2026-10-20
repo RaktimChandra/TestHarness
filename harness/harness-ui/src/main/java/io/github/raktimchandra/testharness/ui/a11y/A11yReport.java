@@ -23,7 +23,7 @@ public record A11yReport(String page, String browser, String url, List<Violation
      * @param help    one-line description
      * @param helpUrl Deque University link
      * @param nodes   number of offending elements
-     * @param targets CSS selectors of up to five offending elements
+     * @param targets CSS selectors of the offending elements, one per element
      */
     public record Violation(String rule, String impact, String help, String helpUrl, int nodes, List<String> targets) {}
 

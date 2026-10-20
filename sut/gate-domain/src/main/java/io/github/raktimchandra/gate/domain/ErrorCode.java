@@ -17,7 +17,8 @@ public enum ErrorCode {
     CHANGE_CUTOFF_PASSED(409),
     CHECKIN_TOO_EARLY(409),
     CHECKIN_TOO_LATE(409),
-    SAME_SLOT(409);
+    SAME_SLOT(409),
+    TOO_MANY_ATTEMPTS(429);
 
     private final int httpStatus;
 
