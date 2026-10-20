@@ -38,6 +38,9 @@ for tgz in "$T"/inputs/*.tgz; do
   tar -xzf "$tgz" -C "$UNPACK/$name"
 done
 python3 "$ROOT/.github/scripts/merge_inputs.py" "$UNPACK" "$ROOT" "$RUN_DIR"
+# A re-run attempt carries the passed jobs' artifacts over unchanged; keep each result once.
+python3 "$ROOT/.github/scripts/dedupe_attempts.py" "$H/runs" | tail -1
+[ -d "$RUN_DIR" ] && [ -z "$(ls -A "$RUN_DIR")" ] && rmdir "$RUN_DIR"
 
 # Oldest runs beyond the window are dropped: history is a sliding window, not an archive.
 ls -1d "$H"/runs/*/ | sort | head -n -"$KEEP_RUNS" | xargs -r rm -rf

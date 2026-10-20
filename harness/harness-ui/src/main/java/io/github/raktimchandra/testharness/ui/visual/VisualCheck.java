@@ -117,6 +117,9 @@ public final class VisualCheck {
 
     private void stabilise() {
         if (driver instanceof org.openqa.selenium.JavascriptExecutor js) {
+            // Let effects queued by the last interaction run first (a component that focuses an
+            // element after paint would otherwise do it after the blur below).
+            js.executeAsyncScript(TWO_FRAMES);
             js.executeScript(STABILISE);
             // The pointer stays where the last click left it; native form controls paint a hover
             // border (Chrome on Windows: 2.1 % of a capture differed). Park it on the page corner.
