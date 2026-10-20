@@ -1,0 +1,110 @@
+# Measures how stable the visual checks are on the CI runner image: the whole UI suite (the
+# visual checks in parallel with the other journeys, as in ci.yml) runs N times per browser,
+# each on a fresh runner, and every visual check's differing and anti-aliased pixel counts
+# are collected. Results go to the branch visual-stability/<run id> (RESULTS §40).
+name: visual-stability
+
+on:
+  workflow_dispatch:
+    inputs:
+      browsers:
+        description: Browsers (JSON list)
+        default: '["firefox", "chrome", "edge"]'
+      repeats:
+        description: Runs per browser (JSON list of run numbers)
+        default: '[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]'
+
+permissions:
+  contents: read
+
+env:
+  HARNESS_ENV: ci
+  GATE_SEED_PASSWORD: vs-${{ github.run_id }}
+  MVN: ./mvnw -B -ntp
+
+jobs:
+  run:
+    name: ${{ matrix.browser }} ${{ matrix.rep }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    strategy:
+      fail-fast: false
+      max-parallel: 10
+      matrix:
+        browser: ${{ fromJSON(inputs.browsers) }}
+        rep: ${{ fromJSON(inputs.repeats) }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: Build upstream modules
+        run: $MVN -q install -DskipTests -pl suites/ui-suite -am
+      - name: UI suite with the visual checks, as in ci.yml
+        run: |
+          # A red suite is a result here, not a reason to stop: it is counted in the report.
+          $MVN verify -pl suites/ui-suite -Dharness.ui.browser=${{ matrix.browser }} \
+            -Dharness.visual.platform=${{ matrix.browser }}-ci \
+            -Djunit.jupiter.execution.parallel.config.fixed.parallelism=4 \
+            -Djunit.jupiter.execution.parallel.config.fixed.max-pool-size=4 \
+            -Dharness.quarantine.mode=exclude > "$RUNNER_TEMP/suite.log" 2>&1 || true
+      - name: Collect the visual results
+        run: |
+          mkdir -p out
+          python3 - "$RUNNER_TEMP/suite.log" "out/${{ matrix.browser }}-${{ matrix.rep }}.json" <<'PY'
+          import json, re, sys
+          log = open(sys.argv[1], encoding="utf-8", errors="replace").read()
+          checks = {}
+          for m in re.finditer(r"Visual ([a-z-]+) \[[^]]+\]: (\d+) of (\d+) pixels differ \(([\d.]+)%\), (\d+) anti-aliased", log):
+              checks[m[1]] = {"differing": int(m[2]), "compared": int(m[3]), "ratio_pct": float(m[4]), "anti_aliased": int(m[5])}
+          failed = re.findall(r"Visual mismatch '([a-z-]+)': ([\d.]+)% of pixels differ[^;]*", log)
+          retaken = re.findall(r"Visual capture of ([a-z-]+) (?:settled after|did not settle after) (\d+) captures", log)
+          tests = re.findall(r"Tests run: (\d+), Failures: (\d+), Errors: (\d+), Skipped: (\d+)\s*$", log, re.M)
+          out = {"browser": "${{ matrix.browser }}", "rep": ${{ matrix.rep }}, "checks": checks,
+                 "visual_failures": [{"check": c, "pct": float(p)} for c, p in failed],
+                 "retaken": [{"check": c, "captures": int(n)} for c, n in retaken],
+                 "suite": dict(zip(["tests", "failures", "errors", "skipped"], map(int, tests[-1]))) if tests else None}
+          json.dump(out, open(sys.argv[2], "w"), indent=2)
+          print(json.dumps(out))
+          PY
+      - uses: actions/upload-artifact@v7
+        with:
+          name: vs-${{ matrix.browser }}-${{ matrix.rep }}
+          path: out
+
+  report:
+    name: Report
+    needs: run
+    if: always()
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: vs-*
+          path: experiments/visual-stability/runs/${{ github.run_id }}
+          merge-multiple: true
+      - name: Summarise
+        run: |
+          python3 tools/visual_stability_report.py experiments/visual-stability/runs/${{ github.run_id }} \
+            > "experiments/visual-stability/${{ github.run_id }}.md"
+          cat "experiments/visual-stability/${{ github.run_id }}.md" | tee -a "$GITHUB_STEP_SUMMARY"
+      - name: Push
+        run: |
+          set -o pipefail
+          {
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git checkout -b "visual-stability/${{ github.run_id }}"
+            git add experiments/visual-stability
+            git commit -q -m "experiment: visual stability, run ${{ github.run_id }}"
+            git push origin "visual-stability/${{ github.run_id }}"
+          } 2>&1 | tee "$RUNNER_TEMP/push.log"
+      - uses: ./.github/actions/log-tail
+        if: failure()
+        with:
+          file: ${{ runner.temp }}/push.log
