@@ -1,0 +1,43 @@
+NAME                     IMAGE                    COMMAND                  SERVICE    CREATED         STATUS                   PORTS
+testharness-gate-1       testharness/gate:local   "java -XX:MaxRAMPerc…"   gate       2 minutes ago   Up 2 minutes (healthy)   127.0.0.1:8080->8080/tcp
+testharness-postgres-1   postgres:16-alpine       "docker-entrypoint.s…"   postgres   2 minutes ago   Up 2 minutes (healthy)   127.0.0.1:5432->5432/tcp
+CONTAINER ID   NAME                     CPU %     MEM USAGE / LIMIT   MEM %     NET I/O           BLOCK I/O         PIDS
+88d5ae472ef9   testharness-gate-1       0.10%     239.5MiB / 1GiB     23.39%    12.4MB / 20.1MB   0B / 81.9kB       29
+201d9714112b   testharness-postgres-1   0.03%     72.63MiB / 512MiB   14.19%    2.39MB / 10.1MB   6.07MB / 75.5MB   26
+gate-1  | 
+gate-1  |   .   ____          _            __ _ _
+gate-1  |  /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+gate-1  | ( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+gate-1  |  \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+gate-1  |   '  |____| .__|_| |_|_| |_\__, | / / / /
+gate-1  |  =========|_|==============|___/=/_/_/_/
+gate-1  | 
+gate-1  |  :: Spring Boot ::               (v3.5.16)
+gate-1  | 
+gate-1  | 2026-10-20T10:52:59.120Z  INFO 1 --- [gate-api] [           main] i.g.r.gate.api.GateApplication           : Starting GateApplication using Java 21.0.12.1 with PID 1 (/app/gate.jar started by gate in /)
+gate-1  | 2026-10-20T10:52:59.153Z  INFO 1 --- [gate-api] [           main] i.g.r.gate.api.GateApplication           : No active profile set, falling back to 1 default profile: "default"
+gate-1  | 2026-10-20T10:53:01.324Z  INFO 1 --- [gate-api] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+gate-1  | 2026-10-20T10:53:01.336Z  INFO 1 --- [gate-api] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+gate-1  | 2026-10-20T10:53:01.336Z  INFO 1 --- [gate-api] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.61]
+gate-1  | 2026-10-20T10:53:01.371Z  INFO 1 --- [gate-api] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+gate-1  | 2026-10-20T10:53:01.372Z  INFO 1 --- [gate-api] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 2115 ms
+gate-1  | 2026-10-20T10:53:01.784Z  INFO 1 --- [gate-api] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+gate-1  | 2026-10-20T10:53:01.985Z  INFO 1 --- [gate-api] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@657b3b
+gate-1  | 2026-10-20T10:53:01.986Z  INFO 1 --- [gate-api] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+gate-1  | 2026-10-20T10:53:02.012Z  INFO 1 --- [gate-api] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://postgres:5432/gate (PostgreSQL 16.15)
+gate-1  | 2026-10-20T10:53:02.043Z  INFO 1 --- [gate-api] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Schema history table "public"."flyway_schema_history" does not exist yet
+gate-1  | 2026-10-20T10:53:02.046Z  INFO 1 --- [gate-api] [           main] o.f.core.internal.command.DbValidate     : Successfully validated 1 migration (execution time 00:00.014s)
+gate-1  | 2026-10-20T10:53:02.063Z  INFO 1 --- [gate-api] [           main] o.f.c.i.s.JdbcTableSchemaHistory         : Creating Schema History table "public"."flyway_schema_history" ...
+gate-1  | 2026-10-20T10:53:02.138Z  INFO 1 --- [gate-api] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": << Empty Schema >>
+gate-1  | 2026-10-20T10:53:02.151Z  INFO 1 --- [gate-api] [           main] o.f.core.internal.command.DbMigrate      : Migrating schema "public" to version "1 - schema"
+gate-1  | 2026-10-20T10:53:02.205Z  INFO 1 --- [gate-api] [           main] o.f.core.internal.command.DbMigrate      : Successfully applied 1 migration to schema "public", now at version v1 (execution time 00:00.041s)
+gate-1  | 2026-10-20T10:53:02.830Z  INFO 1 --- [gate-api] [           main] o.s.b.a.w.s.WelcomePageHandlerMapping    : Adding welcome page: class path resource [META-INF/resources/index.html]
+gate-1  | 2026-10-20T10:53:03.115Z  INFO 1 --- [gate-api] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 3 endpoints beneath base path '/actuator'
+gate-1  | 2026-10-20T10:53:03.613Z  INFO 1 --- [gate-api] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+gate-1  | 2026-10-20T10:53:03.630Z  INFO 1 --- [gate-api] [           main] i.g.r.gate.api.GateApplication           : Started GateApplication in 5.145 seconds (process running for 5.689)
+gate-1  | 2026-10-20T10:53:04.092Z  INFO 1 --- [gate-api] [           main] i.g.r.gate.api.service.DemoDataSeeder    : Demo data ready: 5 users and 448 slots created
+gate-1  | 2026-10-20T10:53:04.094Z  WARN 1 --- [gate-api] [           main] o.s.core.events.SpringDocAppInitializer  : SpringDoc /v3/api-docs endpoint is enabled by default. To disable it in production, set the property 'springdoc.api-docs.enabled=false'
+gate-1  | 2026-10-20T10:53:04.094Z  WARN 1 --- [gate-api] [           main] o.s.core.events.SpringDocAppInitializer  : SpringDoc /swagger-ui.html endpoint is enabled by default. To disable it in production, set the property 'springdoc.swagger-ui.enabled=false'
+gate-1  | 2026-10-20T10:53:08.079Z  INFO 1 --- [gate-api] [omcat-handler-0] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+gate-1  | 2026-10-20T10:53:08.079Z  INFO 1 --- [gate-api] [omcat-handler-0] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+gate-1  | 2026-10-20T10:53:08.080Z  INFO 1 --- [gate-api] [omcat-handler-0] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms

@@ -1,0 +1,108 @@
+{
+  "flow": "full",
+  "label": "39410838330-r3",
+  "duration_s": 60,
+  "started": "2026-10-20T10:53:08+0000",
+  "sut_cpus": 2.0,
+  "sut_memory_bytes": 1073741824,
+  "host_cpus": 4,
+  "rules": {
+    "p95_ms": 800,
+    "max_error_pct": 1.0,
+    "min_achieved_ratio": 0.95
+  },
+  "levels": [
+    {
+      "offered_flows_per_s": 5.0,
+      "maven_exit": 0,
+      "wall_s": 73.3,
+      "requests": 0,
+      "failed": 0,
+      "error_pct": null,
+      "p50_ms": 5.0,
+      "p95_ms": 81.0,
+      "p99_ms": 97.0,
+      "max_ms": 185.0,
+      "rps": 25.0,
+      "by_request": {
+        "login": {
+          "total": 300,
+          "ok": 300,
+          "ko": 0
+        },
+        "list slots": {
+          "total": 300,
+          "ok": 300,
+          "ko": 0
+        },
+        "book": {
+          "total": 300,
+          "ok": 300,
+          "ko": 0
+        },
+        "read booking": {
+          "total": 300,
+          "ok": 300,
+          "ko": 0
+        },
+        "cancel": {
+          "total": 300,
+          "ok": 300,
+          "ko": 0
+        }
+      },
+      "completed_flows_per_s": 5.0,
+      "achieved_ratio": 1.0,
+      "sut_cpu_pct_mean": 62.6,
+      "sut_cpu_pct_max": 175.6,
+      "keeps_up": false
+    },
+    {
+      "offered_flows_per_s": 10.0,
+      "maven_exit": 0,
+      "wall_s": 72.1,
+      "requests": 0,
+      "failed": 0,
+      "error_pct": null,
+      "p50_ms": 3.0,
+      "p95_ms": 83.0,
+      "p99_ms": 128.0,
+      "max_ms": 209.0,
+      "rps": 50.0,
+      "by_request": {
+        "login": {
+          "total": 600,
+          "ok": 600,
+          "ko": 0
+        },
+        "list slots": {
+          "total": 600,
+          "ok": 600,
+          "ko": 0
+        },
+        "book": {
+          "total": 600,
+          "ok": 600,
+          "ko": 0
+        },
+        "read booking": {
+          "total": 600,
+          "ok": 600,
+          "ko": 0
+        },
+        "cancel": {
+          "total": 600,
+          "ok": 600,
+          "ko": 0
+        }
+      },
+      "completed_flows_per_s": 10.0,
+      "achieved_ratio": 1.0,
+      "sut_cpu_pct_mean": 88.0,
+      "sut_cpu_pct_max": 126.3,
+      "keeps_up": false
+    }
+  ],
+  "capacity_flows_per_s": 0,
+  "finished": "2026-10-20T10:55:33+0000"
+}
