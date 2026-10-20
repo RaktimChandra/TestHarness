@@ -32,10 +32,10 @@ From real runs on 2026-10-14 to 2026-10-20 — method, machine and raw numbers f
 | Mutation score, domain rules (PIT, STRONGER) | **95.1 % → 100 %** (143 mutants) after turning the 7 survivors into tests |
 | Test impact analysis, per-test JaCoCo, three recordings | **18/18** selected runs still caught their bug; wall-clock saved **3.8–33.2 %** (and why so little) |
 | Flaky-test detection (20 runs on one commit, three times, CI) | deliberately flaky test scored **0.368 / 0.474 / 0.421** and was quarantined every time; its stable control scored 0 every time |
-| A second, unrelated system (PortSync: Kafka + Spring + React) | **54 tests, 0 failures** in CI with the framework unchanged, including a consumer contract and SLA scenarios; found **two real WCAG contrast defects in PortSync** (4.21:1 and 3.03:1) |
+| A second, unrelated system (PortSync: Kafka + Spring + React) | **54 tests, 0 failures** in CI with the framework unchanged, including a consumer contract and SLA scenarios; found **two real WCAG contrast defects in PortSync** (4.21:1 and 3.03:1), now fixed there |
 | Dependency vulnerabilities (OSV-Scanner over a Maven-resolved SBOM) | **41 advisories in 18 transitive packages** on the first scan → 0 untriaged after version floors; 3 Spring 6.2 advisories ignored with code-checked reasons and an expiry date |
 | OWASP ZAP baseline of the running SUT | **8 alert types** on the first scan → 6 header findings fixed in the app, 3 informational rules triaged; now a gate |
-| Windows (`windows-2025`, the Windows guide's own commands) | **492 tests, 0 failed** with `mvnw.cmd` / `th.cmd`, UI in Chrome and Edge; found 4 problems Linux CI could not |
+| Windows (`windows-2025`, the Windows guide's own commands) | **500 tests, 0 failed** with `mvnw.cmd` / `th.cmd`, UI in Chrome and Edge; found 4 problems Linux CI could not |
 | TeamCity 2025.07, real server + agent | the server imports and compiles `settings.kts` and runs the chain: **every build green** (build 350, API 112, BDD 24, UI 15 + 14, Gatling, PIT) |
 | CI pipeline (`main`, run 39425545521) | **quality gate green in 13 min 18 s**, 22 jobs: UI sharded 3 browsers × 2 by recorded duration, quarantine non-blocking (its flaky test failed, as designed), then history and the dashboard published in 3 min 36 s more; the same chain on CIForge in 5 min 25 s |
 | Capacity on 2 CPUs / 1 GiB (three runners per flow) | **25 booking flows/s** with sign-in on every flow (CPU-bound), **200** with a reused token (then the 20-connection pool runs out) |
@@ -266,6 +266,17 @@ The same pipeline exists three times, each labelled with how far it was proven:
 | GitHub Actions | `.github/workflows/ci.yml` | runs on every push and PR; on `main` it also records history and publishes the site (RESULTS §31, §39) |
 | CIForge (my TeamCity-style orchestrator) | `.ciforge.yml` | **executed** in the sandbox (8 min 11 s) and inside GitHub Actions (5 min 25 s), 9 of 9 builds green (RESULTS §28, §41) |
 | TeamCity | `.teamcity/settings.kts` | **executed**: a TeamCity 2025.07 server imports and compiles the Kotlin settings and runs the chain on an agent, every build green (RESULTS §37) |
+
+### Repository settings the pipeline expects
+
+Set once by the owner (a workflow token cannot change them):
+
+| Setting | Value | Why |
+|---|---|---|
+| Pages | source `gh-pages`, `/ (root)` | serves the dashboard the `publish` job builds |
+| Rules → ruleset on the default branch | pull request required; status check **Quality gate** required and up to date; no force pushes | the gate is the one check that decides a merge |
+| Code security → Dependency graph | enabled | needed by the `dependency-review` job |
+| Actions variable `DEPENDENCY_REVIEW` | `true` | switches that job on (it fails on new high-severity dependencies in a PR) |
 
 Interview preparation for this project: [INTERVIEW.md](INTERVIEW.md).
 

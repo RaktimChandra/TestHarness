@@ -726,7 +726,14 @@ Linux containers, so the runner's PostgreSQL stands in for Testcontainers throug
 | Skipped | 5 visual checks (no Windows baselines: baselines are rendered per platform on Linux, so the job writes Windows candidates instead); 14 BDD scenarios outside `@smoke` (the guide's BDD step runs the smoke tag); `DraftStepCoverageTest.reportOnDrafts` (needs `-Dai.drafts`) |
 | Not run on Windows | `gate-api`'s 26 tests (Testcontainers integration tests; they run in the Linux build job) |
 
-Earlier green runs: 38890845411 (`d26ea7d`, 490 tests) and 39406598745 (`88fd713`).
+Earlier green runs: 38890845411 (`d26ea7d`, 490 tests) and 39406598745 (`88fd713`); latest
+39452849947 (`d303237`): **500 tests, 0 failed**, the same 20 skips.
+
+**One Edge failure on Windows** (run 39449323500): two journeys stopped while opening a page
+with `Timed out receiving message from renderer` — EdgeDriver lost contact with a renderer
+process on the loaded runner, before the page under test was involved. Navigations now repeat
+once in exactly that case, logged and reported (DESIGN D66); every other timeout and every
+assertion still fails at once.
 
 It found four problems that Linux CI could not: `install -DskipTests` still ran the Gatling
 simulation; a framework test assumed a container; `cmd.exe` split `-Dname=value` arguments
@@ -786,6 +793,12 @@ One real bug turned up: a failure without a message was summarised as an empty
   colour-contrast violation on the overview and one on the alerts page, both counted as known,
   and the suite passed — **54 tests, 0 failed**. (In 39429169337, `52112b4`, neither state
   occurred: 0 violations.)
+- **Fixed in PortSync** (PortSync `1bd2080`, release 1.1.0): light `--signal` `#965b00`
+  (5.54:1), labels over the quay fill in `--ink` (8.90:1), and a third defect found by auditing
+  every colour pair there — the primary button's text on the light amber was 4.41:1, now its own
+  `--on-signal` token. PortSync gained a contrast test over all its theme blocks that fails on
+  the old palette. This repository's PortSync config lists **no known issues** any more; run
+  39444742884 (`f5b0b8a`) scanned with the gate fully strict: 0 violations, 54 tests, 0 failed.
 
 ### 37. TeamCity — the real settings on a real server and agent
 
@@ -872,30 +885,45 @@ of test time, per browser; job time is the shard job's wall-clock.
   as Chrome. Durations per browser and more history are the next steps; the claim stays "more
   even", not "faster".
 
-### 40. An intermittent visual failure in Firefox — `cancel-dialog` (open)
+### 40. An intermittent visual failure in Firefox — `cancel-dialog`
 
-The Firefox `cancel-dialog` check failed three times on 2026-10-20 — **2.389 %** of pixels in
-run 39410820490 (passed on re-run), and **0.552 %** in runs 39419767821 and 39425329315 —
-after passing in every earlier run, and in other runs the same day. Five consecutive local
-Firefox runs differed by **0 pixels**. The diff images stay in CI artifacts, which this
-environment cannot download, so the cause has not been seen:
+**Observed:** the Firefox `cancel-dialog` check failed in five CI runs on 2026-10-20 and passed
+in the others, while five consecutive local Firefox runs (and three full UI-suite runs under
+load) differed by **0 pixels**.
 
-- First hypothesis: the dialog focuses its confirm button in an effect that runs after paint,
-  so the capture could race the focus ring. The test now waits for that focus and the capture
-  lets queued effects run first (`3454758`) — and the **0.552 % failure came back**
-  (39425329315, on `da81231`). So that was not the cause, or not the only one.
-- Second: element rects reach the harness as whole pixels, truncated separately for the
-  dialog and the masked message, which changes every run (reference, lane, date). With the
-  dialog centred in the viewport, the mask can miss a pixel of anti-aliased text. Masks now
-  get a 2-pixel margin (`045271f`).
-- So the next failure explains itself, the message now carries the changed area: bounding box
-  and pixels per quarter of the capture.
+| Run | Commit | Mismatch | Changed area (from the failure message, 440×200 capture) |
+|---|---|---:|---|
+| 39410820490 | `768ee4d` | 2.389 % | — (message added later) |
+| 39419767821 | `f5fa6a1` | 0.552 % | — |
+| 39425329315 | `da81231` | 0.552 % | — |
+| 39429169339 | `52112b4` | 0.567 % | x=90..415, y=31..137: heading row and button row |
+| 39444742951 | `f5b0b8a` | 0.306 % | x=90..221, y=31..45: the heading only, from just after "Cancel " |
 
-Runs after the settled-capture change: `9b26d27` (39431122708) and `f82f93a` (39433445732),
-both green in Firefox, and no capture needed retaking in the second (the first predates that
-report). Two green runs do not prove a fix for an intermittent failure. Until the cause is seen, this check is the one known
-source of a red pipeline that is not a product defect.
+The diff images stay in CI artifacts, which this environment cannot download, so each step
+below was an explanation tested against the next runs:
 
+1. *The capture raced the dialog's focus ring* (it focuses its button in an effect after
+   paint). The test now waits for that focus (`3454758`) — the failure came back.
+2. *The mask over the per-run message was off by a pixel* (element rects are truncated to whole
+   pixels). Masks got a 2-pixel margin (`045271f`) — it came back.
+3. *The browser repainted after the page looked ready.* Captures are now retaken until two in a
+   row are identical, and each UI job reports when that took more than two (`9b26d27`,
+   `f82f93a`). In the failing run on `f5b0b8a` no capture needed retaking: the image was
+   stable, just different. Rejected.
+4. **What the changed area shows:** the differing pixels are the heading's glyphs *after its
+   first word*, and in one run the button labels' — text drawn at a different sub-pixel offset
+   from run to run, which changes every anti-aliased edge pixel and nothing else. That is what
+   anti-aliasing detection exists for, and it was the simplification D26 had recorded: the diff
+   now discounts anti-aliased edge pixels with pixelmatch's detector, reports them separately,
+   and still fails on moved edges and changed colours (`ImageDiffTest`, DESIGN D65).
+
+**Status: open, with the likely cause addressed.** Since D65 (`e29d4ac`, run 39449323307;
+`d303237`, run 39452850062) the check passed; in the second run, which already reports the
+counts, every visual check in every browser matched with **0 differing and 0 anti-aliased
+pixels** — the alternate rendering simply did not occur, so D65 has not yet met it in CI. Its
+unit tests show the case it targets (an edge drawn half a pixel further) is discounted while a
+moved edge or a recoloured area still fails. Each UI job now annotates, per check, the
+differing and the discounted pixels, so the next occurrence will show whether it is enough.
 ### 41. TestHarness on CIForge inside GitHub Actions — `ciforge.yml`
 
 **Method and both run records:** [experiments/ciforge](experiments/ciforge/README.md#in-github-actions--ciforgeyml-2026-10-20).
@@ -974,11 +1002,12 @@ it is not a speed-up in this pipeline.
 - **The diff images of CI visual failures** cannot be downloaded into the authoring
   environment (artifact downloads are blocked there), which is why the Firefox `cancel-dialog`
   failure (§40) is diagnosed from its message, not its picture.
-- **GitHub Pages** cannot be switched on by a workflow token; the site exists on `gh-pages` and
-  is served once the repository owner selects that branch in the settings.
+- **GitHub Pages** cannot be switched on by a workflow token; the owner switched it on and the
+  site is live at <https://raktimchandra.github.io/TestHarness/>.
 - **`gate-api`'s Testcontainers tests on Windows** — hosted Windows runners cannot run Linux
   containers (§34).
 - **A hosted frontier model** for the AI evaluation — it uses small open models through Ollama
   on the runner, so it needs no key and costs nothing, and says nothing about larger models (§43).
-- **The PortSync fixes** — both contrast defects are in PortSync's repository; this one only
-  records them and computes the fixes (§36).
+- **Repository settings** (branch rules, the dependency graph, Actions variables) cannot be
+  changed from the authoring environment; they are set by the owner (README, "Repository
+  settings").

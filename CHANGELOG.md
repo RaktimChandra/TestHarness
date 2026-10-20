@@ -39,6 +39,11 @@ compiling, every test passing, and `./mvnw verify` running end to end.
   not control: reported, not counted, and any other element still fails.
 - **Release workflow** (`release.yml`): tag, notes from this file, source archive, SBOM,
   Allure report and site.
+- **Anti-aliasing detection** in the visual diff (pixelmatch's detector): anti-aliased edge
+  pixels are counted separately and do not fail a check; moved edges and changed colours do.
+- Visual captures are retaken until two consecutive ones agree; each UI job annotates retaken
+  captures and the differing / anti-aliased pixels per check.
+- Tests for the Python tools and CI scripts (`tools/tests`, run in CI).
 - Environment variables reach dashed configuration keys (`HARNESS_DB_PASSWORD` →
   `harness.db.password` or `harness.db-password`).
 
@@ -68,13 +73,16 @@ compiling, every test passing, and `./mvnw verify` running end to end.
 - Re-run attempts on `main` stored the passed jobs' history twice.
 - Gatling's `1,500` was parsed as 0 requests (capacity experiment and CI summary).
 - The AI evaluation could end "success" without a result (missing `pipefail`).
-- Two accessibility defects in PortSync (contrast 4.21:1 and 3.03:1) are recorded as known
-  issues, with computed fixes for PortSync.
+- A navigation that hits `Timed out receiving message from renderer` (EdgeDriver on Windows) is
+  repeated once; any other timeout still fails at once.
+- Two accessibility defects found in PortSync (contrast 4.21:1 and 3.03:1) were fixed in
+  PortSync 1.1.0, together with a third its new contrast test found; the adapter lists no
+  known issues any more.
 
 ### Measured
 - Local `clean install` (2 vCPU): **526 JVM tests, 0 failed**, 6 min 32 s.
 - OSV: 41 advisories on the first scan → 0 untriaged. ZAP: 8 alert types → 6 fixed, now 0 warnings.
-- Windows: 492 tests, 0 failed. TeamCity: every build of the chain green. CIForge in Actions:
+- Windows: 500 tests, 0 failed. TeamCity: every build of the chain green. CIForge in Actions:
   9 of 9 builds, 5 min 25 s.
 - Capacity on 2 CPUs: 25 flows/s with sign-in on every flow, 200 without (three runners each).
 - Repeats: fault seeding 46 of 48 cells stable over three runs; flaky demo quarantined 3 of 3;
@@ -84,8 +92,7 @@ compiling, every test passing, and `./mvnw verify` running end to end.
 ### Open
 - The Firefox `cancel-dialog` visual check failed intermittently in CI on 2026-10-20 and was
   never reproduced locally (RESULTS §40).
-- GitHub Pages must be switched on in the repository settings to serve the published site.
-- The two PortSync contrast defects need fixing in PortSync.
+
 
 ## [1.0.0] — 2026-10-16 — Phase 5: the pipeline in three CI systems
 
