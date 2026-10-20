@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Supplier;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.parallel.Isolated;
@@ -111,22 +112,33 @@ class SlaScenariosTest extends LiveTest {
         SimulationStatus paused = simulator.pause();
         try {
             assertThat(paused.paused()).isTrue();
-            // wait until the core has consumed everything the simulator published
-            List<Long> processed = new ArrayList<>();
-            await(Duration.ofSeconds(60)).until("the core to stop processing events", () -> {
-                processed.add(core.overview().eventsProcessed());
-                int n = processed.size();
-                return n >= 3 && processed.get(n - 1).equals(processed.get(n - 3));
-            }, b -> b);
+            // The simulator is paused, so its yard no longer changes. Events it published just
+            // before the pause may still be in flight to the core, and a count of processed events
+            // that holds still for a few polls does not prove they have all arrived (PR #8, run
+            // 39464783586: the core still held one container the simulator had already removed).
+            // So the core is given time to converge on the simulator's yard, and must then stay
+            // there: a real disagreement fails with both yards in the message.
             Map<String, Integer> simulated = new TreeMap<>();
             simulator.status().terminal().yardOccupancy().forEach((b, n) -> {
                 if (n > 0) {
                     simulated.put(b, n);
                 }
             });
-            Map<String, Integer> recorded = new TreeMap<>();
-            core.blocks().stream().filter(b -> b.used() > 0).forEach(b -> recorded.put(b.block(), b.used()));
-            assertThat(recorded).as("core yard (blocks API) vs simulator yard").isEqualTo(simulated);
+            Supplier<Map<String, Integer>> coreYard = () -> {
+                Map<String, Integer> recorded = new TreeMap<>();
+                core.blocks().stream().filter(b -> b.used() > 0).forEach(b -> recorded.put(b.block(), b.used()));
+                return recorded;
+            };
+            await(Duration.ofSeconds(60)).until("the core's yard to match the paused simulator's " + simulated,
+                    coreYard, simulated::equals);
+            List<Long> processed = new ArrayList<>();
+            await(Duration.ofSeconds(30)).until("the core to stop processing events", () -> {
+                processed.add(core.overview().eventsProcessed());
+                int n = processed.size();
+                return n >= 3 && processed.get(n - 1).equals(processed.get(n - 3));
+            }, b -> b);
+            assertThat(coreYard.get()).as("core yard (blocks API) vs simulator yard, once the core is idle")
+                    .isEqualTo(simulated);
         } finally {
             simulator.resume();
         }
