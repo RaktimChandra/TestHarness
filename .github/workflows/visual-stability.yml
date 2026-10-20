@@ -1,7 +1,8 @@
 # Measures how stable the visual checks are on the CI runner image: the whole UI suite (the
 # visual checks in parallel with the other journeys, as in ci.yml) runs N times per browser,
 # each on a fresh runner, and every visual check's differing and anti-aliased pixel counts
-# are collected. Results go to the branch visual-stability/<run id> (RESULTS §40).
+# are collected, with the actual and diff images of every check that failed. Results go to the
+# branch visual-stability/<run id> (RESULTS §40).
 name: visual-stability
 
 on:
@@ -57,8 +58,9 @@ jobs:
           import json, re, sys
           log = open(sys.argv[1], encoding="utf-8", errors="replace").read()
           checks = {}
-          for m in re.finditer(r"Visual ([a-z-]+) \[[^]]+\]: (\d+) of (\d+) pixels differ \(([\d.]+)%\), (\d+) anti-aliased", log):
-              checks[m[1]] = {"differing": int(m[2]), "compared": int(m[3]), "ratio_pct": float(m[4]), "anti_aliased": int(m[5])}
+          for m in re.finditer(r"Visual ([a-z-]+) \[[^]]+\]: (\d+) of (\d+) pixels differ \(([\d.]+)%\), (\d+) anti-aliased[^;\n]*(?:; (drawn at [^\n]*))?", log):
+              checks[m[1]] = {"differing": int(m[2]), "compared": int(m[3]), "ratio_pct": float(m[4]), "anti_aliased": int(m[5]),
+                              "geometry": (m[6] or "").strip()}
           failed = re.findall(r"Visual mismatch '([a-z-]+)': ([\d.]+)% of pixels differ[^;]*", log)
           retaken = re.findall(r"Visual capture of ([a-z-]+) (?:settled after|did not settle after) (\d+) captures", log)
           tests = re.findall(r"Tests run: (\d+), Failures: (\d+), Errors: (\d+), Skipped: (\d+)\s*$", log, re.M)
@@ -69,6 +71,12 @@ jobs:
           json.dump(out, open(sys.argv[2], "w"), indent=2)
           print(json.dumps(out))
           PY
+          # The images of every failed check (actual + diff), so a failure can be looked at
+          # from the results branch: artifact downloads are not reachable from everywhere.
+          if [ -d suites/ui-suite/target/visual/diff ]; then
+            mkdir -p "out/images/${{ matrix.browser }}-${{ matrix.rep }}"
+            cp -r suites/ui-suite/target/visual/diff/. "out/images/${{ matrix.browser }}-${{ matrix.rep }}/"
+          fi
       - uses: actions/upload-artifact@v7
         with:
           name: vs-${{ matrix.browser }}-${{ matrix.rep }}

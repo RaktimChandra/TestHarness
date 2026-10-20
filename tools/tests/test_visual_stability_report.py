@@ -8,10 +8,12 @@ sys.path.insert(0, os.path.join(ROOT, "tools"))
 import visual_stability_report as vsr  # noqa: E402
 
 
-def run(rep, differing, aa, failed=False, suite_failures=0):
+def run(rep, differing, aa, failed=False, suite_failures=0, geometry=None):
+    check = {"differing": differing, "compared": 69184, "ratio_pct": 100 * differing / 69184, "anti_aliased": aa}
+    if geometry is not None:
+        check["geometry"] = geometry
     return {"browser": "firefox", "rep": rep,
-            "checks": {"cancel-dialog": {"differing": differing, "compared": 69184,
-                                         "ratio_pct": 100 * differing / 69184, "anti_aliased": aa}},
+            "checks": {"cancel-dialog": check},
             "visual_failures": [{"check": "cancel-dialog", "pct": 0.552}] if failed else [],
             "retaken": [], "suite": {"tests": 29, "failures": suite_failures, "errors": 0, "skipped": 0}}
 
@@ -29,6 +31,16 @@ class Report(unittest.TestCase):
         r["suite"] = None
         _, suites = vsr.summarise([r])
         self.assertEqual(suites["firefox"]["red"], 1)
+
+    def test_positions_group_runs_by_where_the_element_was_drawn_ignoring_scroll(self):
+        at = "drawn at x=420 y=316.8 size 440x200.38 in viewport 1280x814"
+        moved = "drawn at x=420 y=316.3 size 440x200.38 in viewport 1280x813"
+        p = vsr.positions([run(1, 0, 0, geometry=at + " scrollY=0 dpr=1"),
+                           run(2, 0, 0, geometry=at + " scrollY=950 dpr=1"),
+                           run(3, 876, 777, failed=True, geometry=moved + " scrollY=12 dpr=1"),
+                           run(4, 0, 0)])
+        self.assertEqual(dict(p[("firefox", "cancel-dialog")]),
+                         {at: [2, 0], moved: [1, 1], "not logged": [1, 0]})
 
 
 if __name__ == "__main__":

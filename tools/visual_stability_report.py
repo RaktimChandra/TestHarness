@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 """Aggregates visual-stability.yml results (<dir>/<browser>-<rep>.json) into a Markdown table:
 per browser and check, how many runs matched, how many failed, and the largest differing and
-anti-aliased pixel counts seen.
+anti-aliased pixel counts seen; then, per check, each distinct place the element was drawn
+(sub-pixel position and viewport) with how many runs drew it there and how many of those failed,
+because a sub-pixel move is a cause the images alone do not show.
 
 usage: tools/visual_stability_report.py <dir>
 """
@@ -36,6 +38,20 @@ def summarise(results):
     return rows, suites
 
 
+def positions(results):
+    """(browser, check) -> {geometry without scrollY: [runs, failed]}."""
+    out = defaultdict(lambda: defaultdict(lambda: [0, 0]))
+    for r in results:
+        failed_checks = {f["check"] for f in r.get("visual_failures", [])}
+        for check, c in r.get("checks", {}).items():
+            g = c.get("geometry") or "not logged"
+            g = g.split(" scrollY=")[0]
+            cell = out[(r["browser"], check)][g]
+            cell[0] += 1
+            cell[1] += check in failed_checks
+    return out
+
+
 def main():
     d = sys.argv[1]
     results = [json.load(open(f)) for f in sorted(glob.glob(os.path.join(d, "*.json")))]
@@ -53,6 +69,12 @@ def main():
     for (b, check), r in sorted(rows.items()):
         print(f"| {b} | {check} | {r['runs']} | {r['failed']} | {r['max_differing']} ({r['max_ratio']:.4f} %) | "
               f"{r['runs_with_aa']} | {r['max_aa']} |")
+    print("\n## Where each element was drawn\n")
+    print("| browser | check | position and viewport | runs | failed |")
+    print("|---|---|---|---:|---:|")
+    for (b, check), cells in sorted(positions(results).items()):
+        for g, (n, f) in sorted(cells.items()):
+            print(f"| {b} | {check} | {g} | {n} | {f} |")
     return 0
 
 
