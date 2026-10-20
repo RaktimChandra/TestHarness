@@ -57,7 +57,7 @@ public final class VisualCheck {
     /** Compares the element against baseline {@code name}, ignoring the given child regions. */
     public Outcome matches(String name, WebElement element, By... ignore) {
         stabilise();
-        BufferedImage actual = read(element.getScreenshotAs(OutputType.BYTES));
+        BufferedImage actual = settledCapture(element);
         List<Rectangle> regions = regions(element, ignore);
         Path baseline = settings.baselineDir().resolve(settings.platform()).resolve(name + ".png");
         if (settings.update()) {
@@ -97,6 +97,60 @@ public final class VisualCheck {
         }
         return Outcome.MATCHED;
     }
+
+    /** Captures tried before giving up on two identical ones in a row. */
+    static final int MAX_CAPTURES = 5;
+
+    /**
+     * Captures until two consecutive captures are pixel-identical, waiting a little between
+     * them, because a browser can repaint after the page looks ready and a capture taken
+     * mid-repaint makes a check flaky rather than wrong. (Suspected, not proven, for Firefox's
+     * intermittent cancel-dialog mismatches in CI on 2026-10-20: 0.55 % of pixels, in the
+     * heading and button rows, never reproduced locally.)
+     */
+    private BufferedImage settledCapture(WebElement element) {
+        BufferedImage previous = read(element.getScreenshotAs(OutputType.BYTES));
+        for (int i = 1; i < MAX_CAPTURES; i++) {
+            pause();
+            BufferedImage next = read(element.getScreenshotAs(OutputType.BYTES));
+            if (samePixels(previous, next)) {
+                if (i > 1) {
+                    log.info("Visual capture settled after {} captures", i + 1);
+                }
+                return next;
+            }
+            previous = next;
+        }
+        log.warn("Visual capture did not settle after {} captures; comparing the last one", MAX_CAPTURES);
+        Report.note("Visual capture did not settle after " + MAX_CAPTURES + " captures");
+        return previous;
+    }
+
+    private void pause() {
+        if (driver instanceof org.openqa.selenium.JavascriptExecutor js) {
+            js.executeAsyncScript(SETTLE);
+        }
+    }
+
+    static boolean samePixels(BufferedImage a, BufferedImage b) {
+        if (a.getWidth() != b.getWidth() || a.getHeight() != b.getHeight()) {
+            return false;
+        }
+        for (int y = 0; y < a.getHeight(); y++) {
+            for (int x = 0; x < a.getWidth(); x++) {
+                if (a.getRGB(x, y) != b.getRGB(x, y)) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    /** Resolves after 150 ms and two animation frames. */
+    static final String SETTLE = """
+            const done = arguments[arguments.length - 1];
+            setTimeout(() => requestAnimationFrame(() => requestAnimationFrame(() => done(true))), 150);
+            """;
 
     /** Pixels added on every side of a masked element (see {@link #regions}). */
     static final int MASK_MARGIN = 2;

@@ -81,6 +81,17 @@ class VisualCheckTest {
     }
 
     @Test
+    void aCaptureTakenMidRepaintIsRetakenUntilTwoAgree() throws Exception {
+        new VisualCheck(driver, settings(true, false)).matches("settle", element(png(Color.WHITE, false)));
+        WebElement repainting = element(png(Color.WHITE, false));
+        // first capture mid-repaint (the box), then the settled page twice
+        when(repainting.getScreenshotAs(OutputType.BYTES))
+                .thenReturn(png(Color.WHITE, true), png(Color.WHITE, false), png(Color.WHITE, false));
+        assertThat(new VisualCheck(driver, settings(false, true)).matches("settle", repainting))
+                .isEqualTo(VisualCheck.Outcome.MATCHED);
+    }
+
+    @Test
     void ignoredChildRegionsAreMaskedRelativeToTheElement() throws Exception {
         new VisualCheck(driver, settings(true, false)).matches("masked", element(png(Color.WHITE, false)));
         WebElement child = mock(WebElement.class);
