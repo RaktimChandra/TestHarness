@@ -57,7 +57,7 @@ public final class VisualCheck {
     /** Compares the element against baseline {@code name}, ignoring the given child regions. */
     public Outcome matches(String name, WebElement element, By... ignore) {
         stabilise();
-        BufferedImage actual = settledCapture(element);
+        BufferedImage actual = settledCapture(name, element);
         List<Rectangle> regions = regions(element, ignore);
         Path baseline = settings.baselineDir().resolve(settings.platform()).resolve(name + ".png");
         if (settings.update()) {
@@ -108,21 +108,21 @@ public final class VisualCheck {
      * intermittent cancel-dialog mismatches in CI on 2026-10-20: 0.55 % of pixels, in the
      * heading and button rows, never reproduced locally.)
      */
-    private BufferedImage settledCapture(WebElement element) {
+    private BufferedImage settledCapture(String name, WebElement element) {
         BufferedImage previous = read(element.getScreenshotAs(OutputType.BYTES));
         for (int i = 1; i < MAX_CAPTURES; i++) {
             pause();
             BufferedImage next = read(element.getScreenshotAs(OutputType.BYTES));
             if (samePixels(previous, next)) {
                 if (i > 1) {
-                    log.info("Visual capture settled after {} captures", i + 1);
+                    log.info("Visual capture of {} settled after {} captures", name, i + 1);
                 }
                 return next;
             }
             previous = next;
         }
-        log.warn("Visual capture did not settle after {} captures; comparing the last one", MAX_CAPTURES);
-        Report.note("Visual capture did not settle after " + MAX_CAPTURES + " captures");
+        log.warn("Visual capture of {} did not settle after {} captures; comparing the last one", name, MAX_CAPTURES);
+        Report.note("Visual capture of " + name + " did not settle after " + MAX_CAPTURES + " captures");
         return previous;
     }
 
