@@ -640,6 +640,13 @@ brighter neighbour that each belong to a flat area. Discounted pixels are report
 "no anti-aliasing detection" simplification after Firefox in CI drew the same heading with its
 glyphs half a pixel apart from run to run (RESULTS §40). *Rejected again:* a higher threshold.
 
+### D66 — One repeat for a browser-plumbing timeout during navigation, and only that — Built
+`Navigation.open` repeats a navigation once when ChromeDriver or EdgeDriver reports `Timed out
+receiving message from renderer` — a renderer process that stopped answering the driver,
+seen twice in one Edge run on the Windows runner (2026-10-20). It is logged and added to the
+report; a second failure, or any other timeout, fails the test. Assertions are still never
+retried (D36): a slow page is a finding, a deaf renderer is not.
+
 ---
 
 ## Build and tooling
@@ -682,8 +689,6 @@ sandbox). Lifecycle plugins (clean, resources, install, …) are pinned because 
   (77.5 % after).
 - TeamCity has run on one server and one agent, both containers started inside a GitHub
   Actions job (D60) — not on a long-lived installation with several agents.
-- The PortSync accessibility gate excludes one listed defect in PortSync itself
-  (`color-contrast@.tone-warn`) until PortSync fixes it; any other element still fails.
 - The PortSync suites run only in CI (PortSync needs Kafka; Docker Hub is blocked in the
   authoring sandbox), and their schemas are the adapter's expectations, not a published
   PortSync contract (D44).

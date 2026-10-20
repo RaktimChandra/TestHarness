@@ -68,7 +68,7 @@ public final class GatePages {
         Report.step("Sign in " + user.username() + " via API token", () -> {
             Models.Login login = GateApi.get().login(user.username(), user.credentials().password().reveal())
                     .as(Models.Login.class);
-            driver.get(baseUrl + "/login");
+            io.github.raktimchandra.testharness.ui.page.Navigation.open(driver, baseUrl + "/login");
             waits.visible(io.github.raktimchandra.testharness.ui.page.Locators.testId("login-form"));
             ((JavascriptExecutor) driver).executeScript("sessionStorage.setItem('gate.token', arguments[0]);",
                     login.token());

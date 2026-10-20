@@ -201,4 +201,4 @@ eight-line API test. Running the module took 54 s for the API suite and 39 s for
 Ask me to change something live: add a seeded bug and predict which suites catch it, explain
 why `RACE_ON_LAST_SLOT` only fails under concurrency, or walk through why the quarantine
 filter had to treat parameterised tests as containers. The design decisions and their
-alternatives are written down in DESIGN.md (D1–D65), including the ones that turned out wrong.
+alternatives are written down in DESIGN.md (D1–D66), including the ones that turned out wrong.
