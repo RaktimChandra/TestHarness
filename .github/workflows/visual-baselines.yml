@@ -11,14 +11,14 @@ permissions:
 
 jobs:
   baselines:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
       HARNESS_ENV: ci
       GATE_SEED_PASSWORD: baseline-${{ github.run_id }}
     steps:
-      - uses: actions/checkout@v5
-      - uses: actions/setup-java@v5
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: '21'

@@ -1,0 +1,10 @@
+# Fixed resources for the capacity experiment (tools/capacity.py, .github/workflows/capacity.yml):
+# the measured capacity is "on 2 CPUs and 1 GiB", whatever machine runs it.
+#   docker compose -f docker-compose.yml -f docker-compose.capacity.yml up -d --build --wait
+services:
+  gate:
+    cpus: 2.0
+    mem_limit: 1g
+  postgres:
+    cpus: 1.0
+    mem_limit: 512m

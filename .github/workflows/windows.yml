@@ -1,0 +1,108 @@
+# The Windows instructions (docs/WINDOWS.md), executed on a Windows runner: mvnw.cmd, th.cmd,
+# PowerShell quoting, Windows paths, and the UI suite in Chrome and Edge on Windows.
+#
+# Difference from a developer's Windows machine, and why: hosted Windows runners cannot run
+# Linux containers, so Testcontainers' PostgreSQL is replaced by the PostgreSQL installed on
+# the runner (-Dharness.db.url, the same switch the Compose setup uses), and the SUT's own
+# Testcontainers integration tests (gate-api) run in the Linux build job only. There are no
+# Windows visual baselines (baselines are per platform and rendered by visual-baselines.yml on
+# Linux), so the visual checks write Windows candidates and skip instead of failing.
+name: windows
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  HARNESS_ENV: ci
+  GATE_SEED_PASSWORD: win-${{ github.run_id }}
+  HARNESS_DB_PASSWORD: gate
+  HARNESS_HISTORY_DB_PASSWORD: gate
+
+jobs:
+  windows:
+    name: Windows - mvnw.cmd, th.cmd, suites in Chrome and Edge
+    runs-on: windows-2025
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: PostgreSQL (installed on the runner) with one database per suite
+        run: |
+          $svc = Get-Service -Name 'postgresql*' | Select-Object -First 1
+          Set-Service -Name $svc.Name -StartupType Manual
+          Start-Service -Name $svc.Name
+          $env:PGPASSWORD = 'root'
+          $psql = Join-Path $env:PGBIN 'psql.exe'
+          & $psql -U postgres -h localhost -c "CREATE ROLE gate LOGIN PASSWORD 'gate' CREATEDB"
+          foreach ($db in 'gate_data','gate_insights','gate_api','gate_ui','gate_bdd','gate_perf') {
+            & $psql -U postgres -h localhost -c "CREATE DATABASE $db OWNER gate"
+          }
+          & $psql -U postgres -h localhost -tAc "select version()"
+      - name: 'WINDOWS.md step 10: install once'
+        run: .\mvnw.cmd -B -ntp install -DskipTests 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
+      - name: Framework tests (real Chrome on Windows)
+        run: >
+          .\mvnw.cmd -B -ntp verify
+          -pl harness/harness-core,harness/harness-reporting,harness/harness-data,harness/harness-api,harness/harness-ui,harness/harness-bdd,harness/harness-insights,harness/harness-cli,sut/gate-domain
+          "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_data" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
+      - name: 'WINDOWS.md step 4: API suite'
+        run: .\mvnw.cmd -B -ntp verify -pl suites/api-suite "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_api" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
+      - name: 'WINDOWS.md step 4: UI suite in Chrome'
+        run: >
+          .\mvnw.cmd -B -ntp verify -pl suites/ui-suite "-Dharness.ui.browser=chrome"
+          "-Dharness.visual.platform=chrome-windows" "-Dharness.visual.require-baseline=false" "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_ui" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
+      - name: 'WINDOWS.md step 4: UI suite in Edge'
+        run: >
+          .\mvnw.cmd -B -ntp verify -pl suites/ui-suite "-Dharness.ui.browser=edge"
+          "-Dharness.visual.platform=edge-windows" "-Dharness.visual.require-baseline=false" "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_ui" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
+      - name: 'WINDOWS.md step 4: BDD suite, @smoke'
+        run: >
+          .\mvnw.cmd -B -ntp verify -pl suites/bdd-suite "-Dcucumber.filter.tags=@smoke"
+          "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_bdd" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
+      - name: 'WINDOWS.md step 7: Gatling smoke'
+        run: .\mvnw.cmd -B -ntp verify -pl suites/perf-suite "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_perf" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
+      - name: 'WINDOWS.md steps 10-12: th.cmd'
+        run: |
+          .\th.cmd --help
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\th.cmd history flaky --jsonl suites\api-suite\target\test-history --top 5
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\th.cmd history durations --jsonl suites\ui-suite\target\test-history --shards 2 --out target\shard-durations.json
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          .\th.cmd dashboard
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          if (-not (Test-Path target\dashboard\index.html)) { throw "dashboard not written" }
+      - name: 'WINDOWS.md step 3: Allure report'
+        run: .\mvnw.cmd -B -ntp -N -Preport verify 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
+      - name: Test summary
+        if: always()
+        run: python .github/scripts/test_summary.py "windows" "**/target/surefire-reports/TEST-*.xml"
+      - uses: ./.github/actions/log-tail
+        if: failure()
+        with:
+          file: ${{ runner.temp }}/win.log
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: windows-evidence
+          path: |
+            suites/*/target/evidence
+            suites/*/target/surefire-reports
+          if-no-files-found: ignore

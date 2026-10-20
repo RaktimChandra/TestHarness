@@ -27,6 +27,15 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.header.writers.CrossOriginEmbedderPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.CrossOriginOpenerPolicyHeaderWriter;
+import org.springframework.security.web.header.writers.CrossOriginResourcePolicyHeaderWriter;
+import org.springframework.security.web.header.writers.DelegatingRequestMatcherHeaderWriter;
+import org.springframework.security.web.header.writers.StaticHeadersWriter;
+import org.springframework.security.web.servlet.util.matcher.PathPatternRequestMatcher;
+import org.springframework.security.web.util.matcher.NegatedRequestMatcher;
+import org.springframework.security.web.util.matcher.OrRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 import org.springframework.security.web.firewall.RequestRejectedHandler;
 
 @Configuration(proxyBeanMethods = false)
@@ -75,6 +84,18 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+    /** Every directive without a default-src fallback is set explicitly (ZAP rule 10055). */
+    static final String CSP = "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; "
+            + "font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; "
+            + "frame-ancestors 'none'";
+
+    static final String PERMISSIONS_POLICY = "camera=(), microphone=(), geolocation=(), payment=(), usb=(), "
+            + "accelerometer=(), gyroscope=(), magnetometer=()";
+
+    private static final RequestMatcher SWAGGER_UI = new OrRequestMatcher(
+            PathPatternRequestMatcher.withDefaults().matcher("/swagger-ui/**"),
+            PathPatternRequestMatcher.withDefaults().matcher("/swagger-ui.html"));
+
     @Bean
     SecurityFilterChain api(HttpSecurity http, ProblemWriter problems) throws Exception {
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
@@ -83,9 +104,22 @@ public class SecurityConfig {
 
         http.csrf(csrf -> csrf.disable()) // stateless bearer tokens; no cookies are used
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .headers(h -> h.contentSecurityPolicy(csp -> csp.policyDirectives(
-                        "default-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline'; "
-                                + "frame-ancestors 'none'")))
+                .headers(h -> h
+                        // The app needs nothing inline. Swagger UI sets style attributes, so only its
+                        // pages allow inline styles (found by the ZAP baseline scan, security.yml).
+                        .addHeaderWriter(new DelegatingRequestMatcherHeaderWriter(
+                                new NegatedRequestMatcher(SWAGGER_UI),
+                                new StaticHeadersWriter("Content-Security-Policy", CSP)))
+                        .addHeaderWriter(new DelegatingRequestMatcherHeaderWriter(SWAGGER_UI,
+                                new StaticHeadersWriter("Content-Security-Policy",
+                                        CSP.replace("style-src 'self'", "style-src 'self' 'unsafe-inline'"))))
+                        .addHeaderWriter(new StaticHeadersWriter("Permissions-Policy", PERMISSIONS_POLICY))
+                        .crossOriginOpenerPolicy(c -> c.policy(
+                                CrossOriginOpenerPolicyHeaderWriter.CrossOriginOpenerPolicy.SAME_ORIGIN))
+                        .crossOriginEmbedderPolicy(c -> c.policy(
+                                CrossOriginEmbedderPolicyHeaderWriter.CrossOriginEmbedderPolicy.REQUIRE_CORP))
+                        .crossOriginResourcePolicy(c -> c.policy(
+                                CrossOriginResourcePolicyHeaderWriter.CrossOriginResourcePolicy.SAME_ORIGIN)))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll()
                         .requestMatchers("/api/test-support/**").permitAll() // guarded by TestSupportKeyFilter

@@ -1,0 +1,3 @@
+score  runs  flips pass%  meanms  test
+0.421  20    8     75.0   589     io.github.raktimchandra.testharness.suites.flaky.LastPlaceRaceTest#the_driver_who_asks_first_gets_the_last_place [the driver who asks first gets the last place] {ASSERTION=5}
+0.000  20    0     100.0  4217    io.github.raktimchandra.testharness.suites.flaky.LastPlaceRaceTest#exactly_one_driver_gets_the_last_place [exactly one driver gets the last place] 

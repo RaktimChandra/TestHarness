@@ -89,6 +89,17 @@ class HarnessConfigTest {
     }
 
     @Test
+    void environmentVariablesReachDashedKeys() {
+        // env names cannot contain '-': HARNESS_API_READ_TIMEOUT sets the declared api.read-timeout
+        HarnessConfig c = load(Map.of("HARNESS_API_READ_TIMEOUT", "45s", "HARNESS_UI_NO_SANDBOX", "true"),
+                new Properties());
+        assertThat(c.string("api.read-timeout")).isEqualTo("45s");
+        assertThat(c.origin("api.read-timeout")).isEqualTo("env HARNESS_API_READ_TIMEOUT");
+        // a dashed key no file declares is still found
+        assertThat(c.bool("ui.no-sandbox", false)).isTrue();
+    }
+
+    @Test
     void unknownEnvironmentIsAClearError() {
         Properties props = new Properties();
         props.setProperty("harness.env", "staging");

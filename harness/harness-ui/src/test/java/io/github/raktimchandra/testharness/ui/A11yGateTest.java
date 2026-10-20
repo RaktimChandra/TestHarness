@@ -30,13 +30,31 @@ class A11yGateTest {
         A11yGate gate = A11yGate.from(HarnessConfig.load(Map.of(), new Properties(), getClass().getClassLoader()));
         assertThat(gate).isEqualTo(new A11yGate(0, 0, -1, -1));
         assertThat(gate.breaches(REPORT)).containsExactly(
-                "1 critical (max 0): image-alt (2 elements)",
-                "1 serious (max 0): color-contrast (3 elements)");
+                "1 critical (max 0): image-alt (2 elements: img)",
+                "1 serious (max 0): color-contrast (3 elements: #a)");
     }
 
     @Test
     void reportOnlyThresholdsNeverBreach() {
         assertThat(new A11yGate(-1, -1, -1, -1).breaches(REPORT)).isEmpty();
-        assertThat(new A11yGate(1, 1, 0, 0).breaches(REPORT)).containsExactly("1 moderate (max 0): region (1 element)");
+        assertThat(new A11yGate(1, 1, 0, 0).breaches(REPORT)).containsExactly("1 moderate (max 0): region (1 element: #b)");
+    }
+
+    @Test
+    void knownIssuesAreReportedButNotCountedUnlessANewElementAppears() {
+        A11yGate gate = A11yGate.from(HarnessConfig.load(Map.of(),
+                props("harness.a11y.known-issues", "color-contrast@#a, region@#zzz"), getClass().getClassLoader()));
+        assertThat(gate.known(REPORT)).extracting(Violation::rule).containsExactly("color-contrast");
+        assertThat(gate.breaches(REPORT)).containsExactly("1 critical (max 0): image-alt (2 elements: img)");
+        A11yReport more = new A11yReport("login", "chrome", "u", List.of(
+                new Violation("color-contrast", "serious", "Contrast", "u", 2, List.of("#a", "#new"))));
+        assertThat(gate.known(more)).isEmpty();
+        assertThat(gate.breaches(more)).containsExactly("1 serious (max 0): color-contrast (2 elements: #a #new)");
+    }
+
+    private static Properties props(String k, String v) {
+        Properties p = new Properties();
+        p.setProperty(k, v);
+        return p;
     }
 }

@@ -58,6 +58,37 @@ public final class Simulator {
         return inject(given().spec(spec).post("/api/faults/cranes/" + craneId + "/recover"));
     }
 
+    /** A burst of export trucks into one block (simulator default: the fullest, enough to pass ~90 %). */
+    public Injection gateSurge(int trucks, String block) {
+        return inject(given().spec(spec).queryParam("trucks", trucks).queryParam("block", block)
+                .post("/api/faults/gate-surge"));
+    }
+
+    /** Several vessels arrive at once, so some must wait for a berth. */
+    public Injection vesselSurge(int vessels) {
+        return inject(given().spec(spec).queryParam("vessels", vessels).post("/api/faults/vessel-surge"));
+    }
+
+    /** Runs a crane at a fraction of its normal speed; factor 1 restores it. */
+    public Injection slowCrane(String craneId, double factor) {
+        return inject(given().spec(spec).queryParam("factor", factor).post("/api/faults/cranes/" + craneId + "/slow"));
+    }
+
+    public SimulationStatus pause() {
+        return statusOf(given().spec(spec).post("/api/simulation/pause"));
+    }
+
+    public SimulationStatus resume() {
+        return statusOf(given().spec(spec).post("/api/simulation/resume"));
+    }
+
+    private static SimulationStatus statusOf(Response r) {
+        if (r.statusCode() != 200) {
+            throw new AssertionError("Simulator returned HTTP " + r.statusCode() + ": " + r.asString());
+        }
+        return r.as(SimulationStatus.class);
+    }
+
     public SimulationStatus status() {
         Response r = given().spec(spec).get("/api/simulation/status");
         if (r.statusCode() != 200) {

@@ -40,7 +40,7 @@ class AccessibilityTest extends UiTest {
     void login_page_and_its_error_state(WebDriver driver) {
         LoginPage login = pages().login().open();
         scanner(driver).assertWithin("login", gate);
-        login.enter("driver1", "wrong-password").submit();
+        login.enter(fx.newDriver().username(), "wrong-password").submit();
         login.error();
         scanner(driver).assertWithin("login-error", gate);
     }
