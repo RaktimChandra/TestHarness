@@ -96,7 +96,15 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git checkout -b "ai-eval/${{ github.run_id }}"
-          git add -f experiments/ai/results
-          git commit -m "experiment: AI drafter evaluation from run ${{ github.run_id }}"
-          git push origin "ai-eval/${{ github.run_id }}"
+          set -o pipefail
+          {
+            git checkout -b "ai-eval/${{ github.run_id }}"
+            git add -f experiments/ai/results
+            git status --short | head -20
+            git commit -q -m "experiment: AI drafter evaluation from run ${{ github.run_id }}"
+            git push origin "ai-eval/${{ github.run_id }}"
+          } 2>&1 | tee "$RUNNER_TEMP/push.log"
+      - uses: ./.github/actions/log-tail
+        if: failure()
+        with:
+          file: ${{ runner.temp }}/push.log
