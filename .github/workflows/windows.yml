@@ -74,6 +74,8 @@ jobs:
         run: >
           .\mvnw.cmd -B -ntp verify -pl suites/ui-suite "-Dharness.ui.browser=chrome"
           "-Dharness.visual.platform=chrome-windows-ci" "-Dharness.db.url=jdbc:postgresql://localhost:5432/gate_ui" 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
+      - name: Keep the Chrome run's reports (the Edge run rewrites the same files)
+        run: Rename-Item suites\ui-suite\target\surefire-reports surefire-reports-chrome
       - name: 'WINDOWS.md step 4: UI suite in Edge'
         run: >
           .\mvnw.cmd -B -ntp verify -pl suites/ui-suite "-Dharness.ui.browser=edge"
@@ -99,7 +101,7 @@ jobs:
         run: .\mvnw.cmd -B -ntp -N -Preport verify 2>&1 | Tee-Object -FilePath "$env:RUNNER_TEMP\win.log" -Append
       - name: Test summary
         if: always()
-        run: python .github/scripts/test_summary.py "windows" "**/target/surefire-reports/TEST-*.xml"
+        run: python .github/scripts/test_summary.py "windows" "**/target/surefire-reports/TEST-*.xml" "**/target/surefire-reports-chrome/TEST-*.xml"
       - uses: ./.github/actions/log-tail
         if: failure()
         with:
