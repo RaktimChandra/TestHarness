@@ -632,6 +632,14 @@ pixel-identical (at most five). It targets the one intermittent visual failure s
 which checks needed retaking, so the explanation can be confirmed or rejected by data.
 *Rejected:* raising the Firefox threshold, which would hide real changes of the same size.
 
+### D65 — Anti-aliased edge pixels are not counted as differences — Built
+`ImageDiff` now applies pixelmatch's anti-aliasing detector (Vysniauskas 2009): a differing
+pixel is discounted when, in either image, it sits on a smooth slope between a darker and a
+brighter neighbour that each belong to a flat area. Discounted pixels are reported separately
+(orange in the diff, a count in the report), so they stay visible. This replaces D26's
+"no anti-aliasing detection" simplification after Firefox in CI drew the same heading with its
+glyphs half a pixel apart from run to run (RESULTS §40). *Rejected again:* a higher threshold.
+
 ---
 
 ## Build and tooling
@@ -658,7 +666,6 @@ sandbox). Lifecycle plugins (clean, resources, install, …) are pinned because 
 - Edge has not been run outside CI (no Edge binary in the authoring sandbox).
 - Selenium Grid and the Docker Compose stack have only run in CI (Docker Hub is blocked in
   the authoring sandbox).
-- Visual diff has no anti-aliasing detection (D26); tests must keep layouts deterministic.
 - Performance numbers come from a shared runner and are for regression detection (D29).
 - Test impact analysis attributes SUT start-up code to the first test that boots it, and has no
   per-test JavaScript coverage (D39).

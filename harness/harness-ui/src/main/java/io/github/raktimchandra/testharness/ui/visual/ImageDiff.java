@@ -11,11 +11,17 @@ import java.util.List;
  * pixelmatch (Kotsarenko &amp; Ramos, "Measuring perceived color difference using YIQ NTSC
  * transmission color space", 2009) — exceeds {@code pixelTolerance} (0..1, where 1 is the
  * distance between black and white). Pixels inside ignore regions never count. The result
- * includes a diff image: unchanged pixels faded to grey, differing pixels in red, ignored
- * regions tinted yellow.
+ * includes a diff image: unchanged pixels faded to grey, differing pixels in red, pixels
+ * discounted as anti-aliasing in orange, ignored regions tinted yellow.
  *
- * <p>Simplified relative to pixelmatch: no anti-aliasing detection; small anti-aliasing
- * noise is absorbed by the tolerance and the mismatch-ratio threshold instead.
+ * <p>Anti-aliasing: a differing pixel is not counted when, in either image, it is an
+ * anti-aliased edge pixel — the detector pixelmatch uses (Vysniauskas, "Anti-aliased Pixel and
+ * Intensity Slope Detector", 2009): among its 8 neighbours at most two have its exact colour,
+ * it lies between a darker and a brighter neighbour, and that darkest or brightest neighbour
+ * sits inside a flat area (3+ identical neighbours) in both images. A glyph drawn half a pixel
+ * further along produces exactly such pixels (Firefox did, run to run, in CI in October 2026);
+ * a changed colour, a moved box or a different word does not, because their pixels are not
+ * on a smooth slope between two flat areas.
  */
 public final class ImageDiff {
 
@@ -24,7 +30,16 @@ public final class ImageDiff {
 
     private ImageDiff() {}
 
-    public record Result(boolean sizeMismatch, long differingPixels, long comparedPixels, BufferedImage diffImage) {
+    /**
+     * @param differingPixels   pixels that differ and are not anti-aliasing
+     * @param antiAliasedPixels pixels that differ only as anti-aliased edges (not counted)
+     */
+    public record Result(boolean sizeMismatch, long differingPixels, long comparedPixels, BufferedImage diffImage,
+                         long antiAliasedPixels) {
+        public Result(boolean sizeMismatch, long differingPixels, long comparedPixels, BufferedImage diffImage) {
+            this(sizeMismatch, differingPixels, comparedPixels, diffImage, 0);
+        }
+
         public double ratio() {
             return comparedPixels == 0 ? (sizeMismatch ? 1.0 : 0.0) : (double) differingPixels / comparedPixels;
         }
@@ -38,27 +53,100 @@ public final class ImageDiff {
         int w = actual.getWidth();
         int h = actual.getHeight();
         BufferedImage diff = new BufferedImage(w, h, BufferedImage.TYPE_INT_RGB);
+        int[] e = expected.getRGB(0, 0, w, h, null, 0, w);
+        int[] a = actual.getRGB(0, 0, w, h, null, 0, w);
         double maxDelta = MAX_YIQ_DELTA * pixelTolerance * pixelTolerance;
         long differing = 0;
+        long antiAliased = 0;
         long compared = 0;
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
-                int a = expected.getRGB(x, y);
-                int b = actual.getRGB(x, y);
+                int pe = e[y * w + x] & 0xFFFFFF;
+                int pa = a[y * w + x] & 0xFFFFFF;
                 if (ignored(ignore, x, y)) {
-                    diff.setRGB(x, y, blend(fade(b), 0xFFE066));
+                    diff.setRGB(x, y, blend(fade(pa), 0xFFE066));
                     continue;
                 }
                 compared++;
-                if (a != b && yiqDelta(a, b) > maxDelta) {
-                    differing++;
-                    diff.setRGB(x, y, 0xFF0000);
+                if (pe != pa && yiqDelta(pe, pa) > maxDelta) {
+                    if (antiAliased(e, a, x, y, w, h) || antiAliased(a, e, x, y, w, h)) {
+                        antiAliased++;
+                        diff.setRGB(x, y, 0xFFA500);
+                    } else {
+                        differing++;
+                        diff.setRGB(x, y, 0xFF0000);
+                    }
                 } else {
-                    diff.setRGB(x, y, fade(b));
+                    diff.setRGB(x, y, fade(pa));
                 }
             }
         }
-        return new Result(false, differing, compared, diff);
+        return new Result(false, differing, compared, diff, antiAliased);
+    }
+
+    /** Whether pixel (x1, y1) of {@code img} is an anti-aliased edge pixel (see the class comment). */
+    static boolean antiAliased(int[] img, int[] other, int x1, int y1, int w, int h) {
+        int x0 = Math.max(x1 - 1, 0), y0 = Math.max(y1 - 1, 0);
+        int x2 = Math.min(x1 + 1, w - 1), y2 = Math.min(y1 + 1, h - 1);
+        int centre = img[y1 * w + x1] & 0xFFFFFF;
+        int zeroes = (x1 == x0 || x1 == x2 || y1 == y0 || y1 == y2) ? 1 : 0;
+        double min = 0, max = 0;
+        int minX = 0, minY = 0, maxX = 0, maxY = 0;
+        for (int x = x0; x <= x2; x++) {
+            for (int y = y0; y <= y2; y++) {
+                if (x == x1 && y == y1) {
+                    continue;
+                }
+                double delta = brightnessDelta(centre, img[y * w + x] & 0xFFFFFF);
+                if (delta == 0) {
+                    zeroes++;
+                    if (zeroes > 2) {
+                        return false; // three or more identical neighbours: part of a flat area
+                    }
+                } else if (delta < min) {
+                    min = delta;
+                    minX = x;
+                    minY = y;
+                } else if (delta > max) {
+                    max = delta;
+                    maxX = x;
+                    maxY = y;
+                }
+            }
+        }
+        if (min == 0 || max == 0) {
+            return false; // not between a darker and a brighter neighbour
+        }
+        return (manySiblings(img, minX, minY, w, h) && manySiblings(other, minX, minY, w, h))
+                || (manySiblings(img, maxX, maxY, w, h) && manySiblings(other, maxX, maxY, w, h));
+    }
+
+    /** Whether the pixel has at least three neighbours of exactly its colour (edges count as one). */
+    private static boolean manySiblings(int[] img, int x1, int y1, int w, int h) {
+        int x0 = Math.max(x1 - 1, 0), y0 = Math.max(y1 - 1, 0);
+        int x2 = Math.min(x1 + 1, w - 1), y2 = Math.min(y1 + 1, h - 1);
+        int centre = img[y1 * w + x1] & 0xFFFFFF;
+        int zeroes = (x1 == x0 || x1 == x2 || y1 == y0 || y1 == y2) ? 1 : 0;
+        for (int x = x0; x <= x2; x++) {
+            for (int y = y0; y <= y2; y++) {
+                if ((x != x1 || y != y1) && (img[y * w + x] & 0xFFFFFF) == centre) {
+                    zeroes++;
+                    if (zeroes > 2) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    /** Signed difference in YIQ luma (pixelmatch's colorDelta with yOnly). */
+    static double brightnessDelta(int rgb1, int rgb2) {
+        return luma(rgb1) - luma(rgb2);
+    }
+
+    private static double luma(int rgb) {
+        return ((rgb >> 16) & 0xFF) * 0.29889531 + ((rgb >> 8) & 0xFF) * 0.58662247 + (rgb & 0xFF) * 0.11448223;
     }
 
     /** Squared YIQ distance between two opaque RGB colours (pixelmatch's colorDelta). */

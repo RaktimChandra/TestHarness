@@ -79,8 +79,10 @@ public final class VisualCheck {
         BufferedImage expected = read(baseline);
         ImageDiff.Result r = ImageDiff.compare(expected, actual, regions, settings.pixelTolerance());
         Report.parameter("visual." + name + ".mismatch", String.format("%.5f", r.ratio()));
-        log.info("Visual {} [{}]: {} of {} pixels differ ({})", name, settings.platform(), r.differingPixels(),
-                r.comparedPixels(), String.format("%.4f%%", r.ratio() * 100));
+        Report.parameter("visual." + name + ".anti-aliased-pixels", Long.toString(r.antiAliasedPixels()));
+        log.info("Visual {} [{}]: {} of {} pixels differ ({}), {} anti-aliased edge pixels not counted", name,
+                settings.platform(), r.differingPixels(), r.comparedPixels(), String.format("%.4f%%", r.ratio() * 100),
+                r.antiAliasedPixels());
         if (r.sizeMismatch() || r.ratio() > settings.maxMismatch()) {
             Path dir = settings.outputDir().resolve("diff").resolve(settings.platform());
             write(dir.resolve(name + "-actual.png"), actual);
