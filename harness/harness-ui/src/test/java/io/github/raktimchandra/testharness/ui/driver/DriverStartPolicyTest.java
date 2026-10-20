@@ -29,7 +29,7 @@ class DriverStartPolicyTest {
 
     private static UiSettings settings(Browser browser, int attempts) {
         return new UiSettings(browser, true, 800, 600, Duration.ofSeconds(1), Duration.ofMillis(50),
-                Duration.ofSeconds(5), Optional.empty(), Optional.empty(), Optional.empty(), false, attempts);
+                Duration.ofSeconds(5), Optional.empty(), Optional.empty(), Optional.empty(), Optional.empty(), false, attempts);
     }
 
     @BeforeEach

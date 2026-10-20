@@ -62,6 +62,20 @@ class DriverOptionsTest {
     }
 
     @Test
+    void aPinnedVersionIsRequestedOnlyForALocalBrowserWithoutAnExplicitBinary() {
+        MutableCapabilities pinned = DriverFactory.options(settings("ui.browser", "firefox", "ui.version.firefox", "158.0"));
+        assertThat(pinned.getBrowserVersion()).isEqualTo("158.0");
+        // the pin is per browser
+        assertThat(DriverFactory.options(settings("ui.browser", "chrome", "ui.version.firefox", "158.0"))
+                .getBrowserVersion()).isNullOrEmpty();
+        // a Grid's node image fixes the version; an explicit binary is the version
+        assertThat(DriverFactory.options(settings("ui.browser", "firefox", "ui.version.firefox", "158.0",
+                "ui.grid-url", "http://localhost:4444")).getBrowserVersion()).isNullOrEmpty();
+        assertThat(DriverFactory.options(settings("ui.browser", "firefox", "ui.version.firefox", "158.0",
+                "ui.binary.firefox", "/opt/firefox/firefox")).getBrowserVersion()).isNullOrEmpty();
+    }
+
+    @Test
     void badValuesFailClearly() {
         assertThatThrownBy(() -> Browser.parse("safari")).hasMessageContaining("use chrome, firefox or edge");
         assertThatThrownBy(() -> settings("ui.window", "big")).hasMessageContaining("1366x900");
