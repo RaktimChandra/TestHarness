@@ -10,6 +10,9 @@ on:
       repeats:
         description: Drafts per story per model
         default: '2'
+      models:
+        description: Models to evaluate (JSON list)
+        default: '["qwen2.5:1.5b", "llama3.2:3b", "qwen2.5:7b"]'
 
 permissions:
   contents: read
@@ -26,7 +29,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        model: ['qwen2.5:1.5b', 'llama3.2:3b', 'qwen2.5:7b']
+        model: ${{ fromJSON(inputs.models || '["qwen2.5:1.5b", "llama3.2:3b", "qwen2.5:7b"]') }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v6
@@ -54,10 +57,18 @@ jobs:
       - name: Build
         run: ./mvnw -B -ntp -q install -DskipTests
       - name: Draft and score
+        # pipefail: the first run's qwen2.5:7b job ended "success" without a summary, because tee
+        # hid the evaluator's exit code.
         run: |
+          set -o pipefail
+          mkdir -p out
           python3 tools/ai_eval.py --model '${{ matrix.model }}' --repeats ${{ inputs.repeats || '2' }} \
-            --out out --explain | tee console.txt
+            --out out --explain 2>&1 | tee out/console-${{ strategy.job-index }}.txt
           echo "::notice title=ai-eval ${{ matrix.model }}::$(python3 -c "import json,glob;print(json.dumps(json.load(open(glob.glob('out/*/ai-eval.json')[0]))['summary']))")"
+      - uses: ./.github/actions/log-tail
+        if: failure()
+        with:
+          file: out/console-${{ strategy.job-index }}.txt
       - uses: actions/upload-artifact@v7
         if: always()
         with:
