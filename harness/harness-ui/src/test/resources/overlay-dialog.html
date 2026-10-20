@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Overlay dialog fixture</title>
+<style>
+  body { margin: 0; font-family: sans-serif; background: #fff; }
+  /* Page content that differs with the scroll position: alternating dark and light bands. */
+  .band { height: 37px; }
+  .band:nth-child(odd) { background: #123; }
+  .band:nth-child(even) { background: #fd0; }
+  /* A modal centred in the viewport; its height is fractional, so it lands between pixels. */
+  .backdrop { position: fixed; inset: 0; background: rgba(7, 42, 64, 0.55); display: grid; place-items: center; }
+  .dialog { background: #fff; border-radius: 8px; padding: 1.1rem; width: 300px; height: 120.4px; }
+</style>
+</head>
+<body>
+<main id="bands"></main>
+<div class="backdrop"><div class="dialog" data-testid="dialog" role="dialog" aria-label="Fixture">Dialog</div></div>
+<script>
+  const bands = document.getElementById('bands');
+  for (let i = 0; i < 200; i++) {
+    const b = document.createElement('div');
+    b.className = 'band';
+    bands.appendChild(b);
+  }
+</script>
+</body>
+</html>

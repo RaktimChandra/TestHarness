@@ -39,6 +39,11 @@ import org.slf4j.LoggerFactory;
  * the page content too (hover styles), and the capture waits two animation frames so the
  * changes are painted. Focus styling is therefore
  * outside what visual checks assert (keyboard access is covered by the UI journeys).
+ *
+ * <p>During the capture everything except the element and its ancestors is hidden
+ * ({@link #ISOLATE}), so a translucent overlay's edges do not pick up the page behind it, and
+ * the log line and failure message carry the element's sub-pixel position and the viewport
+ * ({@link #GEOMETRY}).
  */
 public final class VisualCheck {
 
@@ -57,7 +62,15 @@ public final class VisualCheck {
     /** Compares the element against baseline {@code name}, ignoring the given child regions. */
     public Outcome matches(String name, WebElement element, By... ignore) {
         stabilise();
-        BufferedImage actual = settledCapture(name, element);
+        BufferedImage actual;
+        String geometry;
+        isolate(element);
+        try {
+            actual = settledCapture(name, element);
+            geometry = geometry(element);
+        } finally {
+            restore();
+        }
         List<Rectangle> regions = regions(element, ignore);
         Path baseline = settings.baselineDir().resolve(settings.platform()).resolve(name + ".png");
         if (settings.update()) {
@@ -80,9 +93,9 @@ public final class VisualCheck {
         ImageDiff.Result r = ImageDiff.compare(expected, actual, regions, settings.pixelTolerance());
         Report.parameter("visual." + name + ".mismatch", String.format("%.5f", r.ratio()));
         Report.parameter("visual." + name + ".anti-aliased-pixels", Long.toString(r.antiAliasedPixels()));
-        log.info("Visual {} [{}]: {} of {} pixels differ ({}), {} anti-aliased edge pixels not counted", name,
+        log.info("Visual {} [{}]: {} of {} pixels differ ({}), {} anti-aliased edge pixels not counted; {}", name,
                 settings.platform(), r.differingPixels(), r.comparedPixels(), String.format("%.4f%%", r.ratio() * 100),
-                r.antiAliasedPixels());
+                r.antiAliasedPixels(), geometry);
         if (r.sizeMismatch() || r.ratio() > settings.maxMismatch()) {
             Path dir = settings.outputDir().resolve("diff").resolve(settings.platform());
             write(dir.resolve(name + "-actual.png"), actual);
@@ -93,9 +106,9 @@ public final class VisualCheck {
             throw new AssertionError(r.sizeMismatch()
                     ? "Visual mismatch '" + name + "': size " + actual.getWidth() + "x" + actual.getHeight()
                             + " differs from baseline " + expected.getWidth() + "x" + expected.getHeight()
-                    : String.format("Visual mismatch '%s': %.3f%% of pixels differ (allowed %.3f%%) %s; diff at %s",
+                    : String.format("Visual mismatch '%s': %.3f%% of pixels differ (allowed %.3f%%) %s; %s; diff at %s",
                             name, r.ratio() * 100, settings.maxMismatch() * 100, changedArea(r.diffImage()),
-                            dir.resolve(name + "-diff.png")));
+                            geometry, dir.resolve(name + "-diff.png")));
         }
         return Outcome.MATCHED;
     }
@@ -209,12 +222,85 @@ public final class VisualCheck {
             js.executeScript(STABILISE);
             // The pointer stays where the last click left it; native form controls paint a hover
             // border (Chrome on Windows: 2.1 % of a capture differed). Park it on the page corner.
+            // Two moves, because a move to where the driver's pointer state already is sends no
+            // event: geckodriver does not update that state on WebElement.click(), so a single
+            // move to (0, 0) after a click left Firefox's :hover on the clicked input (1.97 % of
+            // the focus-ring fixture differed; RealBrowserTest in Firefox).
             try {
-                new org.openqa.selenium.interactions.Actions(driver).moveToLocation(0, 0).perform();
+                new org.openqa.selenium.interactions.Actions(driver).moveToLocation(1, 1).moveToLocation(0, 0).perform();
             } catch (RuntimeException unsupported) {
                 // drivers without pointer actions: nothing was hovered by them either
             }
             js.executeAsyncScript(TWO_FRAMES);
+        }
+    }
+
+    /**
+     * Hides (visibility, so nothing moves) everything on the page except the element, its
+     * descendants and its ancestors, for the length of the capture. Where the element is not
+     * opaque, whatever lies behind it is part of the capture: a modal dialog centred at a
+     * fractional position has rounded corners and top and bottom rows that are partly the
+     * backdrop over the page content behind, and that content depends on the scroll position
+     * and on what other tests created. In Firefox locally, the same dialog captured at ten
+     * scroll positions differed in 0 to 95 edge pixels; with the page hidden, in none (RESULTS §40).
+     */
+    static final String ISOLATE = """
+            const el = arguments[0];
+            const hidden = [];
+            for (let node = el; node && node !== document.documentElement; node = node.parentElement) {
+              const parent = node.parentElement;
+              if (!parent) break;
+              for (const sibling of parent.children) {
+                if (sibling === node || ['SCRIPT', 'STYLE', 'LINK', 'META'].includes(sibling.tagName)) continue;
+                hidden.push([sibling, sibling.style.getPropertyValue('visibility'),
+                             sibling.style.getPropertyPriority('visibility')]);
+                sibling.style.setProperty('visibility', 'hidden', 'important');
+              }
+            }
+            window.__harnessIsolated = hidden;
+            """;
+
+    /** Puts back what {@link #ISOLATE} hid. */
+    static final String RESTORE = """
+            for (const [e, value, priority] of (window.__harnessIsolated || [])) {
+              if (value) e.style.setProperty('visibility', value, priority); else e.style.removeProperty('visibility');
+            }
+            window.__harnessIsolated = [];
+            """;
+
+    /**
+     * Where the element was drawn, to the sub-pixel, and in what viewport. A rendering can
+     * differ only because its position moved by a fraction of a pixel (edges and text are
+     * anti-aliased against a different pixel grid), and that is invisible in the images.
+     */
+    static final String GEOMETRY = """
+            const r = arguments[0].getBoundingClientRect();
+            const f = (n) => (Math.round(n * 100) / 100).toString();
+            return 'drawn at x=' + f(r.x) + ' y=' + f(r.y) + ' size ' + f(r.width) + 'x' + f(r.height)
+              + ' in viewport ' + innerWidth + 'x' + innerHeight + ' scrollY=' + f(scrollY) + ' dpr=' + devicePixelRatio;
+            """;
+
+    private String geometry(WebElement element) {
+        if (driver instanceof org.openqa.selenium.JavascriptExecutor js) {
+            try {
+                return String.valueOf(js.executeScript(GEOMETRY, element));
+            } catch (RuntimeException e) {
+                return "geometry unavailable (" + e.getClass().getSimpleName() + ")";
+            }
+        }
+        return "geometry unavailable";
+    }
+
+    private void isolate(WebElement element) {
+        if (driver instanceof org.openqa.selenium.JavascriptExecutor js) {
+            js.executeScript(ISOLATE, element);
+            js.executeAsyncScript(TWO_FRAMES);
+        }
+    }
+
+    private void restore() {
+        if (driver instanceof org.openqa.selenium.JavascriptExecutor js) {
+            js.executeScript(RESTORE);
         }
     }
 

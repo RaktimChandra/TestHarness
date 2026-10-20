@@ -100,6 +100,30 @@ class RealBrowserTest {
     }
 
     @Test
+    void anOverlayCaptureDoesNotDependOnThePageBehindIt(WebDriver driver, Waits waits) throws Exception {
+        // A dialog at a fractional position over a translucent backdrop: its rounded corners and
+        // edge rows are partly the page behind it. Scrolling changes that page; the capture must
+        // not change, even with no tolerance at all.
+        driver.get(RealBrowserTest.class.getResource("/overlay-dialog.html").toURI().toString());
+        var js = (org.openqa.selenium.JavascriptExecutor) driver;
+        var dialog = waits.visible(Locators.testId("dialog"));
+        var update = new io.github.raktimchandra.testharness.ui.visual.VisualSettings(evidence.resolve("baselines"),
+                evidence.resolve("out"), "test", 0.0, 0.0, true, false);
+        new io.github.raktimchandra.testharness.ui.visual.VisualCheck(driver, update).matches("overlay", dialog);
+        var exact = new io.github.raktimchandra.testharness.ui.visual.VisualSettings(evidence.resolve("baselines"),
+                evidence.resolve("out"), "test", 0.0, 0.0, false, true);
+        for (int y : new int[] {19, 37, 400, 1111}) {
+            js.executeScript("window.scrollTo(0, arguments[0])", y);
+            assertThat(new io.github.raktimchandra.testharness.ui.visual.VisualCheck(driver, exact)
+                    .matches("overlay", dialog)).as("capture at scrollY=" + y)
+                    .isEqualTo(io.github.raktimchandra.testharness.ui.visual.VisualCheck.Outcome.MATCHED);
+        }
+        // and the page is put back afterwards
+        assertThat(js.executeScript("return getComputedStyle(document.getElementById('bands')).visibility"))
+                .isEqualTo("visible");
+    }
+
+    @Test
     void timeoutsAreFastAndDescriptive(WebDriver driver, Waits waits) throws Exception {
         driver.get(page());
         long start = System.nanoTime();
