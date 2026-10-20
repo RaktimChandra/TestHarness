@@ -3,6 +3,58 @@
 All notable changes, one section per phase. Each phase ends with the whole project
 compiling, every test passing, and `./mvnw verify` running end to end.
 
+## [1.2.0] — 2026-10-21 — Phase 7: the open items
+
+### Fixed
+- **The intermittent Firefox `cancel-dialog` failure.** A runner image rollout moved Firefox
+  from 157 to 158, which lays the gate UI out 1/60 px differently: every Firefox run on the new
+  image failed, every run on the old one passed (`visual-stability.yml`, two runs of 30 suites).
+  Browser versions are now pinned on the Linux runners and the baselines were re-rendered with
+  them; the next 30 suites matched with 0 differing pixels (RESULTS §46).
+- **Firefox kept `:hover` after a click:** parking the pointer took one move, and WebDriver sends
+  nothing for a move to where it thinks the pointer is. Now two moves (D71).
+- **A translucent overlay's capture included the page behind it** (scroll-dependent corners and
+  edge rows); the page around the element is hidden during the capture (D70).
+- **AI evaluation results lost on push:** `git status | head` under `pipefail` died of SIGPIPE
+  (exit 141) whenever there were many result files. The same pattern was removed from two
+  other places.
+- **`th -V` printed 1.0.0** in every release; it now reads the jar's manifest.
+- **PortSync yard comparison** compared the core with a snapshot taken at the pause; it now
+  reads both yards on every poll. The race it exposed was in PortSync and is fixed there
+  (PortSync PR #1).
+- **The Windows job counted the UI suite once** (the Edge run rewrote the Chrome run's reports).
+
+### Added
+- `ui.version.<browser>`: a browser version for a local browser, resolved by Selenium Manager;
+  the browser's real version in the start log line (D69).
+- Sub-pixel geometry (position, size, viewport) in every visual log line and mismatch message.
+- `visual-stability.yml` and `tools/visual_stability_report.py`: the UI suite N times per
+  browser on fresh runners, with per-check pixel counts, geometry, runner environment and the
+  failing images; started by a push to `experiment/visual-stability*` or by dispatch.
+- Windows: the SUT's integration tests on the runner's PostgreSQL (`TestDatabase`,
+  `-Dgate.it.jdbc-url` with `{db}`, D67), the whole BDD suite, and visual checks against
+  Windows baselines (`chrome-windows-ci`, `edge-windows-ci`), required like on Linux.
+- The AI drafter is given the BDD suite's step definitions (`step-definitions.txt`, kept in step
+  with the glue by `DraftStepCoverageTest`; `--no-step-definitions` for the old prompt, D68).
+  `ai-eval.yml` compares both prompts, adds qwen2.5 14B, can run a hosted model
+  (`hosted_model`, needs an `ANTHROPIC_API_KEY` secret) and can collect an earlier run's results
+  (`from_run`).
+- The framework's browser tests run in Firefox and Edge in CI, not only in Chrome.
+
+### Measured
+- Visual stability: Firefox 5 / 10 and 4 / 10 suites failing on the mixed images → 0 / 10 with
+  pinned browsers; Chrome and Edge 0 / 10 throughout (RESULTS §46).
+- Windows: **560 tests, 0 failed, 1 skipped** (RESULTS §45).
+- AI drafter, step reuse with / without the step definitions: qwen2.5 1.5B 68.3 / 27.1 %,
+  llama3.2 3B 60.1 / 44.8 %, qwen2.5 7B 77.7 / 57.9 %, qwen2.5 14B 73.4 / 58.8 % (RESULTS §47).
+- Local `clean install`: **540 JVM tests, 0 failed**, 6 min 36 s.
+- CIForge: 38 / 38 tests including the Docker runner, locally and in its CI (RESULTS §49).
+
+### Open
+- A hosted frontier model in the AI evaluation (needs a paid API key).
+- Windows uses the runner's own Chrome and Edge, so a Windows image update can need new
+  Windows baselines; Docker-based tests run on Linux only.
+
 ## [1.1.0] — 2026-10-20 — Phase 6: closing the gaps
 
 ### Added
