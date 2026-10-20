@@ -102,6 +102,15 @@ class A11yGateTest {
                         + ".b > .hull-label > .code.muted)");
     }
 
+    @Test
+    void axeTargetListsBecomePlainSelectors() {
+        // axe-core's node target is a list (one entry per frame); its toString() was "[.tone-warn]"
+        assertThat(io.github.raktimchandra.testharness.ui.a11y.A11yScannerTargets.of(List.of(".tone-warn")))
+                .isEqualTo(".tone-warn");
+        assertThat(io.github.raktimchandra.testharness.ui.a11y.A11yScannerTargets.of(
+                List.of("iframe#app", List.of("my-widget", ".label")))).isEqualTo("iframe#app >>> my-widget >>> .label");
+    }
+
     private static Properties props(String k, String v) {
         Properties p = new Properties();
         p.setProperty(k, v);
