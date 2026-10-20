@@ -10,6 +10,7 @@ file says so.
 |---|---|---|
 | **Sandbox** (authoring machine) | 2 vCPU Intel Xeon @ 2.10 GHz, 7.8 GiB RAM, Linux 6.18 | OpenJDK 21.0.12, Maven 3.9.11, Docker Engine 29.8.2, Chrome 154.0.8037.97, Firefox 157.0, Node 22.22 |
 | **CI** (GitHub Actions `ubuntu-latest`) | 4 vCPU, 15 GiB RAM (probed 2026-10-14 by `bootstrap-probe.yml`) | Temurin 21, Docker 28.0.4, Chrome 154.0.8037.97, Firefox 157.0, Edge 154.0.4258.53 |
+| **CI from Phase 7** (`ubuntu-24.04`, images 20261012 and 20261018) | 4 vCPU; AMD EPYC 7763 / 9V45 / 9V74, Intel Xeon 8573C / 6973P (recorded per job, §46) | browsers pinned: Chrome 155.0.8059.84, Firefox 158.0, Edge 155.0.4283.62 (DESIGN D69) |
 
 ## Phase 1
 
@@ -918,7 +919,11 @@ below was an explanation tested against the next runs:
    now discounts anti-aliased edge pixels with pixelmatch's detector, reports them separately,
    and still fails on moved edges and changed colours (`ImageDiffTest`, DESIGN D65).
 
-**Status: open, with the likely cause addressed.** Since D65 (`e29d4ac`, run 39449323307;
+**Status (Phase 7): resolved — the cause was a runner image update from Firefox 157 to 158,
+not any of the explanations below; see §46.** What follows is the Phase 6 record, kept as it
+was written.
+
+**Status in Phase 6: open, with the likely cause addressed.** Since D65 (`e29d4ac`, run 39449323307;
 `d303237`, run 39452850062) the check passed; in the second run, which already reports the
 counts, every visual check in every browser matched with **0 differing and 0 anti-aliased
 pixels** — the alternate rendering simply did not occur, so D65 has not yet met it in CI. Its
@@ -1002,13 +1007,146 @@ it is not a speed-up in this pipeline.
 
 - **The diff images of CI visual failures** cannot be downloaded into the authoring
   environment (artifact downloads are blocked there), which is why the Firefox `cancel-dialog`
-  failure (§40) is diagnosed from its message, not its picture.
+  failure (§40) is diagnosed from its message, not its picture. *(Phase 7: resolved with the
+  images committed by the stability workflow, §46.)*
 - **GitHub Pages** cannot be switched on by a workflow token; the owner switched it on and the
   site is live at <https://raktimchandra.github.io/TestHarness/>.
 - **`gate-api`'s Testcontainers tests on Windows** — hosted Windows runners cannot run Linux
-  containers (§34).
+  containers (§34). *(Phase 7: the same tests now run there on the runner's PostgreSQL, §45.)*
 - **A hosted frontier model** for the AI evaluation — it uses small open models through Ollama
   on the runner, so it needs no key and costs nothing, and says nothing about larger models (§43).
 - **Repository settings** (branch rules, the dependency graph, Actions variables) cannot be
   changed from the authoring environment; they are set by the owner (README, "Repository
   settings").
+
+## Phase 7
+
+The four items Phase 6 left open: the Firefox visual failure, what Windows did not run, an AI
+evaluation limited to small models with one prompt, and CIForge's Docker runner test.
+
+### 45. Windows — now everything the Linux build runs, except Docker itself
+
+**Method:** `windows.yml` on `windows-2025`. New since §34: the SUT's 26 integration tests run
+against the runner's PostgreSQL, one fresh database per test class (`-Dgate.it.jdbc-url` with a
+`{db}` placeholder, DESIGN D67); the BDD step runs the whole suite instead of `@smoke`; and the
+five visual checks compare in Chrome and Edge against Windows baselines (`chrome-windows-ci`,
+`edge-windows-ci`) rendered on the same image by `visual-baselines.yml` (run 39474299608) and
+reviewed before they were committed. A missing baseline now fails the job.
+
+| Run | Commit | Result | JVM tests |
+|---|---|---|---|
+| 39468630984 | `fc866d6` | success | gate-api integration tests and full BDD on Windows; 528 tests, 0 failed, 6 skipped (the 5 visual checks, still without baselines, and the drafts report) |
+| 39476012939 | `0718151` | success, 9 min 7 s | 530 tests, 0 failed, 1 skipped — the UI suite counted once (below) |
+| 39485215657 | `a31f05b` | success, 7 min 39 s | **560 tests, 0 failed, 1 skipped**: `DraftStepCoverageTest.reportOnDrafts`, which needs `-Dai.drafts` on every platform |
+
+Per module in run 39485215657: gate-api 26, gate-domain 69, api-suite 112, bdd-suite 25
+(+1 skipped), ui-suite 58 (29 in Chrome, 29 in Edge, the five visual checks in each),
+harness modules 270. In run 39476012939 both UI runs passed but the Edge run rewrote the Chrome
+run's report files, so the summary counted 29; the job now keeps the Chrome reports apart. The one thing Windows still does not run is anything that needs Docker:
+Testcontainers, Compose and the Grid — hosted Windows runners cannot run Linux containers, and
+the replacement (the installed PostgreSQL) is what a Windows developer without Docker uses too
+(`docs/WINDOWS.md`, troubleshooting).
+
+### 46. The Firefox `cancel-dialog` failure — found and fixed
+
+**Method:** `visual-stability.yml` (new): 30 fresh runners per run, the whole UI suite ten times
+per browser, recording per check the differing and anti-aliased pixels, where the element was
+drawn to the sub-pixel, the runner image, CPU, browser and font versions, and the failing
+images. Data and tables: [experiments/visual-stability](experiments/visual-stability/README.md).
+
+| Run | Commit | Firefox suites with a visual failure | Chrome | Edge |
+|---|---|---:|---:|---:|
+| 39474301499 | `a4ab182` | **5 / 10** — cancel-dialog, 876 px each | 0 / 10 | 0 / 10 |
+| 39475856277 | `123babd` | **4 / 10** — cancel-dialog, 164 px each | 0 / 10 | 0 / 10 |
+| 39478245282 | `46ea379` (pinned browsers) | **0 / 10** | 0 / 10 | 0 / 10 |
+
+- **Two renderings, decided by the runner image.** The failing runs laid the dialog out
+  200.4 px tall instead of 200.38 px; the diff images show the heading one pixel lower. The
+  second run recorded why: GitHub was rolling out image 20261018 (Firefox **158.0**) next to
+  20261012 (Firefox **157.0**), and every Firefox run on the new image failed (4 / 4) while every
+  run on the old one passed (6 / 6), on any CPU. The baseline had been rendered with 157. This
+  explains §40: failures appeared on the day the new image did and came and went with which
+  image a job landed on. It was not a repaint (no capture ever needed retaking) and not the
+  half-pixel drift D65 was built for.
+- **Fix:** the Linux CI profile pins Chrome 155.0.8059.84, Firefox 158.0 and Edge 155.0.4283.62
+  (`ui.version.*`, DESIGN D69); Selenium Manager downloads the pinned version where the image
+  has another. The baselines were re-rendered with the pins (run 39477608857) and reviewed
+  pixel by pixel. In run 39478245282, **30 of 30 suites were green and every check in every
+  browser matched with 0 differing and 0 anti-aliased pixels**, on both images (runners with
+  Firefox 157 installed downloaded 158).
+- **Found on the way, and fixed** (neither caused the failure): Firefox kept `:hover` on a
+  clicked input because a single pointer move to (0, 0) sends no event (DESIGN D71; the
+  framework's browser tests now run in Firefox and Edge in CI, not only Chrome); and a
+  translucent overlay's corners showed the page behind it, which depends on the scroll
+  position — up to 95 raw pixels in Firefox locally — so captures now hide the page around the
+  element (D70).
+
+### 47. The AI drafter with the suite's step definitions, and a 14B model — run 39464782994, commit `6f681c9`
+
+**Method:** as §43, plus qwen2.5 14B, and each model drafted twice in the same run: with the
+BDD suite's 28 step definitions in the prompt (**catalogue**, now the default, DESIGN D68) and
+with only phrases of existing features (**phrases**, the earlier prompt). Every draft that hit
+the 15-minute request timeout counts as a failure. Data: [experiments/ai](experiments/ai/README.md).
+
+| Model | Step reuse, catalogue | Step reuse, phrases | Valid Gherkin (cat. / phr.) | Fully runnable (cat. / phr.) | Timeouts (cat. / phr.) |
+|---|---:|---:|---:|---:|---:|
+| qwen2.5 1.5B | **68.3 %** | 27.1 % | 14 / 9 of 16 | 0 / 0 | 2 / 5 |
+| llama3.2 3B | 60.1 % | 44.8 % | 6 / 13 of 16 | 0 / 0 | **10** / 2 |
+| qwen2.5 7B | **77.7 %** | 57.9 % | 16 / 15 of 16 | 1 / 1 | 0 / 0 |
+| qwen2.5 14B | **73.4 %** | 58.8 % | 15 / 15 of 16 | 2 / 0 | 0 / 0 |
+
+- Offering the step definitions raised reuse for every model, by 15 to 41 points; the 7B model
+  with them is the best result measured (77.7 %, all 16 drafts valid). 14B did not beat 7B on
+  reuse and took about twice as long per draft (269 s median against 141 s).
+- The longer prompt made llama3.2 3B time out on ten of sixteen drafts on the 4-vCPU runner.
+- The 7B model's phrases-prompt reuse was 57.9 % here against 68.5 % and 69.9 % in §43's runs,
+  with one sentence of the system prompt changed in between; that is why the comparison is
+  made within one run.
+- Explaining the seeded capacity bug, 7B and 14B both called all three failures a product bug
+  in capacity enforcement (correct); 1.5B called them test bugs; 3B split them.
+- The run's results push failed with exit 141 (SIGPIPE from `git status | head` under
+  `pipefail`) — the cause of §43's two lost pushes too. Fixed; the results were collected from
+  the run's artifacts by run 39489821085.
+
+### 48. PortSync: a race in the simulator's pause, found by the core/simulator check
+
+`coreAndSimulatorAgreeOnTheYard` pauses the simulator and compares its yard with the core's,
+block by block. It failed twice (runs 39464783586 and 39478295663) with the core **one
+container ahead** of the yard the test had read after the pause — in the second run for the
+full 60 s it waited. PortSync's `SimulationRunner` checked "paused?" and then ran the tick
+without a lock, so a tick that had checked just before a pause still changed the yard and
+published events after the pause was acknowledged. Fixed in PortSync (PR #1: the tick and
+`pause()` share the simulation's lock; `SimulationRunnerTest` holds a slow tick and checks
+that `pause()` returns only after it). The test now reads both yards on every poll and passes
+when they agree twice in a row with nothing processed in between, so it no longer depends on
+when the snapshot was taken, and a real disagreement still fails with both yards.
+
+### 49. CIForge's Docker runner test
+
+The one CIForge test that never ran in the authoring sandbox (`test_docker_runner_executes_
+inside_the_image_with_the_workspace_mounted`) needs an image; Docker Hub is blocked there.
+With `CIFORGE_TEST_IMAGE=postgres:16-alpine` (an image the sandbox already had) it ran:
+**38 passed, 0 failed, 0 skipped**, 92 % coverage (CIForge RESULTS, 1.1.0). In CIForge's own CI
+(run 39465064968, Python 3.12 and 3.13) the same 38 passed with `alpine:3.20`, 0 skipped.
+
+### 50. One-command build, 1.2.0 — sandbox, 2026-10-20
+
+`./mvnw clean install` on the 2-vCPU sandbox (Docker for Testcontainers; Chrome 154 for the UI
+suites, whose visual checks skip outside CI by design): **540 JVM tests, 0 failed, 6 skipped**
+(the 5 visual checks and the AI drafts report), 32 Vitest tests and the Gatling smoke
+simulation, in **6 min 36 s** (20:03:05 → 20:09:41 UTC). New since §30: the overlay isolation
+browser test, the geometry message and version pin tests, and `th -V`, which printed 1.0.0
+through 1.1.0 because the version was a constant; it now comes from the jar manifest.
+
+### What could not run in Phase 7, or is still open
+
+- **Docker on the Windows runner** — Testcontainers, Compose and the Grid run on Linux only
+  (§45).
+- **Windows browsers are not pinned** — the Windows job uses the runner's own Chrome and Edge,
+  which its baselines were rendered with; a Windows image update can need new Windows
+  baselines (`visual-baselines.yml`, platform `windows`).
+- **The diff images of a failed CI check** still cannot be downloaded here; the stability
+  workflow now commits them to its results branch instead (§46).
+- **A hosted frontier model** in the AI evaluation — the workflow supports one through the
+  Anthropic API (`hosted_model`), but it needs an `ANTHROPIC_API_KEY` repository secret, which
+  costs money and is the owner's decision; not run. Open models up to 14B were (§47).
