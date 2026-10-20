@@ -11,5 +11,5 @@ after every pipeline on `main`; never edited by hand.
 | `flaky.txt` | flakiness leaderboard over the recorded runs | people |
 | `quarantine-proposal.txt` | what the quarantine policy would list today | a reviewer, before editing `quarantine.json` |
 
-Window: the newest 120 runs. Now: 3 run(s); last update from run
-[39425545521](https://github.com/RaktimChandra/TestHarness/actions/runs/39425545521) on commit `989fa9f`.
+Window: the newest 120 runs. Now: 4 run(s); last update from run
+[39459368294](https://github.com/RaktimChandra/TestHarness/actions/runs/39459368294) on commit `2b47bde`.
