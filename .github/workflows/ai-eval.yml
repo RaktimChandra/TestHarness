@@ -1,7 +1,10 @@
 # The AI drafter against real models: Ollama on the runner serves small open models through
 # its OpenAI-compatible API, tools/ai_eval.py drafts a feature for every story in
 # experiments/ai/stories (twice) and scores the drafts against the BDD suite's real step
-# definitions. One runner per model. Results are pushed to the branch ai-eval/<run id>.
+# definitions. One runner per model and prompt variant: "catalogue" (the suite's step
+# definitions in the prompt, th ai gherkin's default) and "phrases" (only phrases of existing
+# features). Optionally a hosted model through the Anthropic API, if the repository has an
+# ANTHROPIC_API_KEY secret. Results are pushed to the branch ai-eval/<run id>.
 name: ai-eval
 
 on:
@@ -11,8 +14,14 @@ on:
         description: Drafts per story per model
         default: '2'
       models:
-        description: Models to evaluate (JSON list)
-        default: '["qwen2.5:1.5b", "llama3.2:3b", "qwen2.5:7b"]'
+        description: Open models to evaluate (JSON list)
+        default: '["qwen2.5:1.5b", "llama3.2:3b", "qwen2.5:7b", "qwen2.5:14b"]'
+      variants:
+        description: Prompt variants (JSON list of catalogue, phrases)
+        default: '["catalogue", "phrases"]'
+      hosted_model:
+        description: Also evaluate this Anthropic model (needs the ANTHROPIC_API_KEY secret); empty to skip
+        default: ''
 
 permissions:
   contents: read
@@ -23,13 +32,14 @@ env:
 
 jobs:
   model:
-    name: ${{ matrix.model }}
+    name: ${{ matrix.model }} (${{ matrix.variant }})
     runs-on: ubuntu-24.04
-    timeout-minutes: 150
+    timeout-minutes: 240
     strategy:
       fail-fast: false
       matrix:
-        model: ${{ fromJSON(inputs.models || '["qwen2.5:1.5b", "llama3.2:3b", "qwen2.5:7b"]') }}
+        model: ${{ fromJSON(inputs.models || '["qwen2.5:1.5b", "llama3.2:3b", "qwen2.5:7b", "qwen2.5:14b"]') }}
+        variant: ${{ fromJSON(inputs.variants || '["catalogue", "phrases"]') }}
     steps:
       - uses: actions/checkout@v7
       - uses: actions/setup-java@v6
@@ -62,9 +72,11 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p out
-          python3 tools/ai_eval.py --model '${{ matrix.model }}' --repeats ${{ inputs.repeats || '2' }} \
-            --out out --explain 2>&1 | tee out/console-${{ strategy.job-index }}.txt
-          echo "::notice title=ai-eval ${{ matrix.model }}::$(python3 -c "import json,glob;print(json.dumps(json.load(open(glob.glob('out/*/ai-eval.json')[0]))['summary']))")"
+          # the failure explanation depends on the model, not the drafting prompt: once per model
+          EXPLAIN=$([ '${{ matrix.variant }}' = catalogue ] && echo --explain || true)
+          python3 tools/ai_eval.py --model '${{ matrix.model }}' --variant '${{ matrix.variant }}' \
+            --repeats ${{ inputs.repeats || '2' }} --out out $EXPLAIN 2>&1 | tee out/console-${{ strategy.job-index }}.txt
+          echo "::notice title=ai-eval ${{ matrix.model }} ${{ matrix.variant }}::$(python3 -c "import json,glob;print(json.dumps(json.load(open(glob.glob('out/*/ai-eval.json')[0]))['summary']))")"
       - uses: ./.github/actions/log-tail
         if: failure()
         with:
@@ -75,9 +87,44 @@ jobs:
           name: ai-eval-${{ strategy.job-index }}
           path: out
 
+  hosted:
+    name: ${{ inputs.hosted_model }} (Anthropic API)
+    if: inputs.hosted_model != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        variant: ${{ fromJSON(inputs.variants || '["catalogue", "phrases"]') }}
+    env:
+      HARNESS_AI_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-java@v6
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - name: The key is configured
+        run: '[ -n "$HARNESS_AI_API_KEY" ] || { echo "::error::hosted_model needs the ANTHROPIC_API_KEY repository secret"; exit 1; }'
+      - name: Build
+        run: ./mvnw -B -ntp -q install -DskipTests
+      - name: Draft and score
+        run: |
+          set -o pipefail
+          mkdir -p out
+          EXPLAIN=$([ '${{ matrix.variant }}' = catalogue ] && echo --explain || true)
+          python3 tools/ai_eval.py --provider anthropic --model '${{ inputs.hosted_model }}' --variant '${{ matrix.variant }}' \
+            --repeats ${{ inputs.repeats || '2' }} --timeout 5m --out out $EXPLAIN 2>&1 | tee out/console-hosted-${{ strategy.job-index }}.txt
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: ai-eval-hosted-${{ strategy.job-index }}
+          path: out
+
   results:
     name: Push results
-    needs: model
+    needs: [model, hosted]
     if: always()
     runs-on: ubuntu-24.04
     permissions:

@@ -31,6 +31,11 @@ class AiCommand {
         @ArgGroup(multiplicity = "1")
         StorySource story;
 
+        @Option(names = "--no-step-definitions",
+                description = "offer the model only the phrases of existing features, not the suite's step catalogue"
+                        + " (suites/bdd-suite/src/test/resources/step-definitions.txt)")
+        boolean noStepDefinitions;
+
         static class StorySource {
             @Option(names = "--story", description = "the user story text")
             String text;
@@ -50,8 +55,15 @@ class AiCommand {
             try (Stream<Path> s = Files.walk(repo.root().resolve("suites/bdd-suite/src/test/resources/features"))) {
                 features = s.filter(p -> p.toString().endsWith(".feature")).toList();
             }
-            GherkinDrafter.Draft d = new GherkinDrafter(llm, repo.root().resolve("target/ai-drafts")).draft(text, features);
+            Path catalogue = repo.root().resolve("suites/bdd-suite/src/test/resources/step-definitions.txt");
+            List<String> definitions = !noStepDefinitions && Files.exists(catalogue)
+                    ? Files.readAllLines(catalogue).stream().filter(l -> !l.isBlank()).toList() : List.of();
+            GherkinDrafter.Draft d = new GherkinDrafter(llm, repo.root().resolve("target/ai-drafts"))
+                    .draft(text, features, definitions);
             PrintWriter out = spec.commandLine().getOut();
+            out.println(definitions.isEmpty() ? "Offered the model the phrases of existing features."
+                    : "Offered the model " + definitions.stream().filter(l -> !l.startsWith("#")).count()
+                            + " step definitions and the phrases of existing features.");
             out.println("DRAFT written to " + d.file() + (d.parses() ? " (" + d.scenarios() + " scenarios, valid Gherkin)"
                     : " (NOT valid Gherkin: " + d.parseError().orElse("") + ")"));
             out.println("Review it before moving it into src/test/resources/features.");

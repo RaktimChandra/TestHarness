@@ -35,7 +35,9 @@ def slug(s):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--model", required=True)
-    ap.add_argument("--base-url", default="http://localhost:11434/v1")
+    ap.add_argument("--provider", choices=["openai", "anthropic"], default="openai",
+                    help="openai: any OpenAI-compatible server (Ollama); anthropic: the Anthropic API (key in HARNESS_AI_API_KEY)")
+    ap.add_argument("--base-url", default=None, help="default: http://localhost:11434/v1 for openai, the provider's own for anthropic")
     ap.add_argument("--stories", default="experiments/ai/stories")
     ap.add_argument("--out", default="experiments/ai/results")
     ap.add_argument("--repeats", type=int, default=1)
@@ -43,22 +45,31 @@ def main():
     ap.add_argument("--cli", default="./th")
     ap.add_argument("--mvn", default="./mvnw -B -ntp")
     ap.add_argument("--explain", action="store_true")
+    ap.add_argument("--variant", choices=["catalogue", "phrases"], default="catalogue",
+                    help="catalogue: the model also gets the suite's step definitions (the default of th ai gherkin);"
+                         " phrases: only the phrases of existing features (th ai gherkin --no-step-definitions)")
     a = ap.parse_args()
 
-    out = os.path.abspath(os.path.join(a.out, slug(a.model)))
+    out = os.path.abspath(os.path.join(a.out, slug(a.model) + "-" + a.variant))
     drafts_dir = os.path.join(out, "drafts")
     shutil.rmtree(out, ignore_errors=True)
     os.makedirs(drafts_dir)
-    props = [f"-Dharness.ai.provider=openai", f"-Dharness.ai.model={a.model}",
-             f"-Dharness.ai.base-url={a.base_url}", f"-Dharness.ai.timeout={a.timeout}"]
+    if a.base_url is None and a.provider == "openai":
+        a.base_url = "http://localhost:11434/v1"
+    if a.provider == "anthropic" and not os.environ.get("HARNESS_AI_API_KEY"):
+        raise SystemExit("--provider anthropic needs HARNESS_AI_API_KEY")
+    props = [f"-Dharness.ai.provider={a.provider}", f"-Dharness.ai.model={a.model}", f"-Dharness.ai.timeout={a.timeout}"]
+    if a.base_url:
+        props.append(f"-Dharness.ai.base-url={a.base_url}")
     cli = shlex.split(a.cli)
-    report = {"model": a.model, "base_url": a.base_url, "protocol": "openai-compatible", "temperature": 0.2,
+    report = {"model": a.model, "variant": a.variant, "base_url": a.base_url, "protocol": "openai-compatible" if a.provider == "openai" else "anthropic", "temperature": 0.2,
               "started": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "drafts": []}
     for story in sorted(glob.glob(os.path.join(a.stories, "*.md"))):
         name = os.path.splitext(os.path.basename(story))[0]
         for r in range(1, a.repeats + 1):
             t0 = time.time()
-            p = subprocess.run(cli + props + ["ai", "gherkin", "--story-file", story], capture_output=True, text=True)
+            p = subprocess.run(cli + props + ["ai", "gherkin", "--story-file", story]
+                               + (["--no-step-definitions"] if a.variant == "phrases" else []), capture_output=True, text=True)
             seconds = round(time.time() - t0, 1)
             entry = {"story": name, "repeat": r, "seconds": seconds, "exit": p.returncode}
             m = re.search(r"DRAFT written to (.+?\.feature) \((.*)\)", p.stdout)

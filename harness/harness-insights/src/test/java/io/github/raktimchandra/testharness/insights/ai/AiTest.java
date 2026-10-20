@@ -141,6 +141,29 @@ class AiTest {
     }
 
     @Test
+    void stepDefinitionsAreOfferedWhenGiven() throws IOException {
+        String[] prompt = new String[2];
+        LlmClient fake = new LlmClient() {
+            public String complete(String system, String user, List<Image> images) {
+                prompt[0] = system;
+                prompt[1] = user;
+                return "```gherkin\n@draft\nFeature: f\n  Scenario: s\n    Given I am a driver\n```";
+            }
+
+            public String describe() {
+                return "fake/model";
+            }
+        };
+        new GherkinDrafter(fake, dir.resolve("with")).draft("story", List.of(),
+                List.of("# {time} is HH:mm", "I book that slot for container {string}"));
+        assertThat(prompt[1]).contains("Step definitions (Cucumber expressions the suite runs):\n# {time} is HH:mm\n"
+                + "I book that slot for container {string}");
+        assertThat(prompt[0]).contains("copy one word for word");
+        new GherkinDrafter(fake, dir.resolve("without")).draft("story", List.of());
+        assertThat(prompt[1]).doesNotContain("Step definitions");
+    }
+
+    @Test
     void anInvalidDraftIsSavedWithAWarning() throws IOException {
         LlmClient broken = new LlmClient() {
             public String complete(String s, String u, List<Image> i) {

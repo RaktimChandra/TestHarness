@@ -60,6 +60,21 @@ class DraftStepCoverageTest {
         assertThat(Files.readString(dir.resolve("out/coverage.json"))).contains("\"parses\" : false");
     }
 
+    /**
+     * The catalogue the AI drafter is given (th ai gherkin) is committed, so drafting needs no
+     * build; this keeps it in step with the glue. -Dai.step-catalogue.update=true rewrites it.
+     */
+    @Test
+    void theCommittedStepCatalogueMatchesTheGlue() throws Exception {
+        Path file = Path.of("src/test/resources/step-definitions.txt");
+        String expected = String.join("\n", coverage.catalogue()) + "\n";
+        if (Boolean.getBoolean("ai.step-catalogue.update")) {
+            Files.writeString(file, expected);
+        }
+        assertThat(Files.exists(file)).as(file + " (create it with -Dai.step-catalogue.update=true)").isTrue();
+        assertThat(Files.readString(file)).as(file + " is stale: run with -Dai.step-catalogue.update=true").isEqualTo(expected);
+    }
+
     /** The AI evaluation's entry point: -Dai.drafts=<dir> [-Dai.coverage.out=<file>]. */
     @Test
     @EnabledIfSystemProperty(named = "ai.drafts", matches = ".+")
