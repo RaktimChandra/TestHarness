@@ -12,6 +12,7 @@ public final class BookingAccessPolicy {
         this.bugs = bugs;
     }
 
+    /** Clerks see every booking; a driver sees only bookings they own. */
     public boolean canView(Actor actor, long bookingOwnerId) {
         return actor.isClerk() || ownsOrBugged(actor, bookingOwnerId);
     }
@@ -21,6 +22,7 @@ public final class BookingAccessPolicy {
         return ownsOrBugged(actor, bookingOwnerId);
     }
 
+    /** Checking a truck in at the gate is a clerk's job. */
     public boolean canCheckIn(Actor actor) {
         return actor.isClerk();
     }
