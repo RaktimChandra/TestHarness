@@ -79,7 +79,7 @@ compiling, every test passing, and `./mvnw verify` running end to end.
 - Capacity on 2 CPUs: 25 flows/s with sign-in on every flow, 200 without (three runners each).
 - Repeats: fault seeding 46 of 48 cells stable over three runs; flaky demo quarantined 3 of 3;
   TIA 18 of 18 bugs caught by the selected subset, 3.8–33.2 % saved.
-- AI drafter, step reuse on 8 stories × 2: qwen2.5 7B 69.9 %, 1.5B 43.3 %, llama3.2 3B 36.3 %.
+- AI drafter, step reuse on 8 stories × 2: qwen2.5 7B 68.5 % and 69.9 % (two runs), qwen2.5 1.5B 43.3 %, llama3.2 3B 36.3 %.
 
 ### Open
 - The Firefox `cancel-dialog` visual check failed intermittently in CI on 2026-10-20 and was

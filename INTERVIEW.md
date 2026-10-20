@@ -117,9 +117,9 @@ It drafts Gherkin from a user story and summarises failed runs, through any Open
 or Anthropic endpoint. Drafts are parsed, banner-marked, tagged `@draft` and never written into
 the source tree. I measured it with three small open models served by Ollama in CI, on eight
 user stories, twice each — scored by how many drafted steps an existing step definition
-already runs, matched the way Cucumber matches. qwen2.5 7B: 94 % valid Gherkin, 70 % step
-reuse; the 1.5B and 3B models: 88 % and 69 % valid, 43 % and 36 % reuse. One draft out of 40
-valid ones ran with no new glue code. And asked to explain the failures of a seeded capacity bug, the two
+already runs, matched the way Cucumber matches. qwen2.5 7B: 100 % valid Gherkin and 68.5 % step
+reuse (69.9 % in a second run); the 1.5B and 3B models: 88 % and 69 % valid, 43 % and 36 %
+reuse. Only one 7B draft per run ran with no new glue code. And asked to explain the failures of a seeded capacity bug, the two
 smallest models mostly blamed the tests or the environment — so drafts and explanations are a
 starting point for a human, which is exactly how the tool labels them. I haven't measured a large hosted model.
 

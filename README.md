@@ -39,7 +39,7 @@ From real runs on 2026-10-14 to 2026-10-20 — method, machine and raw numbers f
 | TeamCity 2025.07, real server + agent | the server imports and compiles `settings.kts` and runs the chain: **every build green** (build 350, API 112, BDD 24, UI 15 + 14, Gatling, PIT) |
 | CI pipeline (`main`, run 39425545521) | **quality gate green in 13 min 18 s**, 22 jobs: UI sharded 3 browsers × 2 by recorded duration, quarantine non-blocking (its flaky test failed, as designed), then history and the dashboard published in 3 min 36 s more; the same chain on CIForge in 5 min 25 s |
 | Capacity on 2 CPUs / 1 GiB (three runners per flow) | **25 booking flows/s** with sign-in on every flow (CPU-bound), **200** with a reused token (then the 20-connection pool runs out) |
-| AI drafter on real open models (8 stories × 2, Ollama in CI) | qwen2.5 7B: **94 % valid Gherkin, 70 % of drafted steps run on existing step definitions**; 1.5B / 3B: 43 % / 36 %; 1 of 40 valid drafts needed no new glue |
+| AI drafter on real open models (8 stories × 2, Ollama in CI) | qwen2.5 7B: **100 % valid Gherkin, 68.5 % of drafted steps run on existing step definitions** (69.9 % in a second run); 1.5B / 3B: 43 % / 36 %; one draft per 7B run needed no new glue |
 | Self-healing locators | **1 heal in 26 UI tests** — the demo that renames a `data-testid` — reported with the exact fix, never silent |
 | Cross-browser | UI suite passes in **Chrome 154, Firefox 157 and Edge 154** in CI, both directly and on **Selenium Grid** |
 | Accessibility (axe-core, WCAG 2.0/2.1 A+AA) | **0 violations** on 9 page states × 3 browsers |

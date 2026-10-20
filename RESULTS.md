@@ -937,19 +937,22 @@ completed flows ≥ 95 % of offered.
 Ollama on the runner (CPU only), eight user stories drafted twice each; every drafted step is
 matched against the BDD suite's 28 real step definitions the way Cucumber matches.
 
-| Model | Valid Gherkin | Step reuse | Fully runnable drafts | Median s / draft |
+| Model (run) | Valid Gherkin | Step reuse | Fully runnable drafts | Median s / draft |
 |---|---:|---:|---:|---:|
-| qwen2.5 1.5B (run 39419517177) | 14 / 16 | **43.3 %** | 0 | 24 |
-| llama3.2 3B (run 39419517177) | 11 / 16 | **36.3 %** | 0 | 56 |
-| qwen2.5 7B (run 39430576335) | 15 / 16 | **69.9 %** | 1 | 118 |
+| qwen2.5 1.5B (39419517177) | 14 / 16 | **43.3 %** | 0 | 24 |
+| llama3.2 3B (39419517177) | 11 / 16 | **36.3 %** | 0 | 56 |
+| qwen2.5 7B (39438329586) | 16 / 16 | **68.5 %** | 1 | 96 |
+| qwen2.5 7B (39430576335, summary only) | 15 / 16 | **69.9 %** | 1 | 118 |
 
-- The 7B model reuses existing steps far more often, but only 1 of 40 valid drafts runs without
-  new glue code; most misses are near-misses of existing step texts.
+- The 7B model reuses existing steps about twice as often as the smaller ones, and two runs of
+  it agree within 1.4 points; still only one draft per run runs without new glue code. Most
+  misses are near-misses of existing step texts.
 - Asked to explain a seeded capacity bug, the 1.5B and 3B models mostly blamed the tests or the
-  environment. The tool labels drafts and explanations as unverified, and this is why.
-- The 7B figures come from the job's summary annotation; that run's files were lost when its
-  results push failed without a message (now logged), and the first 7B job hid its evaluator's
-  failure behind `tee` (now `pipefail`).
+  environment; the 7B model pointed at the API's conflict handling for two of three failures
+  but misquoted a status code. The tool labels drafts and explanations as unverified.
+- Two runs went wrong and are kept as such: the first 7B job hid its evaluator's failure behind
+  `tee` (now `pipefail`), and run 39430576335's results push failed twice without a message (now
+  logged; the following run pushed normally).
 
 ### 44. Test impact analysis on a real pull request — PR #7
 
