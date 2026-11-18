@@ -1,0 +1,330 @@
+{
+  "run": {
+    "id": "20261118-132806-26bc4c",
+    "project": "testharness",
+    "commit_sha": "a3679219c3e13d0d4d884343ff366f0ffdf9d87a",
+    "branch": "main",
+    "trigger": "cli",
+    "targets": "[\"build\", \"api\", \"bdd\", \"ui-1\", \"ui-2\", \"mutation\", \"perf\", \"quarantined\", \"quality-gate\"]",
+    "params": "{\"suite.args\": \"-Dharness.visual.platform=chrome-ci\"}",
+    "status": "success",
+    "created_at": "2026-11-18T13:28:06+00:00",
+    "started_at": "2026-11-18T13:28:06+00:00",
+    "finished_at": "2026-11-18T13:33:42+00:00"
+  },
+  "builds": [
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "build",
+      "name": "Build + framework & SUT tests",
+      "position": 0,
+      "depends_on": "[]",
+      "status": "success",
+      "reason": null,
+      "started_at": "2026-11-18T13:28:07+00:00",
+      "finished_at": "2026-11-18T13:30:34+00:00"
+    },
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "api",
+      "name": "API + security suite",
+      "position": 1,
+      "depends_on": "[\"build\"]",
+      "status": "success",
+      "reason": null,
+      "started_at": "2026-11-18T13:30:34+00:00",
+      "finished_at": "2026-11-18T13:31:32+00:00"
+    },
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "bdd",
+      "name": "BDD suite",
+      "position": 2,
+      "depends_on": "[\"build\"]",
+      "status": "success",
+      "reason": null,
+      "started_at": "2026-11-18T13:30:34+00:00",
+      "finished_at": "2026-11-18T13:31:31+00:00"
+    },
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "ui-1",
+      "name": "UI suite, shard 1/2",
+      "position": 3,
+      "depends_on": "[\"build\"]",
+      "status": "success",
+      "reason": null,
+      "started_at": "2026-11-18T13:31:31+00:00",
+      "finished_at": "2026-11-18T13:32:36+00:00"
+    },
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "ui-2",
+      "name": "UI suite, shard 2/2",
+      "position": 4,
+      "depends_on": "[\"build\"]",
+      "status": "success",
+      "reason": null,
+      "started_at": "2026-11-18T13:31:32+00:00",
+      "finished_at": "2026-11-18T13:32:43+00:00"
+    },
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "mutation",
+      "name": "Mutation testing (PIT), 95 % gate",
+      "position": 5,
+      "depends_on": "[\"build\"]",
+      "status": "success",
+      "reason": null,
+      "started_at": "2026-11-18T13:32:36+00:00",
+      "finished_at": "2026-11-18T13:33:10+00:00"
+    },
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "perf",
+      "name": "Gatling performance smoke",
+      "position": 6,
+      "depends_on": "[\"build\"]",
+      "status": "success",
+      "reason": null,
+      "started_at": "2026-11-18T13:32:43+00:00",
+      "finished_at": "2026-11-18T13:33:38+00:00"
+    },
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "quarantined",
+      "name": "Quarantined tests (non-blocking)",
+      "position": 7,
+      "depends_on": "[\"build\"]",
+      "status": "success",
+      "reason": null,
+      "started_at": "2026-11-18T13:33:10+00:00",
+      "finished_at": "2026-11-18T13:33:32+00:00"
+    },
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "quality-gate",
+      "name": "Quality gate",
+      "position": 8,
+      "depends_on": "[\"api\", \"bdd\", \"ui-1\", \"ui-2\", \"mutation\", \"perf\"]",
+      "status": "success",
+      "reason": null,
+      "started_at": "2026-11-18T13:33:38+00:00",
+      "finished_at": "2026-11-18T13:33:42+00:00"
+    }
+  ],
+  "steps": [
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "api",
+      "idx": 0,
+      "name": "api suite",
+      "status": "success",
+      "exit_code": 0,
+      "started_at": "2026-11-18T13:30:34+00:00",
+      "finished_at": "2026-11-18T13:31:32+00:00",
+      "log_path": "runs/20261118-132806-26bc4c/builds/api/logs/00-api-suite.log"
+    },
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "bdd",
+      "idx": 0,
+      "name": "bdd suite",
+      "status": "success",
+      "exit_code": 0,
+      "started_at": "2026-11-18T13:30:34+00:00",
+      "finished_at": "2026-11-18T13:31:31+00:00",
+      "log_path": "runs/20261118-132806-26bc4c/builds/bdd/logs/00-bdd-suite.log"
+    },
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "build",
+      "idx": 0,
+      "name": "compile, unit, framework, SUT integration and Pact tests; install for the suites",
+      "status": "success",
+      "exit_code": 0,
+      "started_at": "2026-11-18T13:28:07+00:00",
+      "finished_at": "2026-11-18T13:30:34+00:00",
+      "log_path": "runs/20261118-132806-26bc4c/builds/build/logs/00-compile-unit-framework-sut-integration-a.log"
+    },
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "build",
+      "idx": 1,
+      "name": "the consumer contract is up to date",
+      "status": "success",
+      "exit_code": 0,
+      "started_at": "2026-11-18T13:30:34+00:00",
+      "finished_at": "2026-11-18T13:30:34+00:00",
+      "log_path": "runs/20261118-132806-26bc4c/builds/build/logs/01-the-consumer-contract-is-up-to-date.log"
+    },
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "mutation",
+      "idx": 0,
+      "name": "pit on the domain rules",
+      "status": "success",
+      "exit_code": 0,
+      "started_at": "2026-11-18T13:32:37+00:00",
+      "finished_at": "2026-11-18T13:33:10+00:00",
+      "log_path": "runs/20261118-132806-26bc4c/builds/mutation/logs/00-pit-on-the-domain-rules.log"
+    },
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "perf",
+      "idx": 0,
+      "name": "booking flow under load (p95/p99/error-rate gates)",
+      "status": "success",
+      "exit_code": 0,
+      "started_at": "2026-11-18T13:32:43+00:00",
+      "finished_at": "2026-11-18T13:33:38+00:00",
+      "log_path": "runs/20261118-132806-26bc4c/builds/perf/logs/00-booking-flow-under-load-p95-p99-error-ra.log"
+    },
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "quality-gate",
+      "idx": 0,
+      "name": "count every suite result and fail on any failure",
+      "status": "success",
+      "exit_code": 0,
+      "started_at": "2026-11-18T13:33:38+00:00",
+      "finished_at": "2026-11-18T13:33:42+00:00",
+      "log_path": "runs/20261118-132806-26bc4c/builds/quality-gate/logs/00-count-every-suite-result-and-fail-on-any.log"
+    },
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "quarantined",
+      "idx": 0,
+      "name": "only what quarantine.json lists; failures are reported, never blocking",
+      "status": "failure",
+      "exit_code": 1,
+      "started_at": "2026-11-18T13:33:10+00:00",
+      "finished_at": "2026-11-18T13:33:32+00:00",
+      "log_path": "runs/20261118-132806-26bc4c/builds/quarantined/logs/00-only-what-quarantine-json-lists-failures.log"
+    },
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "ui-1",
+      "idx": 0,
+      "name": "ui suite shard 1 of 2",
+      "status": "success",
+      "exit_code": 0,
+      "started_at": "2026-11-18T13:31:31+00:00",
+      "finished_at": "2026-11-18T13:32:36+00:00",
+      "log_path": "runs/20261118-132806-26bc4c/builds/ui-1/logs/00-ui-suite-shard-1-of-2.log"
+    },
+    {
+      "run_id": "20261118-132806-26bc4c",
+      "build_id": "ui-2",
+      "idx": 0,
+      "name": "ui suite shard 2 of 2",
+      "status": "success",
+      "exit_code": 0,
+      "started_at": "2026-11-18T13:31:32+00:00",
+      "finished_at": "2026-11-18T13:32:43+00:00",
+      "log_path": "runs/20261118-132806-26bc4c/builds/ui-2/logs/00-ui-suite-shard-2-of-2.log"
+    }
+  ],
+  "log_extracts": {
+    "api#0": [
+      "[INFO] Tests run: 11, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 25.99 s -- in Auth API",
+      "[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 27.78 s -- in reschedule",
+      "[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.070 s -- in Search and object-level access",
+      "[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.620 s -- in cancel",
+      "[INFO] Tests run: 20, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 34.76 s -- in Security smoke",
+      "[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.402 s -- in check-in",
+      "[INFO] Tests run: 0, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 34.84 s -- in Booking lifecycle API",
+      "[INFO] Tests run: 23, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.849 s -- in Slots API",
+      "[INFO] Tests run: 26, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 36.56 s -- in Booking API",
+      "[INFO] Tests run: 5, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 1.525 s -- in Time-dependent rules and test-support controls",
+      "[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.080 s -- in io.github.raktimchandra.testharness.suites.api.ArchitectureTest",
+      "[INFO] Tests run: 112, Failures: 0, Errors: 0, Skipped: 0",
+      "[INFO] BUILD SUCCESS"
+    ],
+    "bdd#0": [
+      "[WARNING] Tests run: 5, Failures: 0, Errors: 0, Skipped: 1, Time elapsed: 1.388 s -- in io.github.raktimchandra.testharness.suites.bdd.eval.DraftStepCoverageTest",
+      "[INFO] Tests run: 17, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 35.26 s -- in io.github.raktimchandra.testharness.suites.bdd.RunBddSuite",
+      "[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.152 s -- in io.github.raktimchandra.testharness.suites.bdd.ArchitectureTest",
+      "[WARNING] Tests run: 25, Failures: 0, Errors: 0, Skipped: 1",
+      "[INFO] BUILD SUCCESS"
+    ],
+    "build#0": [
+      "[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.158 s -- in io.github.raktimchandra.testharness.insights.history.FlakinessTest",
+      "[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.345 s -- in io.github.raktimchandra.testharness.insights.history.HistoryListenerTest",
+      "[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.303 s -- in io.github.raktimchandra.testharness.insights.history.HistoryJsonTest",
+      "[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.693 s -- in io.github.raktimchandra.testharness.insights.history.HistoryStoreTest",
+      "[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.149 s -- in io.github.raktimchandra.testharness.insights.history.RunContextTest",
+      "[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.144 s -- in io.github.raktimchandra.testharness.insights.TestKeysTest",
+      "[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.335 s -- in io.github.raktimchandra.testharness.insights.tia.TiaTest",
+      "[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.225 s -- in io.github.raktimchandra.testharness.insights.tia.TiaRecorderTest",
+      "[INFO] Tests run: 50, Failures: 0, Errors: 0, Skipped: 0",
+      "[INFO] Tests run: 8, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.957 s -- in io.github.raktimchandra.testharness.cli.CliTest",
+      "[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.012 s -- in io.github.raktimchandra.testharness.cli.ProcessesTest",
+      "[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.018 s -- in io.github.raktimchandra.testharness.cli.MavenCommandTest",
+      "[INFO] Tests run: 6, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.953 s -- in io.github.raktimchandra.testharness.cli.CliCommandsTest",
+      "[INFO] Tests run: 20, Failures: 0, Errors: 0, Skipped: 0",
+      "[INFO] BUILD SUCCESS"
+    ],
+    "build#1": [],
+    "mutation#0": [
+      ">> Generated 7 Killed 7 (100%)",
+      ">> Generated 7 Killed 7 (100%)",
+      ">> Generated 4 Killed 4 (100%)",
+      ">> Generated 3 Killed 3 (100%)",
+      ">> Generated 10 Killed 10 (100%)",
+      ">> Generated 36 Killed 36 (100%)",
+      ">> Generated 9 Killed 9 (100%)",
+      ">> Generated 7 Killed 7 (100%)",
+      ">> Generated 11 Killed 11 (100%)",
+      ">> Generated 9 Killed 9 (100%)",
+      ">> Generated 4 Killed 4 (100%)",
+      ">> Generated 36 Killed 36 (100%)",
+      "> pre-scan for mutations : < 1 second",
+      ">> Generated 143 mutations Killed 143 (100%)",
+      "[INFO] BUILD SUCCESS"
+    ],
+    "perf#0": [
+      "[INFO] BUILD SUCCESS"
+    ],
+    "quality-gate#0": [
+      "suites: 166 tests, 0 failed, 1 skipped"
+    ],
+    "quarantined#0": [
+      "[ERROR] Failures:",
+      "[ERROR]   LastPlaceRaceTest.the_driver_who_asks_first_gets_the_last_place:69 [first-submitted request (WRONG assumption: submission order = service order)]",
+      "[ERROR] Tests run: 1, Failures: 1, Errors: 0, Skipped: 0",
+      "[INFO] BUILD FAILURE",
+      "[ERROR] Failed to execute goal org.apache.maven.plugins:maven-surefire-plugin:3.5.4:test (default-test) on project flaky-demo: There are test failures.",
+      "[ERROR]",
+      "[ERROR] See /home/runner/work/_temp/cf/runs/20261118-132806-26bc4c/builds/quarantined/work/suites/flaky-demo/target/surefire-reports for the individual test results.",
+      "[ERROR] See dump files (if any exist) [date].dump, [date]-jvmRun[N].dump and [date].dumpstream.",
+      "[ERROR] -> [Help 1]",
+      "[ERROR]",
+      "[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.",
+      "[ERROR] Re-run Maven using the -X switch to enable full debug logging.",
+      "[ERROR]",
+      "[ERROR] For more information about the errors and possible solutions, please read the following articles:",
+      "[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException"
+    ],
+    "ui-1#0": [
+      "[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 32.81 s -- in Booking journey",
+      "[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 34.50 s -- in Reschedule, cancel and check-in journeys",
+      "[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.603 s -- in Self-healing locator demo",
+      "[INFO] Tests run: 4, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 9.511 s -- in Login journey",
+      "[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.321 s -- in Visual regression",
+      "[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.206 s -- in io.github.raktimchandra.testharness.suites.ui.ArchitectureTest",
+      "[INFO] Tests run: 15, Failures: 0, Errors: 0, Skipped: 0",
+      "[INFO] BUILD SUCCESS"
+    ],
+    "ui-2#0": [
+      "[INFO] Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 26.26 s -- in Reschedule, cancel and check-in journeys",
+      "[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 33.85 s -- in Booking journey",
+      "[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 6.937 s -- in Login journey",
+      "[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 7.427 s -- in Visual regression",
+      "[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 25.22 s -- in Accessibility (axe-core, WCAG 2.1 AA)",
+      "[INFO] Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 3.073 s -- in io.github.raktimchandra.testharness.suites.ui.ArchitectureTest",
+      "[INFO] Tests run: 14, Failures: 0, Errors: 0, Skipped: 0",
+      "[INFO] BUILD SUCCESS"
+    ]
+  }
+}
